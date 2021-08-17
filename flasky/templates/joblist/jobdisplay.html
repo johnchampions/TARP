@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}List Places{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<p>Get more data in
+<ul>
+    <li><a href="/tar/downloads/uglyreport_{{ job['id'] }}.xlsx">Ugly dump</a></li>
+    <li><a href="/tar/downloads/tarreport_{{ job['id'] }}.xlsx">Trade Area Report</a></li>
+    <li>More coming soon...</li>
+</ul></p>
+<div id="loading"></div>
+<div id="content">
+    <h2>Search parameters</h2>
+    <ul>
+        <li>Address: {{ job['address'] }}</li>
+        <li>Radius: {{ job['radius'] }} meters</li>
+        <li>Latitude: {{ job['lat'] }}</li>
+        <li>Lonitude: {{ job['lng'] }}</li>
+        <ul>
+            {% for parameter in job['searchcategories'] %}
+                <li>{{ parameter }}</li>
+            {% endfor %}
+        </ul>
+    </ul>
+
+<table style="width:100%">
+    <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+    </tr>
+    {% for item in job['placerecords'] %}
+        <tr>
+            <td><a href="/tar/restaurants/{{ item['id'] }}">{{ item['placename'] }}</a></td>
+            <td>{{ item['vicinity'] }}</td>
+            <td>{{ item['phonenumber'] }}</td>
+        </tr>
+    {% endfor %}
+</table>
+</div>
+<script type="text/javascript">
+    function preloader(){
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("content").style.display = "block";
+    }
+    window.onload = preloader;
+</script>
+
+{% endblock %}
