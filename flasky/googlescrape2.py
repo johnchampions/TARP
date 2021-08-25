@@ -137,6 +137,28 @@ class gs2:
             output.extend( self.get_one_dimensional_list(aresult['place_id']))
         return output
 
+    def find_place_from_text(self, input):
+        '''
+        Finds a place based on name or phone nymber.
+        Returns array of google place IDs.
+        '''
+
+        urldir = '/place/textsearch/json?'
+        urldir += '&fields=formatted_address' + self.apikey
+        urldir += '&query=' + urllib.parse.quote(input)
+        data = th.dataFromURL(self.url + urldir)
+        if len(data['resultss']) == 0:
+            raise Exception(
+                "Error: find_place: couldn't find an entry for your input." + urldir)
+        if 'error_message' in data:
+            raise Exception(
+                'Error: find_place: error message: ' + data['error_message'])
+        output = []
+        for result in results:
+            output.extend(self.get_one_dimensional_list(result['place_id']))
+        return output
+        
+
     def get_one_dimensional_list(self,mylist):
         '''
         Goes through a list looking for lists and adds the contents of the found list to the main list.
@@ -221,8 +243,10 @@ class gs2:
                 self._nearby_search_one_type(location, radius, type, keyword=keyword, language=language, minprice=minprice, maxprice=maxprice))
         return output
    
-    def get_place_details(self, place_ids, refresh=False):
+    def get_place_details(self, place_ids, refresh=False, onlyaddress=False):
         fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total']
+        if onlyaddress:
+            fields = ['address_component']
         for place_id in place_ids:
             if (GooglePlace.query.filter(GooglePlace.googleplace_id == place_id).first() is not None):
                 if refresh == False:
@@ -239,6 +263,8 @@ class gs2:
                 ptang = self.url + urldir
                 data = th.dataFromURL(ptang)
                 self.place_to_db(data)
+            if onlyaddress:
+                return data['result']['address_components']
 
     def place_to_db(self, data):
         aresult = data['result']

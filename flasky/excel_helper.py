@@ -2,7 +2,7 @@ import pandas
 import sqlite3
 import db2
 
-postcode = pandas.read_excel('instance/australian_postcodes.xls',
+postcode = pandas.read_excel('../instance/australian_postcodes.xls',
     sheet_name ='Sheet1',
     header = 0)
 

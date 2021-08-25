@@ -145,7 +145,6 @@ class ys2:
         phone = data['phone']
         placeurl = data['url']
         
-        
         yelpplace = YelpPlace.query.filter(YelpPlace.yelpplace_id == yelpplace_id).first()
         if yelpplace is None:
             yelpplace = YelpPlace(business_status=business_status, lat=lat, lng=lng,

@@ -56,6 +56,7 @@ class Places(Base):
     parentplace = Column(Integer)
     googleplaceid = Column(Integer, ForeignKey('googleplace.id'))
     yelpplaceid = Column(Integer, ForeignKey('yelpplace.id'))
+    zomatoplaceid = Column(Integer, ForeignKey('zomatoplace.id'))
     vicinity = Column(TEXT)
     street1 = Column(TEXT)
     street2 = Column(TEXT)
@@ -132,7 +133,7 @@ class YelpPlace(Base):
     user_ratings_total = Column(Integer)
     yelpplace_id = Column(TEXT)
     website = Column(TEXT)
-
+    
     def __init__(self, placeid=None, business_status=None, lat=None, lng=None,
             price_level=None, rating=None, user_ratings_total=None, 
             yelpplace_id=None, website=None):
@@ -145,6 +146,44 @@ class YelpPlace(Base):
         self.user_ratings_total = user_ratings_total
         self.yelpplace_id = yelpplace_id
         self.website = website
+
+class ZomatoPlace(Base):
+    __tablename__ = 'zomatoplace'
+    __table_args__ = {'extend_existing'}
+    id = Column(Integer, primary_key=True)
+    placeid = Column(Integer, ForeignKey('places.id'))
+    zomatoplace_id = Column(Integer)
+    rating = Column(FLOAT)
+    user_ratings_total = Column(Integer)
+    cuisine = Column(TEXT)
+    website =  Column(TEXT)
+    business_status = Column(Integer)
+    price_level = Column(Integer)
+    lat = Column(FLOAT)
+    lng = Column(FLOAT)
+
+    def __init__(self, 
+            placeid=None, 
+            zomatoplace_id=None,
+            rating=None,
+            user_rating_total=None,
+            cuisine=None,
+            website=None,
+            business_status=None,
+            price_level=None,
+            lat=None,
+            lng=None):
+        self.placeid = placeid
+        self.zomatoplace_id = zomatoplace_id
+        self.rating = rating
+        self.user_ratings_total = user_rating_total
+        self.cuisine = cuisine
+        self.website = website
+        self.business_status = business_status
+        self.price_level = price_level
+        self.lat = lat
+        self.lng = lng
+
 
 class OpeningHours(Base):
     __tablename__ = 'openinghours'
@@ -264,10 +303,13 @@ class SearchCategories(Base):
     __table_args__ = {'extend_existing': True }
     id = Column(Integer, primary_key=True)
     jobid = Column(Integer, ForeignKey('joblist.id'))
-    category = (Column(TEXT))
-    plugin = (Column(TEXT))
+    category = Column(TEXT)
+    plugin = Column(TEXT)
 
     def __init__(self, jobid=None, category=None, plugin=None):
         self.jobid = jobid
         self.category = category
         self.plugin = plugin
+
+
+        

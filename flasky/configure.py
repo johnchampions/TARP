@@ -12,7 +12,7 @@ from flask import (
 )
 from auth import login_required
 from db2 import db_session, init_db
-from models import ConfigKeys, OpeningHours, JobResults, JobList, SearchCategories
+from models import ConfigKeys, OpeningHours, JobResults, JobList, PostCode, SearchCategories
 import json
 
 timefields = ('sundayopen','sundayclose',
@@ -98,4 +98,13 @@ def rejigger_job_list():
         db_session.merge(joblistrecord)
     db_session.commit()
     flash('Migrated job list to new format')
+    return set_config()
+
+@bp.route('/camelcaselocalities')
+def camelcaselocalities():
+    myrecords = PostCode.query.all()
+    for record in myrecords:
+        record.Locality = record.Locality.title()
+    db_session.commit()
+    flash('Updated Localities format')
     return set_config()

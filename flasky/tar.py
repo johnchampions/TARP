@@ -1,3 +1,4 @@
+from flasky.zomatoscrape2 import zs2
 from flask import (
     Blueprint,
     flash,
@@ -171,7 +172,7 @@ def search():
         job_dict['lng'] = latlong['lng']
         myjob.lat = latlong['lat'],
         myjob.lng = latlong['lng']
-
+        
         if request.form.get('googleplugin') is not None:
             googleplacelist = ()
             types = request.form.getlist('type')
@@ -199,11 +200,12 @@ def search():
                     mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
                     db_session.add(mycategory)
                     googleplacelist.extend(gs.nearby_search_one_type(address, radius, mytype='' , keyword=keyword,  minprice=minprice, maxprice=maxprice))   
-            res = []
+            gres = []
             for i in googleplacelist:
-                if i not in res:
-                    res.append(i)
-            gs.get_place_details(res)
+                if i not in gres:
+                    gres.append(i)
+            
+            gs.get_place_details(gres)
             job_dict['placelist'].extend(helper.googleplacelist_to_placelist(googleplacelist))
         
         if request.form.get('yelpplugin'):
@@ -223,13 +225,25 @@ def search():
                     myrecord = SearchCategories(jobid=jobid, category=category, plugin='yelpcategory')
                     db_session.add(myrecord)
             if term != '':
-                job_dict['keyword'] = keyword
-                myrecord = SearchCategories(jobid=jobid, category=keyword, plugin='yelpkeyword')
+                job_dict['keyword'] = term
+                myrecord = SearchCategories(jobid=jobid, category=term, plugin='yelpkeyword')
                 db_session.add(myrecord)
             yelpids = myys.nearby_places(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
             myys.get_place_details(yelpids)
             job_dict['placelist'].extend(helper.yelpplacelist_to_placelist(yelpids))
-        
+        '''
+        if request.form.get('zomatoplugin'):
+            myzs = zs2()
+            term = request.form['keyword']
+            if term != '':
+                job_dict['keyword'] = term
+                myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
+            center_address_list = gs.get_place_details(gs.find_place_from_text(address), onlyaddress=True)
+                if myzs.valid_address(gs.find_place_from_text(center_address_list))
+                    zomids = myzs.nearby_places(gs.find_place_from_text(address), radius, term)
+        '''
+
+
         if len(job_dict['placelist']) == 0:
             error = 'That search had no hits.'
        

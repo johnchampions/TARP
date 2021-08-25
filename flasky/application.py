@@ -11,7 +11,7 @@ def hello():
     return "<h1 style='color:green'>Hello There!</h1>"
 
 application = Flask(__name__)
-application.config.from_mapping(SECRET_KEY='dev')
+application.config.from_pyfile('config.py', silent=True)
 application.add_url_rule('/', 'index', indexpage)
 application.add_url_rule('/hello', 'hello', hello)
 application.register_blueprint(auth.bp)
