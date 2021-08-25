@@ -12,8 +12,12 @@
             <td><input type="checkbox" name="googleplugin" id="googleplugin" onclick="showplugin('google')" checked/></td>
         </tr>
         <tr>
-            <td><label for="googleplugin">Yelp</label></td>
+            <td><label for="yelpplugin">Yelp</label></td>
             <td><input type="checkbox" name="yelpplugin" id="yelpplugin" onclick="showplugin('yelp')" /></td>
+        </tr>
+        <tr>
+            <td><label for="zomatoplugin">Zomato</label></td>
+            <td><input type="checkbox" name="zomatoplugin" id="zomatoplugin" onclick="showplugin('Zomato')" /></td>
         </tr>
     </table>
     
@@ -409,6 +413,9 @@
                 <td><input type="checkbox" name="attributes" value="wheelchair_accessible" />Wheelchair Accessible</td>
             </tr>
         </table>
+    </div>
+    <div id="zomatodiv" style="display: none;">
+        <p>Information:  Because of the way the Zomato plugin works, search time will be in the order of hours.</p>
     </div>
     <br />
     <input value="Search" type="submit" />
