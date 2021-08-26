@@ -3,7 +3,7 @@ import datetime
 import urllib.request
 import json
 from db2 import db_session
-from models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, Reviews, YelpPlace
+from models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, Reviews, YelpPlace, PostCode
 
 
 def getapikey(key_name):
@@ -66,16 +66,11 @@ def smooshrecords(dict1, dict2):
     returndict.update({'type': dict1['type'] + "," + dict2['type']})
     return returndict
 
-'''
+
 def get_state_from_postcode(postcode):
-    db = get_db()
-    retval = db.execute(
-        'SELECT postcodestate FROM postcode WHERE postcode = ?', (postcode,)
-    ).fetchone()[0]
-    if retval is None:
-        return ""
-    return retval
-'''
+    record = PostCode.query.filter(PostCode.postcode == int(postcode)).first()
+    return record.postcodestate
+    
 
 def dataFromURL(fullURL):
     """Grabs a file off the internet.
