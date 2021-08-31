@@ -7,18 +7,18 @@ from flask import (
 )
 import flask
 from werkzeug.exceptions import abort
-import reports
-from auth import login_required
-from joblist import display_job
-from googlescrape2 import gs2
-from yelpscrape2 import ys2
-import tar_helper as helper
+import flasky.reports
+from flasky.auth import login_required
+from flasky.joblist import display_job
+from flasky.googlescrape2 import gs2
+from flasky.yelpscrape2 import ys2
+import flasky.tar_helper as helper
 import io
 import json
-from models import JobList, JobResults, KeyWords, Places, PostCode, SearchCategories
+from flasky.models import JobList, JobResults, KeyWords, Places, PostCode, SearchCategories
 from json_excel_converter import Converter
 from json_excel_converter.xlsx import Writer
-from db2 import db_session
+from flasky.db2 import db_session
 
 
 bp = Blueprint('tar', __name__, url_prefix='/tar')

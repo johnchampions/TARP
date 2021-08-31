@@ -2,8 +2,8 @@ from fuzzywuzzy import process, fuzz
 import datetime
 import urllib.request
 import json
-from db2 import db_session
-from models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, Reviews, YelpPlace
+from flasky.db2 import db_session
+from flasky.models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, YelpPlace
 
 
 def getapikey(key_name):

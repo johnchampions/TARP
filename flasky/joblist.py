@@ -1,17 +1,15 @@
-#joblist.py
-
 from werkzeug.exceptions import abort
-from yelpscrape2 import ys2
+from flasky.yelpscrape2 import ys2
 import json
 from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
-from models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace
+from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace
 from flask import (
     Blueprint,
 )
-from db2 import db_session
-from googlescrape2 import gs2
-from tar_helper import getapikey
+from flasky.db2 import db_session
+from flasky.googlescrape2 import gs2
+from flasky.tar_helper import getapikey
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 

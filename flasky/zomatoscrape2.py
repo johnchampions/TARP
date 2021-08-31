@@ -1,12 +1,9 @@
-from os import replace
-from sqlalchemy.sql.operators import op
 from re import split
-from functools import cache
-import selenium
-from db2 import db_session
+#import selenium
+from flasky.db2 import db_session
 from bs4 import BeautifulSoup
 import json
-from models import ZomatoPlace, Places, OpeningHours, KeyWords
+from flasky.models import ZomatoPlace, Places, OpeningHours, KeyWords
 from urllib import parse
 import requests
 from selenium import webdriver

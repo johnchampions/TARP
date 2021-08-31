@@ -10,9 +10,9 @@ from flask import (
     request,
     flash
 )
-from auth import login_required
-from db2 import db_session, init_db
-from models import ConfigKeys, OpeningHours, JobResults, JobList, PostCode, SearchCategories
+from flasky.auth import login_required
+from flasky.db2 import db_session, init_db
+from flasky.models import ConfigKeys, OpeningHours, JobResults, JobList, PostCode, SearchCategories
 import json
 
 timefields = ('sundayopen','sundayclose',

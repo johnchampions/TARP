@@ -1,8 +1,8 @@
-from models import KeyWords, OpeningHours, Places, Reviews, YelpPlace
+from flasky.models import KeyWords, OpeningHours, Places, Reviews, YelpPlace
 import urllib.request
 import urllib.parse
 import json
-from db2 import db_session
+from flasky.db2 import db_session
 
 def mash_yelp_places(new_place, old_place):
     if new_place.business_status is None:

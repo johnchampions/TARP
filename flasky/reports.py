@@ -1,8 +1,8 @@
 from re import split
 from math import atan2, radians, sin, sqrt, cos
-from models import ConfigKeys, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace
+from flasky.models import ConfigKeys, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace
 import json
-import tar_helper as helper
+import flasky.tar_helper as helper
 
 
 def listofplaces_to_listofdict(listofplaces):

@@ -3,7 +3,7 @@ from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import FLOAT, Float, TEXT
-from db2 import Base
+from flasky.db2 import Base
 
 class Users(Base):
     __tablename__ = 'users'
@@ -52,7 +52,7 @@ class Places(Base):
     __tablename__= 'places'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
-    placename = Column(TEXT)
+    placename = Column(TEXT(collation='utf8mb4'))
     parentplace = Column(Integer)
     googleplaceid = Column(Integer, ForeignKey('googleplace.id'))
     yelpplaceid = Column(Integer, ForeignKey('yelpplace.id'))
@@ -66,12 +66,13 @@ class Places(Base):
     phonenumber = Column(TEXT)
 
     def __init__(self, placename=None, parentplace=None, googleplaceid=None, 
-            yelpplaceid=None, vicinity=None, street1=None, street2=None,
+            yelpplaceid=None, zomatoplaceid=None, vicinity=None, street1=None, street2=None,
             suburb=None, postcode=None, placestate=None, phonenumber=None):
         self.placename = placename
         self.parentplace = parentplace
         self.googleplaceid = googleplaceid
         self.yelpplaceid = yelpplaceid
+        self.zomatoplaceid = zomatoplaceid
         self.vicinity = vicinity
         self.street1 = street1
         self.street2 = street2
@@ -149,7 +150,7 @@ class YelpPlace(Base):
 
 class ZomatoPlace(Base):
     __tablename__ = 'zomatoplace'
-    __table_args__ = {'extend_existing'}
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     zomatoplace_id = Column(Integer)

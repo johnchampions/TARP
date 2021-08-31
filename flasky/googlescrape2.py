@@ -1,13 +1,11 @@
-from models import GooglePlace, KeyWords, OpeningHours, Places, Reviews
-from re import A
-import tar_helper as th
+from flasky.models import GooglePlace, KeyWords, OpeningHours, Places, Reviews
+import flasky.tar_helper as th
 import urllib.request
 import urllib.parse
 import json
 from datetime import datetime
 import time
-import pandas as pd
-from db2 import db_session
+from flasky.db2 import db_session
 
 '''
 What we wanna do?
