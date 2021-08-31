@@ -1,8 +1,8 @@
 import os
 from flask import Flask, config
 from flask.templating import render_template
-import db2
-import auth, tar, configure, scratch, joblist
+import flasky.db2 as db2
+import flasky.auth, flasky.tar, flasky.configure, flasky.joblist
 
 def indexpage():
     return render_template('frontpage/frontpage.html')
@@ -14,10 +14,10 @@ application = Flask(__name__)
 application.config.from_pyfile('config.py', silent=True)
 application.add_url_rule('/', 'index', indexpage)
 application.add_url_rule('/hello', 'hello', hello)
-application.register_blueprint(auth.bp)
-application.register_blueprint(tar.bp)
-application.register_blueprint(configure.bp)
-application.register_blueprint(joblist.bp)
+application.register_blueprint(flasky.auth.bp)
+application.register_blueprint(flasky.tar.bp)
+application.register_blueprint(flasky.configure.bp)
+application.register_blueprint(flasky.joblist.bp)
 
 @application.teardown_appcontext
 def shutdown_session(exception=None):
