@@ -5,4 +5,5 @@
 !.elasticbeanstalk/*.global.yml
 /DOCO/*
 /venv/*
-
+/__pycache__/*
+/flasky/__pycache__/*
