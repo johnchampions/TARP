@@ -1,13 +1,10 @@
-from re import split
-#import selenium
+from re import search
 from flasky.db2 import db_session
 from bs4 import BeautifulSoup
 import json
 from flasky.models import ZomatoPlace, Places, OpeningHours, KeyWords
-from urllib import parse
 import requests
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 import time
 
 headers = { 
@@ -52,13 +49,13 @@ class zs2:
             if item['categoryType'] == 'dineout':
                 dineouturl = item['url']
         linklist = self.selenium_get(dineouturl)
+        output = []
         for link in linklist:
             myurl = self.url + link[1:]
             myjson = self.data_from_url(myurl)
-            self.send_to_db(myjson)
-            print(json.dumps(myjson))
-            print('::')
-            time.sleep(15)
+            output.append(self.send_to_db(myjson))
+            time.sleep(2)
+        return output
 
     def send_to_db(self, datadict):
         zomatoplace_id=datadict['pages']['current']['resId']
@@ -67,7 +64,7 @@ class zs2:
         cuisine = datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['cuisine_string']
         website = self.url + datadict['pages']['current']['pageUrl'][1:]
         business_status = self.get_business_status(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO'])
-        price_level = self.get_price_level(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTUIN_RES_DETAILS']['CFT_DETAILS']['cfts']['title'])
+        price_level = self.get_price_level(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS']['CFT_DETAILS']['cfts'])
         lat = float(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['latitude'])
         lng = float(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['longitude'])
         
@@ -91,8 +88,10 @@ class zs2:
         phone_number = datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['phoneDetails']['phoneStr']
         post_code = datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['zipcode']
         vicinity = datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['address']
-        street1 = split(vicinity, ', ')[0]
-        street2 = split(vicinity, ', ')[2]
+        street1 = vicinity.split(', ')[0]
+        street2 = ''
+        if len(vicinity.split(', ')) > 1:
+            street2 = vicinity.split(', ')[1]
         suburb = datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['locality_verbose']
         placerecord = Places.query.filter((Places.placename == place_name) and (Places.phonenumber == phone_number) and (Places.postcode == post_code)).first()
         if placerecord is None:
@@ -102,9 +101,13 @@ class zs2:
             db_session.commit()
         zomplace.placeid = placerecord.id
         db_session.commit
-        keywords = self.get_keywords(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS'], placerecord.id)
+        keywords = self.get_keywords(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS'])
         self.keywords_to_db(keywords, placerecord.id)
-        self.opening_hours_to_db(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['timing']['customised_timings']['opening_hours'])
+        if len(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['timing']['customised_timings']) > 0:
+            if 'opening_hours' in datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['timing']['customised_timings']:
+                self.opening_hours_to_db(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['timing']['customised_timings']['opening_hours'], placeid=placerecord.id)
+        return placerecord.id
+
 
     def keywords_to_db(self, keywords, placeid):
         for keyword in keywords:
@@ -128,30 +131,35 @@ class zs2:
         if oh is None:
             oh = OpeningHours(placeid)
         for hours in timingdict:
-            opening, closing = split(hours['timing'], ' \u2013 ')
+            if hours['timing'] == 'Closed':
+                continue
+            opening = hours['timing'].split('\u2013')[0]
+            closing = hours['timing'].split('\u2013')[-1]
+            
+            
             opening = self.convert_timing(opening)
             closing = self.convert_timing(closing)
             daysindex.extend(self.get_index_of_days(hours['days']))
             for day in daysindex:
-                if day == 0:
+                if day == 'Mon':
                     oh.mondayopen = opening
                     oh.mondayclose = closing
-                if day == 1:
+                if day == 'Tue':
                     oh.tuesdayopen = opening
                     oh.tuesdayclose = closing
-                if day == 2:
+                if day == 'Wed':
                     oh.wednesdayopen = opening
                     oh.wednesdayclose = closing
-                if day == 3:
+                if day == 'Thu':
                     oh.thursdayopen = opening
                     oh.thursdayclose = closing
-                if day == 4:
+                if day == 'Fri':
                     oh.fridayopen = opening
                     oh.fridayclose = closing
-                if day == 5:
+                if day == 'Sat':
                     oh.saturdayopen = opening
                     oh.saturdayclose = closing
-                if day == 6:
+                if day == 'Sun':
                     oh.sundayopen = opening
                     oh.sundayclose = closing
         db_session.add(oh)
@@ -165,29 +173,32 @@ class zs2:
                 output.extend(self.get_index_of_days(mylist))
         elif '-' in daysstring:
             first, last = daysstring.split('-')
-            output.extend(days[days.index(first):days.index(last)])
+            output.extend(days[days.index(first):days.index(last) + 1])
         else:
-            output.append(days.index(daysstring))
+            output.append(days[days.index(daysstring)])
         return output
 
     def convert_timing(self, timingstring):
-        if ':' in timingstring:
-            timingstring.replace(':', '')
+        timingstring = timingstring.replace(' ', '')
+        if search(':', timingstring):
+            timingstring = timingstring.replace(':', '')
         else:
             timingstring = timingstring + '00'
-        if 'am' in timingstring:
-            timingstring.replace('am','')
-        if 'pm' in timingstring:
+        if search('am', timingstring):
+            timingstring = timingstring.replace('am','')
+        if search('pm', timingstring):
             timingstring = str(int(timingstring.replace('pm','')) + 1200)
+        if search('12midnight', timingstring):
+            timingstring = '0000'
         return timingstring
 
-
-
-
-
-    def get_price_level(self, pricestring ):
-        output = split(pricestring, ' ')[0][:1]
-        return output
+    def get_price_level(self, priceob ):
+        pricestring = '$0'
+        for mydict in priceob:
+            pricestring = mydict['title']
+        output = pricestring.split(' ')[0]
+        output = output[1:]
+        return int(output)
         
     def get_business_status(self, datadict):
         if datadict['is_perm_closed']:
@@ -212,7 +223,9 @@ class zs2:
             if new_height == last_height:
                 can_scroll = False
             last_height = new_height
-        return self.get_cards(driver.page_source)
+        page_source = driver.page_source
+        driver.close()
+        return self.get_cards(page_source)
 
     def returnintmeters(self,mystring):
         if mystring.split(' ')[1] == 'm':
@@ -259,7 +272,6 @@ class zs2:
     def latlongtocenter(self, lat, lng):
         path = f'{self.url}webroutes/location/get?lat={lat}&lon={lng}'
         response = requests.get(path, headers=headers)
-        print(response.url)
         output = json.loads(response.text)
         return output
 

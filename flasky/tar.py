@@ -231,19 +231,18 @@ def search():
             yelpids = myys.nearby_places(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
             myys.get_place_details(yelpids)
             job_dict['placelist'].extend(helper.yelpplacelist_to_placelist(yelpids))
-        '''
+        
         if request.form.get('zomatoplugin'):
             myzs = zs2()
             term = request.form['keyword']
             if term != '':
                 job_dict['keyword'] = term
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
-            center_address_list = gs.get_place_details(gs.find_place_from_text(address), onlyaddress=True)
-                if myzs.valid_address(gs.find_place_from_text(center_address_list))
-                    zomids = myzs.nearby_places(gs.find_place_from_text(address), radius, term)
-        '''
-
-
+            else:
+                myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
+            zomids = myzs.nearby_places(gs.find_place_from_text(address), radius, term)
+            job_dict['placelist'].extend(zomids)
+        
         if len(job_dict['placelist']) == 0:
             error = 'That search had no hits.'
        
