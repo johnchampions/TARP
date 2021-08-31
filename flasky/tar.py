@@ -281,17 +281,17 @@ def get_xls_report(path_to_file):
     #TODO: Fix this bit...
     if jobtype == 'job':
         if jobformat == 'json':
-            proxyIO.write(reports.create_job_json(jobnumber))
+            proxyIO.write(flasky.reports.create_job_json(jobnumber))
         elif jobformat == 'xlsx':
-            data = (json.load(reports.create_job_json(jobnumber)))
+            data = (json.load(flasky.reports.create_job_json(jobnumber)))
             converter = Converter()
             converter.convert(data, Writer(mem))
     elif jobtype == 'tarreport':
-        data = reports.tarreport(jobnumber).create_tar_report()
+        data = flasky.reports.tarreport(jobnumber).create_tar_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
     elif jobtype == 'uglyreport':
-        data = reports.uglyreport(jobnumber).create_report()
+        data = flasky.reports.uglyreport(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
     mem.seek(0)
