@@ -211,16 +211,14 @@ class zs2:
 
     def selenium_get(self, url):
         chrome_options = Options()
-        chrome_options.add_argument('--disable-extensions')
+        #chrome_options.add_argument('--disable-extensions')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless')
+        chrome_options.add_argument('user-agent=' + headers['User-agent'])
         chrome_options.add_argument('--window-size=1920x1080')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
-
         driver.get(url)
-        page_source = driver.page_source
-        print(page_source)
         sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
         sort_by_distance.click()
         can_scroll = True
@@ -275,7 +273,7 @@ class zs2:
         for div in s:
             distance = div.find_all("p")[0].text
             link = div.find_all('a')[0]['href']
-            if self.returnintmeters(distance) < self.radius:
+            if self.returnintmeters(distance) < int(self.radius):
                 output.append(link)
         return output
 
