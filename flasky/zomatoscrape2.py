@@ -60,6 +60,8 @@ class zs2:
         return output
 
     def send_to_db(self, datadict):
+        if 'pages' not in datadict:
+            return 0
         zomatoplace_id=datadict['pages']['current']['resId']
         rating = float(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['aggregate_rating'])
         user_rating_total = int(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['votes'])
