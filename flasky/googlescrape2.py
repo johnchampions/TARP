@@ -145,14 +145,14 @@ class gs2:
         urldir += '&fields=formatted_address' + self.apikey
         urldir += '&query=' + urllib.parse.quote(input)
         data = th.dataFromURL(self.url + urldir)
-        if len(data['resultss']) == 0:
+        if len(data['results']) == 0:
             raise Exception(
                 "Error: find_place: couldn't find an entry for your input." + urldir)
         if 'error_message' in data:
             raise Exception(
                 'Error: find_place: error message: ' + data['error_message'])
         output = []
-        for result in results:
+        for result in data['results']:
             output.extend(self.get_one_dimensional_list(result['place_id']))
         return output
         
