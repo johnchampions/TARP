@@ -142,7 +142,7 @@ class gs2:
         '''
 
         urldir = '/place/textsearch/json?'
-        urldir += '&fields=formatted_address' + self.apikey
+        urldir += '&fields=formatted_address&' + self.apikey
         urldir += '&query=' + urllib.parse.quote(input)
         data = th.dataFromURL(self.url + urldir)
         if len(data['results']) == 0:
