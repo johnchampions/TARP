@@ -5,6 +5,7 @@ import json
 from flasky.models import ZomatoPlace, Places, OpeningHours, KeyWords
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import time
 
 headers = { 
@@ -33,6 +34,7 @@ class zs2:
         self.radius = 0
              
     def nearby_places(self, location, radius, keyword=''):
+        
         params = {
             'radius' : str(radius),
             'latitude' : str(location['lat']),
@@ -208,9 +210,17 @@ class zs2:
         return 1
 
     def selenium_get(self, url):
-        driver = webdriver.Chrome('chromedriver.exe')
-        driver.set_window_size(1920,1080)
+        chrome_options = Options()
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--window-size=1920x1080')
+        driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
+
         driver.get(url)
+        page_source = driver.page_source
+        print(page_source)
         sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
         sort_by_distance.click()
         can_scroll = True
@@ -224,7 +234,7 @@ class zs2:
                 can_scroll = False
             last_height = new_height
         page_source = driver.page_source
-        driver.close()
+        driver.quit()
         return self.get_cards(page_source)
 
     def returnintmeters(self,mystring):

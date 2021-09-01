@@ -240,7 +240,7 @@ def search():
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
             else:
                 myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
-            zomids = myzs.nearby_places(gs.find_place_from_text(address), radius, term)
+            zomids = myzs.nearby_places(job_dict, radius, term)
             job_dict['placelist'].extend(zomids)
         
         if len(job_dict['placelist']) == 0:
