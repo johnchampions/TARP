@@ -2,7 +2,7 @@ from re import search
 from flasky.db2 import db_session
 from bs4 import BeautifulSoup
 import json
-from flasky.models import ZomatoPlace, Places, OpeningHours, KeyWords
+from flasky.models import JobList, JobResults, ZomatoPlace, Places, OpeningHours, KeyWords
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -51,13 +51,16 @@ class zs2:
             if item['categoryType'] == 'dineout':
                 dineouturl = item['url']
         linklist = self.selenium_get(dineouturl)
-        output = []
+        return linklist
+        
+    def linklist_to_db(self, linklist, job_id=0):
         for link in linklist:
             myurl = self.url + link[1:]
             myjson = self.data_from_url(myurl)
-            output.append(self.send_to_db(myjson))
+            placeid = self.send_to_db(myjson)
+            db_session.add(JobResults(placeid=placeid, jobid=job_id))
+            db_session.commit()
             time.sleep(2)
-        return output
 
     def send_to_db(self, datadict):
         zomatoplace_id=datadict['pages']['current']['resId']

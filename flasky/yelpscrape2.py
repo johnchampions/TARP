@@ -1,4 +1,4 @@
-from flasky.models import KeyWords, OpeningHours, Places, Reviews, YelpPlace
+from flasky.models import KeyWords, OpeningHours, Places, Reviews, YelpPlace, JobResults
 import urllib.request
 import urllib.parse
 import json
@@ -109,7 +109,7 @@ class ys2:
             output.append(business['id'])
         return output
 
-    def get_place_details(self, place_ids, refresh=False):
+    def get_place_details(self, place_ids, refresh=False, job_id=0):
         myurl = 'https://api.yelp.com/v3/businesses/'
         params = dict()
         for place_id in place_ids:
@@ -118,7 +118,9 @@ class ys2:
                     continue
             urldir = myurl + place_id
             data = self.dataFromURL(urldir, params)
-            self.place_to_db(data)
+            placeid = self.place_to_db(data)
+            db_session.add(JobResults(placeid=placeid, jobid=job_id))
+            db_session.commit()
 
     def place_to_db(self, data):
         categories = self.get_categories(data['categories'])
@@ -171,6 +173,7 @@ class ys2:
         self._get_reviews(placerecord.id)
         if 'hours' in data:
             self._openinghours_to_db(data['hours'], placerecord.id)
+        return placerecord.id
 
 
     def _get_reviews(self, placeid, locale='en_AU'):

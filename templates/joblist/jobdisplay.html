@@ -18,6 +18,7 @@
         <li>Radius: {{ job['radius'] }} meters</li>
         <li>Latitude: {{ job['lat'] }}</li>
         <li>Lonitude: {{ job['lng'] }}</li>
+        <li>Search count rough guess: {{ job['roughguess'] }}</li>
         <ul>
             {% for parameter in job['searchcategories'] %}
                 <li>{{ parameter }}</li>
