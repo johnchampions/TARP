@@ -52,7 +52,8 @@ def display_job(job_id):
         'radius': joblist_record.radius,
         'lat': joblist_record.lat,
         'lng': joblist_record.lng,
-        'searchcategories': get_search_categories(joblist_record.id)
+        'searchcategories': get_search_categories(joblist_record.id),
+        'roughcount': joblist_record.roughcount
     }
     placerecords = []
     for placeid in get_places(joblist_record.id):
