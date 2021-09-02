@@ -158,7 +158,7 @@ def search():
         
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
-        myjob = JobList(address=request.form['address'], radius=request.form['radius'],)
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id
@@ -205,8 +205,7 @@ def search():
             for i in googleplacelist:
                 if i not in gres:
                     gres.append(i)
-            gt = Thread(target=gs.get_place_details, args=(gres))
-            gt.start()
+            Thread(target=gs.get_place_details, kwargs={'place_ids':gres, 'job_id' : jobid}).start()
             job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
 
         if request.form.get('yelpplugin'):
@@ -233,7 +232,7 @@ def search():
             
             yt = Thread(target=myys.get_place_details, kwargs={'place_ids': yelpids, 'job_id':jobid})
             yt.start()
-            job_dict['roughcount'] = job_dict['roughtcount'] + len(yelpids)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(yelpids)
         
         if request.form.get('zomatoplugin'):
             myzs = zs2()
@@ -244,7 +243,7 @@ def search():
             else:
                 myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
             zomids = myzs.nearby_places(job_dict, radius, term)
-            job_dict['roughcount'] = job_dict['roughtcount'] + len(zomids)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(zomids)
             Thread(target=myzs.linklist_to_db, kwargs={'linklist':zomids, 'job_id': jobid}).start()
             
         myjob.roughcount=job_dict['roughcount']

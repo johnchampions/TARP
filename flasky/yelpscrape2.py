@@ -113,7 +113,10 @@ class ys2:
         myurl = 'https://api.yelp.com/v3/businesses/'
         params = dict()
         for place_id in place_ids:
-            if YelpPlace.query.filter(YelpPlace.yelpplace_id == place_id).first() is not None:
+            go_nogo = YelpPlace.query.filter(YelpPlace.yelpplace_id == place_id).first()
+            if  go_nogo is not None:
+                db_session.add(JobResults(placeid=go_nogo.placeid, jobid=job_id))
+                db_session.commit()
                 if refresh == False:
                     continue
             urldir = myurl + place_id

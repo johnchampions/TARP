@@ -56,13 +56,21 @@ class zs2:
     def linklist_to_db(self, linklist, job_id=0):
         for link in linklist:
             myurl = self.url + link[1:]
-            myjson = self.data_from_url(myurl)
-            placeid = self.send_to_db(myjson)
-            db_session.add(JobResults(placeid=placeid, jobid=job_id))
-            db_session.commit()
-            time.sleep(2)
+            goNoGo = ZomatoPlace.query.filter(ZomatoPlace.website == myurl).first()
+            if goNoGo is None:
+                myjson = self.data_from_url(myurl)
+                placeid = self.send_to_db(myjson)
+                time.sleep(2)
+            else:
+                placeid = goNoGo.placeid
+            if placeid != 0:
+                db_session.add(JobResults(placeid=placeid, jobid=job_id))
+                db_session.commit()
+            
 
     def send_to_db(self, datadict):
+        if 'pages' not in datadict:
+            return 0
         zomatoplace_id=datadict['pages']['current']['resId']
         rating = float(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['aggregate_rating'])
         user_rating_total = int(datadict['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['votes'])
@@ -219,11 +227,10 @@ class zs2:
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--window-size=1920x1080')
+        chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
 
         driver.get(url)
-        page_source = driver.page_source
-        print(page_source)
         sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
         sort_by_distance.click()
         can_scroll = True
@@ -278,7 +285,7 @@ class zs2:
         for div in s:
             distance = div.find_all("p")[0].text
             link = div.find_all('a')[0]['href']
-            if self.returnintmeters(distance) < self.radius:
+            if self.returnintmeters(distance) < int(self.radius):
                 output.append(link)
         return output
 

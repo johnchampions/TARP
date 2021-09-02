@@ -246,7 +246,10 @@ class gs2:
         if onlyaddress:
             fields = ['address_component']
         for place_id in place_ids:
-            if (GooglePlace.query.filter(GooglePlace.googleplace_id == place_id).first() is not None):
+            go_nogo = GooglePlace.query.filter(GooglePlace.googleplace_id == place_id).first()
+            if (go_nogo is not None):
+                db_session.add(JobResults(placeid=go_nogo.placeid, jobid=job_id))
+                db_session.commit()
                 if refresh == False:
                     continue
             if type(place_id) is list:
