@@ -231,7 +231,10 @@ class zs2:
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
 
         driver.get(url)
-        sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
+        try:
+            sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
+        except:
+            return []
         sort_by_distance.click()
         can_scroll = True
         last_height = driver.execute_script("return document.body.scrollHeight")

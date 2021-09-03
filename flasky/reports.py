@@ -1,6 +1,6 @@
 from re import split
 from math import atan2, radians, sin, sqrt, cos
-from flasky.models import ConfigKeys, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace
+from flasky.models import ConfigKeys, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace, ZomatoPlace
 import json
 import flasky.tar_helper as helper
 
@@ -87,6 +87,10 @@ class uglyreport:
             if yelprecord is None:
                 yelprecord = YelpPlace()
             placerecord = {**yelprecord.__dict__, **placerecord }
+            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first()
+            if zomatorecord is None:
+                zomatorecord = ZomatoPlace()
+            placerecord = {**zomatorecord.__dict__, **placerecord }
             ohrecord = OpeningHours.query.filter(OpeningHours.placeid == place.placeid).first()
             if ohrecord is None:
                 ohrecord = OpeningHours()
@@ -119,9 +123,9 @@ class tarreport:
             placerecord = Places.query.filter(Places.id == place.placeid).first()
             keywordsrecords = KeyWords.query.filter(
                 KeyWords.placeid == place.placeid).all()
-            gprecord = GooglePlace.query.filter(
-                GooglePlace.placeid == place.placeid).first()
+            gprecord = GooglePlace.query.filter(GooglePlace.placeid == place.placeid).first()
             yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first()
+            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first()
             thisplace = {
                 'Name': placerecord.placename,
                 'Distance': distance_between_places(self.myjob.lat, self.myjob.lng, self.getlat(gprecord, yelprecord), self.getlng(gprecord, yelprecord)),
@@ -133,8 +137,8 @@ class tarreport:
                 'Lunch': self.is_open_for_meal(self.meals['lunch'], self.meals['lunchclose'], place.placeid),
                 'Dinner': self.is_open_for_meal(self.meals['dinner'], self.meals['dinnerclose'], place.placeid),
                 'Late': self.is_open_for_meal(self.meals['supper'], self.meals['supperclose'], place.placeid),
-                'Rating' : self.get_rating((gprecord,yelprecord,)),
-                'Total Ratings' : self.get_total_ratings((gprecord, yelprecord,))
+                'Rating' : self.get_rating((gprecord,yelprecord,zomatorecord,)),
+                'Total Ratings' : self.get_total_ratings((gprecord, yelprecord,zomatorecord,))
             }
             output.append(thisplace)
         return output

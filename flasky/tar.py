@@ -4,6 +4,7 @@ from flask import (
     flash,
     render_template,
     request,
+    redirect
 )
 import flask
 from werkzeug.exceptions import abort
@@ -173,7 +174,7 @@ def search():
         job_dict['lng'] = latlong['lng']
         myjob.lat = latlong['lat'],
         myjob.lng = latlong['lng']
-        
+
         if request.form.get('googleplugin') is not None:
             googleplacelist = ()
             types = request.form.getlist('type')
@@ -250,9 +251,8 @@ def search():
         db_session.commit()
         if job_dict['roughcount'] == 0:
             error = 'That search had no hits.'
-       
         if error is None:
-            return  flasky.joblist.display_job(myjob.id)
+            return  redirect('/joblist/jobdisplay/' + str(jobid))
         flash(error)
     return render_template('/tar/googlesearch.html')
 

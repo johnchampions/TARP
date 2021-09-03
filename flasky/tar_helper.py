@@ -3,7 +3,7 @@ import datetime
 import urllib.request
 import json
 from flasky.db2 import db_session
-from flasky.models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, YelpPlace
+from flasky.models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace
 
 
 def getapikey(key_name):
@@ -168,5 +168,8 @@ def get_urls(placeid):
     yr = YelpPlace.query.filter(YelpPlace.placeid == placeid).first()
     if (yr is not None) and (yr.website is not None):
         output.append(yr.website)
+    zr = ZomatoPlace.query.filter(ZomatoPlace.placeid == placeid).first()
+    if (zr is not None) and (zr.website is not None):
+        output.append(zr.website)
     return output
     
