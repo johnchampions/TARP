@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block content %}
+<div id="searchform">
 <form method="POST" name="myform">
     <h3>Search plugins</h3>
     <table>
@@ -415,10 +416,20 @@
         </table>
     </div>
     <br />
-    <input value="Search" type="submit" />
+    <input value="Search" type="submit" onclick="displaysearching()" />
 </form>
+</div>
+<div id="searching" style="display: none;"><h2>Searching...</h2></div>
 </section>
 <script>
+
+    function displaysearching() {
+        var showid = document.getElementById("searching");
+        var hideid = document.getElementById("searchform");
+        showid.style.display = "block";
+        hideid.style.display = "none";
+        return true;
+    }
 
     function showplugin(pluginname) {
         var checkid = document.getElementById(pluginname + "plugin");

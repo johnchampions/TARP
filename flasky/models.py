@@ -256,9 +256,10 @@ class JobList(Base):
     lng = Column(Float)
     maxprice = Column(Integer)
     minprice = Column(Integer)
+    roughcount = Column(Integer)
 
     def __init__(self, jobjson=None, jobtype=None, address=None, radius=None, lat=None, lng=None,
-        maxprice=None, minprice=None):
+        maxprice=None, minprice=None, roughcount=None):
         self.jobjson = jobjson
         self.jobtype = jobtype
         self.address = address
@@ -267,6 +268,7 @@ class JobList(Base):
         self.lng = lng
         self.maxprice = maxprice
         self.minprice = minprice
+        self.roughcount = roughcount
 
 
 class PostCode(Base):

@@ -2,7 +2,7 @@ from re import search
 from flasky.db2 import db_session
 from bs4 import BeautifulSoup
 import json
-from flasky.models import ZomatoPlace, Places, OpeningHours, KeyWords
+from flasky.models import JobList, JobResults, ZomatoPlace, Places, OpeningHours, KeyWords
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -51,13 +51,22 @@ class zs2:
             if item['categoryType'] == 'dineout':
                 dineouturl = item['url']
         linklist = self.selenium_get(dineouturl)
-        output = []
+        return linklist
+        
+    def linklist_to_db(self, linklist, job_id=0):
         for link in linklist:
             myurl = self.url + link[1:]
-            myjson = self.data_from_url(myurl)
-            output.append(self.send_to_db(myjson))
-            time.sleep(2)
-        return output
+            goNoGo = ZomatoPlace.query.filter(ZomatoPlace.website == myurl).first()
+            if goNoGo is None:
+                myjson = self.data_from_url(myurl)
+                placeid = self.send_to_db(myjson)
+                time.sleep(2)
+            else:
+                placeid = goNoGo.placeid
+            if placeid != 0:
+                db_session.add(JobResults(placeid=placeid, jobid=job_id))
+                db_session.commit()
+            
 
     def send_to_db(self, datadict):
         if 'pages' not in datadict:
@@ -213,15 +222,19 @@ class zs2:
 
     def selenium_get(self, url):
         chrome_options = Options()
-        #chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--disable-extensions')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--headless')
-        chrome_options.add_argument('user-agent=' + headers['User-agent'])
         chrome_options.add_argument('--window-size=1920x1080')
+        chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
+
         driver.get(url)
-        sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
+        try:
+            sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
+        except:
+            return []
         sort_by_distance.click()
         can_scroll = True
         last_height = driver.execute_script("return document.body.scrollHeight")
