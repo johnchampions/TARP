@@ -43,7 +43,9 @@ class zs2:
         self.radius = radius
         if keyword != '':
             params['term'] = keyword
-        center= self.latlongtocenter(location['lat'], location['lng'])
+        center = self.latlongtocenter(location['lat'], location['lng'])
+        if center is None:
+            return []
         cityurl =self.search_city_id(center)
         cityid = center['locationDetails']['cityId'] 
         dineoutlinksearch = self.data_from_url(cityurl)
@@ -295,7 +297,10 @@ class zs2:
     def latlongtocenter(self, lat, lng):
         path = f'{self.url}webroutes/location/get?lat={lat}&lon={lng}'
         response = requests.get(path, headers=headers)
-        output = json.loads(response.text)
+        try:
+            output = json.loads(response.text)
+        except:
+            output = None
         return output
 
     def search_city_id(self, latlongtocenter):
