@@ -62,7 +62,9 @@ def display_job(job_id):
         'searchcategories': get_search_categories(joblist_record.id),
         'roughcount': joblist_record.roughcount
     }
-    return render_template('/joblist/jobdisplay.html', job=mydict)
+    placerecords = get_restaurantlist(job_id)
+    placerecords=placerecords
+    return render_template('/joblist/jobdisplay.html', job=mydict, placerecords=placerecords)
 
 def update_restaurants(job_id):
     with application.application.app_context():
