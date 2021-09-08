@@ -288,7 +288,7 @@ def get_xls_report(path_to_file):
         data = flasky.reports.tarreport(jobnumber).create_tar_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
-    elif jobtype == 'uglyreport':
+    elif jobtype == 'RawReport':
         data = flasky.reports.uglyreport(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
