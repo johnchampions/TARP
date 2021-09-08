@@ -6,11 +6,11 @@
 {% block content %}
 <p>Get more data in: </p>
 <ul>
-    <li><a href="/tar/downloads/uglyreport_{{ job['id'] }}.xlsx">Ugly dump</a></li>
+    <li><a href="/tar/downloads/RawReport_{{ job['id'] }}.xlsx">Raw Report</a></li>
     <li><a href="/tar/downloads/tarreport_{{ job['id'] }}.xlsx">Trade Area Report</a></li>
     <li>More coming soon...</li>
 </ul>
-<input value="Refresh Data" onclick="location.reload()" />
+<input type="button" onclick="location.reload()">Refresh Data</button>
 <div id="content">
     <h2>Search parameters</h2>
     <ul>
