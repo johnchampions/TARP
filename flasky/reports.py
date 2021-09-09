@@ -285,20 +285,21 @@ class new_tar_report:
     
     def create_report(self):
         output = []
+        
 
         coffeetypes = get_Keyword_type_list('coffee')
         licensedtypes = get_Keyword_type_list('licensed')
 
         for place in self.myplacesrecords:
             placerecord = Places.query.filter(Places.id == place.placeid).first()
-            gprecord = GooglePlace.query.filter(GooglePlace.placeid == place.placeid).first()
-            yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first()
-            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first()
+            gprecord = GooglePlace.query.filter(GooglePlace.placeid == place.placeid).first() or GooglePlace(placeid=place, rating=0, user_ratings_total=0)
+            yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first() or YelpPlace(placeid=place, rating=0, user_ratings_total=0)
+            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first() or ZomatoPlace(placeid=place, rating=0,user_rating_total=0, cuisine='')
             keywordsrecords = KeyWords.query.filter(KeyWords.placeid == place.placeid).all()
-
+            
             thisplace = {
-                'Name' : placerecord.Name,
-                'Distance': rounded_distance_between_places(self.myjob.lat, self.myjob.lng, getlat((gprecord, yelprecord, zomatorecord)), self.getlnggetlat((gprecord, yelprecord, zomatorecord))),
+                'Name' : placerecord.placename,
+                'Distance': rounded_distance_between_places(self.myjob.lat, self.myjob.lng, getlat((gprecord, yelprecord, zomatorecord)), getlng((gprecord, yelprecord, zomatorecord))),
                 'Address': placerecord.vicinity,
                 'Cuisine': zomatorecord.cuisine,
                 'Coffee': is_keyword_in_config_keywords(coffeetypes, keywordsrecords),

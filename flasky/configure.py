@@ -32,8 +32,7 @@ def set_config():
     if request.method == 'POST':
         for key in request.form.keys():
             if request.form[key] != '':
-                mykey = ConfigKeys(keyname=key)
-                mykey.keyvalue = request.form[key]
+                mykey = ConfigKeys(keyname=key, keyvalue=request.form[key])
                 if ConfigKeys.query.filter(ConfigKeys.keyname == key).first() is None:
                     db_session.add(mykey)
                 else:

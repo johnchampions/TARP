@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import FLOAT, Float, TEXT
+from sqlalchemy.sql.sqltypes import FLOAT, Boolean, Float, TEXT
 from flasky.db2 import Base
 
 class Users(Base):
@@ -43,7 +43,7 @@ class KeyWords(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     placetype = Column(TEXT)
-    
+        
     def __init__(self, placeid=None, placetype=None):
         self.placeid = placeid
         self.placetype = placetype
@@ -315,4 +315,22 @@ class SearchCategories(Base):
         self.plugin = plugin
 
 
-        
+class CuisineList(Base):
+    __tablename__ = 'cuisinelist'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    placetype = Column(TEXT)
+    coffee = Column(Boolean)
+    license = Column(Boolean)
+    cuisine = Column(Boolean)
+    blacklist = Column(Boolean)
+
+    def __init__(self, 
+            placetype=None,
+            coffee=None,
+            license=None,
+            cuisine=None):
+        self.placetype = placetype
+        self.coffee = coffee
+        self.license = license
+        self.cuisine = cuisine
