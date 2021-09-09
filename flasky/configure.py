@@ -3,6 +3,7 @@ This file should contain the middleware for configuring the reports.
 Setting API keys, Breakfast time and such
 '''
 
+from flasky.tar_helper import get_blacklist
 from flask import (
     Blueprint,
     g,
@@ -107,4 +108,15 @@ def camelcaselocalities():
         record.Locality = record.Locality.title()
     db_session.commit()
     flash('Updated Localities format')
+    return set_config()
+
+@bp.route('/removeblacklistentries')
+def remove_blacklist_entries():
+    blacklist = get_blacklist()
+    for bannedword in blacklist:
+        keyword_records = SearchCategories.query.filter(SearchCategories.category == bannedword).all()
+        for keyword_record in keyword_records:
+            keyword_record.delete()
+    db_session.commit()
+    flash('Removed Blacklist Entries')
     return set_config()
