@@ -108,7 +108,6 @@ def search_postcodes():
         return render_template('/tar/postcode.html', record=get_postcode(postcode), restaurants=get_places_in_postcode(postcode))
     return render_template('tar/postcodesearch.html')
 
-
 def get_postcode(postcode):
     locality = []
     sa2 = []
@@ -135,8 +134,6 @@ def get_places_in_postcode(postcode):
         }
         restaurantlist.append(restaurant_dict)
     return restaurantlist
-
-
 
 @bp.route('/postcodes/<string:postcode>', methods=('GET',))
 def get_postcode_from_url(postcode):
@@ -292,6 +289,11 @@ def get_xls_report(path_to_file):
         data = flasky.reports.uglyreport(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
+    elif jobtype == 'NewTarReport':
+        data = flasky.reports.new_tar_report(jobnumber).create_report()
+        converter = Converter()
+        converter.convert(data, Writer(mem))
+
     mem.seek(0)
     myreturnfile = flask.send_file(mem, attachment_filename=path_to_file,
         as_attachment=True, cache_timeout=0)
