@@ -7,6 +7,7 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
+from flasky.tar_helper import get_blacklist
 
 headers = { 
     'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -125,7 +126,10 @@ class zs2:
 
 
     def keywords_to_db(self, keywords, placeid):
+        blacklist = get_blacklist()
         for keyword in keywords:
+            if keyword in blacklist:
+                continue
             keyword_record = KeyWords.query.filter(KeyWords.placeid == placeid, KeyWords.placetype == keyword).first()
             if keyword_record is None:
                 keyword_record = KeyWords(placeid, keyword)

@@ -12,12 +12,17 @@ def getapikey(key_name):
 
 
 def getapis():
-    possible_apis = ('google', 'yelp',)
+    possible_apis = ('google', 'yelp', )
     my_output = []
     for api in possible_apis:
         if getapikey(api + 'apikey') is not None:
             my_output.append(api)
     return my_output
+
+def get_blacklist():
+    ck = ConfigKeys.query.filter(ConfigKeys.keyname == 'blacklistcategories').first()
+    output = ck.keyvalue.split(',')
+    return output
 
 def removeRepeats(listOfDictionaries):
     """Removes double entries from our list of restaraunts.

@@ -3,6 +3,7 @@ import urllib.request
 import urllib.parse
 import json
 from flasky.db2 import db_session
+from flasky.tar_helper import get_blacklist
 
 def mash_yelp_places(new_place, old_place):
     if new_place.business_status is None:
@@ -167,7 +168,10 @@ class ys2:
         yelpplace.placeid = placerecord.id
         self.db_session.commit()
 
+        blacklist = get_blacklist()
         for mytype in categories:
+            if mytype in blacklist:
+                continue
             my_type_record = KeyWords.query.filter(KeyWords.placeid == placerecord.id, KeyWords.placetype == mytype).first()
             if my_type_record is None:
                 keyword = KeyWords(placerecord.id, mytype)
