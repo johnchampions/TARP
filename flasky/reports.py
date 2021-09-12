@@ -1,6 +1,6 @@
 from re import split
 from math import atan2, floor, radians, sin, sqrt, cos
-from flasky.models import ConfigKeys, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace, ZomatoPlace
+from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace, ZomatoPlace
 import json
 import flasky.tar_helper as helper
 
@@ -36,11 +36,15 @@ def create_job_json(jobnumber):
     return jobrecord.jobjson
 
 def get_Keyword_type_list(keyname):
-    Keywordtypelist = ConfigKeys.query.filter(ConfigKeys.keyname == keyname).first()
-    almost = split(',', Keywordtypelist.keyvalue)
+    mydict = { 'coffee' : CuisineList.coffee,
+        'license' : CuisineList.license,
+        'cuisine' : CuisineList.cuisine,
+        'blacklist' : CuisineList.blacklist}
+    
+    cuisinerecords = CuisineList.query.filter(mydict[keyname] == True).all()
     output = []
-    for item in almost:
-        output.append(item.strip())
+    for record in cuisinerecords:
+        output.append(record.placetype)
     return output
 
 def distance_between_places(lat1, lng1, lat2, lng2):

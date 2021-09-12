@@ -324,14 +324,8 @@ class gs2:
         googleplace.placeid = placerecord.id
         db_session.commit()
         
-        blacklist = th.get_blacklist()
         for mytype in types:
-            if mytype in blacklist:
-                continue
-            my_type_record = KeyWords.query.filter(KeyWords.placeid == placerecord.id, KeyWords.placetype == mytype).first()
-            if my_type_record is None:
-                keyword = KeyWords(placerecord.id, mytype)
-                db_session.add(keyword)
+            th.add_type_to_place(placerecord.id, mytype)
         db_session.commit()
         
         if 'opening_hours' in aresult:

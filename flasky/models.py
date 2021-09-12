@@ -329,8 +329,10 @@ class CuisineList(Base):
             placetype=None,
             coffee=None,
             license=None,
-            cuisine=None):
+            cuisine=None,
+            blacklist=None):
         self.placetype = placetype
         self.coffee = coffee
         self.license = license
         self.cuisine = cuisine
+        self.blacklist = blacklist

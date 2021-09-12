@@ -3,7 +3,7 @@ import datetime
 import urllib.request
 import json
 from flasky.db2 import db_session
-from flasky.models import ConfigKeys, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace
+from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords
 
 
 def getapikey(key_name):
@@ -20,9 +20,26 @@ def getapis():
     return my_output
 
 def get_blacklist():
-    ck = ConfigKeys.query.filter(ConfigKeys.keyname == 'blacklistcategories').first()
-    output = ck.keyvalue.split(',')
+    my_records = CuisineList.query.filter(CuisineList.blacklist == True).all()
+    output = []
+    for record in my_records:
+        output.append(record.placetype)
     return output
+
+def add_type_to_place(placeid, mytype):
+    blacklist = get_blacklist()
+    if type in blacklist:
+        return
+    my_type_record = KeyWords.query.filter(KeyWords.placeid == placeid, KeyWords.placetype == mytype).first()
+    if my_type_record is None:
+        keyword = KeyWords(placeid, mytype)
+        db_session.add(keyword)
+    my_cuisine_record = CuisineList.query.filter(CuisineList.placetype == type).first()
+    if my_cuisine_record is None:
+        my_cuisine_record = CuisineList(mytype, cuisine=True)
+        db_session.add(my_cuisine_record)
+    db_session.commit()
+    
 
 def removeRepeats(listOfDictionaries):
     """Removes double entries from our list of restaraunts.
