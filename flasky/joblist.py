@@ -1,19 +1,23 @@
-#joblist.py
-
+from flask.cli import with_appcontext
 from werkzeug.exceptions import abort
-from yelpscrape2 import ys2
+from flasky.yelpscrape2 import ys2
 import json
 from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
-from models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace
+from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace, ZomatoPlace
 from flask import (
-    Blueprint,
+    Blueprint, current_app
 )
-from db2 import db_session
-from googlescrape2 import gs2
-from tar_helper import getapikey
+from flasky.db2 import db_session
+from flasky.googlescrape2 import gs2
+from flasky.zomatoscrape2 import zs2
+from flasky.tar_helper import getapikey
+import threading
+import time
+import application
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
+
 
 @bp.route('/', methods=('GET',))
 @bp.route('', methods=('GET',))
@@ -45,6 +49,7 @@ def get_places(jobid):
     return output
 
 
+
 @bp.route('/jobdisplay/<int:job_id>', methods=('GET',))
 def display_job(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
@@ -54,22 +59,13 @@ def display_job(job_id):
         'radius': joblist_record.radius,
         'lat': joblist_record.lat,
         'lng': joblist_record.lng,
-        'searchcategories': get_search_categories(joblist_record.id)
+        'searchcategories': get_search_categories(joblist_record.id),
+        'roughcount': joblist_record.roughcount
     }
-    placerecords = []
-    for placeid in get_places(joblist_record.id):
-        placerecord = Places.query.filter(Places.id == placeid).first()
-        if placerecord is None:
-            continue
-        placedict = {
-            'id': placeid,
-            'placename': placerecord.placename,
-            'vicinity': placerecord.vicinity,
-            'phonenumber': placerecord.phonenumber
-        }
-        placerecords.append(placedict)
-    mydict['placerecords'] = placerecords
-    return render_template('/joblist/jobdisplay.html', job=mydict)
+    placerecords = get_restaurantlist(job_id)
+    placerecords=placerecords
+    return render_template('/joblist/jobdisplay.html', job=mydict, placerecords=placerecords)
+
 
 @bp.route('/jobrefresh/<int:job_id>', methods=('GET',))
 def refresh_job_places(job_id):
@@ -86,6 +82,7 @@ def refresh_place(id):
 def refresh_places(idlist):
     gs = gs2(getapikey('googleapikey'))
     ys = ys2(getapikey('yelpapikey'))
+    zs = zs2()
     for id in idlist:
         placerecord = Places.query.filter(Places.id == id).first()
         if placerecord.googleplaceid is not None:
@@ -94,3 +91,16 @@ def refresh_places(idlist):
         if placerecord.yelpplaceid is not None:
             ysid = YelpPlace.query.filter(YelpPlace.placeid == id).first().yelpplace_id
             ys.get_place_details((ysid,), refresh=True)
+        if placerecord.zomatoplaceid is not None:
+            zsid = ZomatoPlace.query.filter(ZomatoPlace.placeid == id).first().zomatoplace_id
+            #TODO: FIX THIS!!!!
+            #zs.get_place_details((zsid,), refresh=True)
+
+def get_restaurantlist(jobid=0):
+    output = []
+    myrecords = JobResults.query.filter(JobResults.jobid == jobid).all()
+    for record in myrecords:
+        myplace = Places.query.filter(Places.id == record.placeid).first()
+        if myplace is not None:
+            output.append(myplace.__dict__)
+    return output

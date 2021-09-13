@@ -4,22 +4,23 @@ from flask import (
     flash,
     render_template,
     request,
+    redirect
 )
 import flask
 from werkzeug.exceptions import abort
-import reports
-from auth import login_required
-from joblist import display_job
-from googlescrape2 import gs2
-from yelpscrape2 import ys2
-import tar_helper as helper
+import flasky.reports
+from flasky.auth import login_required
+from flasky.joblist import display_job
+from flasky.googlescrape2 import gs2
+from flasky.yelpscrape2 import ys2
+import flasky.tar_helper as helper
 import io
 import json
-from models import JobList, JobResults, KeyWords, Places, PostCode, SearchCategories
+from flasky.models import JobList, JobResults, KeyWords, Places, PostCode, SearchCategories
 from json_excel_converter import Converter
 from json_excel_converter.xlsx import Writer
-from db2 import db_session
-
+from flasky.db2 import db_session
+from threading import Thread
 
 bp = Blueprint('tar', __name__, url_prefix='/tar')
 
@@ -107,7 +108,6 @@ def search_postcodes():
         return render_template('/tar/postcode.html', record=get_postcode(postcode), restaurants=get_places_in_postcode(postcode))
     return render_template('tar/postcodesearch.html')
 
-
 def get_postcode(postcode):
     locality = []
     sa2 = []
@@ -135,8 +135,6 @@ def get_places_in_postcode(postcode):
         restaurantlist.append(restaurant_dict)
     return restaurantlist
 
-
-
 @bp.route('/postcodes/<string:postcode>', methods=('GET',))
 def get_postcode_from_url(postcode):
     return render_template('/tar/postcode.html', record=get_postcode(postcode), restaurants=get_places_in_postcode(postcode))
@@ -157,7 +155,8 @@ def search():
         job_dict['radius'] = radius
         
         job_dict['placelist'] = []
-        myjob = JobList(address=request.form['address'], radius=request.form['radius'],)
+        job_dict['roughcount'] = 0
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id
@@ -172,7 +171,7 @@ def search():
         job_dict['lng'] = latlong['lng']
         myjob.lat = latlong['lat'],
         myjob.lng = latlong['lng']
-        
+
         if request.form.get('googleplugin') is not None:
             googleplacelist = ()
             types = request.form.getlist('type')
@@ -204,10 +203,9 @@ def search():
             for i in googleplacelist:
                 if i not in gres:
                     gres.append(i)
-            
-            gs.get_place_details(gres)
-            job_dict['placelist'].extend(helper.googleplacelist_to_placelist(googleplacelist))
-        
+            Thread(target=gs.get_place_details, kwargs={'place_ids':gres, 'job_id' : jobid}).start()
+            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+
         if request.form.get('yelpplugin'):
             myys = ys2(helper.getapikey('yelpapikey'))
             categories = request.form.getlist('categories')
@@ -229,33 +227,29 @@ def search():
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='yelpkeyword')
                 db_session.add(myrecord)
             yelpids = myys.nearby_places(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
-            myys.get_place_details(yelpids)
-            job_dict['placelist'].extend(helper.yelpplacelist_to_placelist(yelpids))
-        '''
+            
+            yt = Thread(target=myys.get_place_details, kwargs={'place_ids': yelpids, 'job_id':jobid})
+            yt.start()
+            job_dict['roughcount'] = job_dict['roughcount'] + len(yelpids)
+        
         if request.form.get('zomatoplugin'):
             myzs = zs2()
             term = request.form['keyword']
             if term != '':
                 job_dict['keyword'] = term
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
-            center_address_list = gs.get_place_details(gs.find_place_from_text(address), onlyaddress=True)
-                if myzs.valid_address(gs.find_place_from_text(center_address_list))
-                    zomids = myzs.nearby_places(gs.find_place_from_text(address), radius, term)
-        '''
-
-
-        if len(job_dict['placelist']) == 0:
+            else:
+                myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
+            zomids = myzs.nearby_places(job_dict, radius, term)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(zomids)
+            Thread(target=myzs.linklist_to_db, kwargs={'linklist':zomids, 'job_id': jobid}).start()
+            
+        myjob.roughcount=job_dict['roughcount']
+        db_session.commit()
+        if job_dict['roughcount'] == 0:
             error = 'That search had no hits.'
-       
         if error is None:
-            res = []
-            for i in job_dict['placelist']:
-                if i not in res:
-                    res.append(i)
-                    jobresult = JobResults(placeid=i, jobid=jobid)
-                    db_session.add(jobresult)
-                db_session.commit()
-            return display_job(myjob.id)
+            return  redirect('/joblist/jobdisplay/' + str(jobid))
         flash(error)
     return render_template('/tar/googlesearch.html')
 
@@ -282,19 +276,24 @@ def get_xls_report(path_to_file):
     #TODO: Fix this bit...
     if jobtype == 'job':
         if jobformat == 'json':
-            proxyIO.write(reports.create_job_json(jobnumber))
+            proxyIO.write(flasky.reports.create_job_json(jobnumber))
         elif jobformat == 'xlsx':
-            data = (json.load(reports.create_job_json(jobnumber)))
+            data = (json.load(flasky.reports.create_job_json(jobnumber)))
             converter = Converter()
             converter.convert(data, Writer(mem))
     elif jobtype == 'tarreport':
-        data = reports.tarreport(jobnumber).create_tar_report()
+        data = flasky.reports.tarreport(jobnumber).create_tar_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
-    elif jobtype == 'uglyreport':
-        data = reports.uglyreport(jobnumber).create_report()
+    elif jobtype == 'RawReport':
+        data = flasky.reports.uglyreport(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
+    elif jobtype == 'NewTarReport':
+        data = flasky.reports.new_tar_report(jobnumber).create_report()
+        converter = Converter()
+        converter.convert(data, Writer(mem))
+
     mem.seek(0)
     myreturnfile = flask.send_file(mem, attachment_filename=path_to_file,
         as_attachment=True, cache_timeout=0)

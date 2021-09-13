@@ -1,13 +1,11 @@
-from models import GooglePlace, KeyWords, OpeningHours, Places, Reviews
-from re import A
-import tar_helper as th
+from flasky.models import GooglePlace, KeyWords, OpeningHours, Places, Reviews, JobResults
+import flasky.tar_helper as th
 import urllib.request
 import urllib.parse
 import json
 from datetime import datetime
 import time
-import pandas as pd
-from db2 import db_session
+from flasky.db2 import db_session
 
 '''
 What we wanna do?
@@ -144,17 +142,17 @@ class gs2:
         '''
 
         urldir = '/place/textsearch/json?'
-        urldir += '&fields=formatted_address' + self.apikey
+        urldir += '&fields=formatted_address&' + self.apikey
         urldir += '&query=' + urllib.parse.quote(input)
         data = th.dataFromURL(self.url + urldir)
-        if len(data['resultss']) == 0:
+        if len(data['results']) == 0:
             raise Exception(
                 "Error: find_place: couldn't find an entry for your input." + urldir)
         if 'error_message' in data:
             raise Exception(
                 'Error: find_place: error message: ' + data['error_message'])
         output = []
-        for result in results:
+        for result in data['results']:
             output.extend(self.get_one_dimensional_list(result['place_id']))
         return output
         
@@ -243,12 +241,15 @@ class gs2:
                 self._nearby_search_one_type(location, radius, type, keyword=keyword, language=language, minprice=minprice, maxprice=maxprice))
         return output
    
-    def get_place_details(self, place_ids, refresh=False, onlyaddress=False):
+    def get_place_details(self, place_ids, refresh=False, onlyaddress=False, job_id=0):
         fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total']
         if onlyaddress:
             fields = ['address_component']
         for place_id in place_ids:
-            if (GooglePlace.query.filter(GooglePlace.googleplace_id == place_id).first() is not None):
+            go_nogo = GooglePlace.query.filter(GooglePlace.googleplace_id == place_id).first()
+            if (go_nogo is not None):
+                db_session.add(JobResults(placeid=go_nogo.placeid, jobid=job_id))
+                db_session.commit()
                 if refresh == False:
                     continue
             if type(place_id) is list:
@@ -262,7 +263,9 @@ class gs2:
                 urldir = urldir + ','.join(fields)
                 ptang = self.url + urldir
                 data = th.dataFromURL(ptang)
-                self.place_to_db(data)
+                placeid = self.place_to_db(data)
+                db_session.add(JobResults(placeid=placeid, jobid=job_id))
+                db_session.commit()
             if onlyaddress:
                 return data['result']['address_components']
 
@@ -322,16 +325,14 @@ class gs2:
         db_session.commit()
         
         for mytype in types:
-            my_type_record = KeyWords.query.filter(KeyWords.placeid == placerecord.id, KeyWords.placetype == mytype).first()
-            if my_type_record is None:
-                keyword = KeyWords(placerecord.id, mytype)
-                db_session.add(keyword)
+            th.add_type_to_place(placerecord.id, mytype)
         db_session.commit()
         
         if 'opening_hours' in aresult:
             self._openinghours_to_db(aresult['opening_hours'], placerecord.id)
         if 'reviews' in aresult:
             self._addgooglereviews(aresult['reviews'], placerecord.id)
+        return placerecord.id
     
     def _openinghours_to_db(self, open_hours_ob, placeid):
         oh = OpeningHours.query.filter(OpeningHours.placeid == placeid).first()

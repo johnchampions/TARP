@@ -3,6 +3,8 @@ This file should contain the middleware for configuring the reports.
 Setting API keys, Breakfast time and such
 '''
 
+from sqlalchemy.sql.expression import false
+from flasky.tar_helper import get_blacklist
 from flask import (
     Blueprint,
     g,
@@ -10,10 +12,11 @@ from flask import (
     request,
     flash
 )
-from auth import login_required
-from db2 import db_session, init_db
-from models import ConfigKeys, OpeningHours, JobResults, JobList, PostCode, SearchCategories
+from flasky.auth import login_required
+from flasky.db2 import db_session, init_db
+from flasky.models import ConfigKeys, CuisineList, OpeningHours, JobResults, JobList, PostCode, SearchCategories
 import json
+from re import split
 
 timefields = ('sundayopen','sundayclose',
     'mondayopen','mondayclose',
@@ -31,8 +34,7 @@ def set_config():
     if request.method == 'POST':
         for key in request.form.keys():
             if request.form[key] != '':
-                mykey = ConfigKeys(keyname=key)
-                mykey.keyvalue = request.form[key]
+                mykey = ConfigKeys(keyname=key, keyvalue=request.form[key])
                 if ConfigKeys.query.filter(ConfigKeys.keyname == key).first() is None:
                     db_session.add(mykey)
                 else:
@@ -108,3 +110,53 @@ def camelcaselocalities():
     db_session.commit()
     flash('Updated Localities format')
     return set_config()
+
+@bp.route('/removeblacklistentries')
+def remove_blacklist_entries():
+    blacklist = get_blacklist()
+    for bannedword in blacklist:
+        keyword_records = SearchCategories.query.filter(SearchCategories.category == bannedword).all()
+        for keyword_record in keyword_records:
+            keyword_record.delete()
+    db_session.commit()
+    flash('Removed Blacklist Entries')
+    return set_config()
+
+@bp.route('/searchtypes', methods=('GET', 'POST',))
+def configure_searchtypes():
+    if request.method == 'POST':
+        categories = ('coffee','license','cuisine','blacklist')
+        keywordrecords = CuisineList.query.all()
+        for record in keywordrecords:
+            for category in categories:
+                state = False
+                keys = request.form.keys()
+                checkbox_name = category + '_' + record.placetype
+                if checkbox_name in keys:
+                    state = True
+                if category == 'coffee':
+                    record.coffee = state
+                if category == 'license':
+                    record.license = state
+                if category == 'cuisine':
+                    record.cuisine = state
+                if category == 'blacklist':
+                    record.blacklist = state
+        db_session.commit()
+        items = get_cuisine_types()
+        return render_template('config/keywords.html', items=items)
+    else:
+        items = get_cuisine_types()
+        return render_template('config/keywords.html', items=items)
+
+def get_cuisine_types():
+    records = CuisineList.query.all()
+    output = []
+    for record in records:
+        mydict = {'keyword' : record.placetype,
+            'coffee' : record.coffee,
+            'license' : record.license,
+            'cuisine' : record.cuisine,
+            'blacklist' : record.blacklist}
+        output.append(mydict)
+    return output

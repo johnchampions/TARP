@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import FLOAT, Float, TEXT
-from db2 import Base
+from sqlalchemy.sql.sqltypes import FLOAT, Boolean, Float, TEXT
+from flasky.db2 import Base
 
 class Users(Base):
     __tablename__ = 'users'
@@ -43,7 +43,7 @@ class KeyWords(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     placetype = Column(TEXT)
-    
+        
     def __init__(self, placeid=None, placetype=None):
         self.placeid = placeid
         self.placetype = placetype
@@ -52,7 +52,7 @@ class Places(Base):
     __tablename__= 'places'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
-    placename = Column(TEXT)
+    placename = Column(TEXT(collation='utf8mb4'))
     parentplace = Column(Integer)
     googleplaceid = Column(Integer, ForeignKey('googleplace.id'))
     yelpplaceid = Column(Integer, ForeignKey('yelpplace.id'))
@@ -66,12 +66,13 @@ class Places(Base):
     phonenumber = Column(TEXT)
 
     def __init__(self, placename=None, parentplace=None, googleplaceid=None, 
-            yelpplaceid=None, vicinity=None, street1=None, street2=None,
+            yelpplaceid=None, zomatoplaceid=None, vicinity=None, street1=None, street2=None,
             suburb=None, postcode=None, placestate=None, phonenumber=None):
         self.placename = placename
         self.parentplace = parentplace
         self.googleplaceid = googleplaceid
         self.yelpplaceid = yelpplaceid
+        self.zomatoplaceid = zomatoplaceid
         self.vicinity = vicinity
         self.street1 = street1
         self.street2 = street2
@@ -149,7 +150,7 @@ class YelpPlace(Base):
 
 class ZomatoPlace(Base):
     __tablename__ = 'zomatoplace'
-    __table_args__ = {'extend_existing'}
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     zomatoplace_id = Column(Integer)
@@ -255,9 +256,10 @@ class JobList(Base):
     lng = Column(Float)
     maxprice = Column(Integer)
     minprice = Column(Integer)
+    roughcount = Column(Integer)
 
     def __init__(self, jobjson=None, jobtype=None, address=None, radius=None, lat=None, lng=None,
-        maxprice=None, minprice=None):
+        maxprice=None, minprice=None, roughcount=None):
         self.jobjson = jobjson
         self.jobtype = jobtype
         self.address = address
@@ -266,6 +268,7 @@ class JobList(Base):
         self.lng = lng
         self.maxprice = maxprice
         self.minprice = minprice
+        self.roughcount = roughcount
 
 
 class PostCode(Base):
@@ -312,4 +315,24 @@ class SearchCategories(Base):
         self.plugin = plugin
 
 
-        
+class CuisineList(Base):
+    __tablename__ = 'cuisinelist'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    placetype = Column(TEXT)
+    coffee = Column(Boolean)
+    license = Column(Boolean)
+    cuisine = Column(Boolean)
+    blacklist = Column(Boolean)
+
+    def __init__(self, 
+            placetype=None,
+            coffee=None,
+            license=None,
+            cuisine=None,
+            blacklist=None):
+        self.placetype = placetype
+        self.coffee = coffee
+        self.license = license
+        self.cuisine = cuisine
+        self.blacklist = blacklist

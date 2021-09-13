@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Search Lat Long{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<form method="POST">
+    <label for="address">Address</label>
+    <input name="address" id="address" required />
+    <input value="Search" type="submit" />
+</form>
+{% endblock %}

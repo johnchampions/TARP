@@ -1,8 +1,9 @@
-from models import KeyWords, OpeningHours, Places, Reviews, YelpPlace
+from flasky.models import KeyWords, OpeningHours, Places, Reviews, YelpPlace, JobResults
 import urllib.request
 import urllib.parse
 import json
-from db2 import db_session
+from flasky.db2 import db_session
+from flasky.tar_helper import get_blacklist
 
 def mash_yelp_places(new_place, old_place):
     if new_place.business_status is None:
@@ -109,16 +110,21 @@ class ys2:
             output.append(business['id'])
         return output
 
-    def get_place_details(self, place_ids, refresh=False):
+    def get_place_details(self, place_ids, refresh=False, job_id=0):
         myurl = 'https://api.yelp.com/v3/businesses/'
         params = dict()
         for place_id in place_ids:
-            if YelpPlace.query.filter(YelpPlace.yelpplace_id == place_id).first() is not None:
+            go_nogo = YelpPlace.query.filter(YelpPlace.yelpplace_id == place_id).first()
+            if  go_nogo is not None:
+                db_session.add(JobResults(placeid=go_nogo.placeid, jobid=job_id))
+                db_session.commit()
                 if refresh == False:
                     continue
             urldir = myurl + place_id
             data = self.dataFromURL(urldir, params)
-            self.place_to_db(data)
+            placeid = self.place_to_db(data)
+            db_session.add(JobResults(placeid=placeid, jobid=job_id))
+            db_session.commit()
 
     def place_to_db(self, data):
         categories = self.get_categories(data['categories'])
@@ -162,7 +168,10 @@ class ys2:
         yelpplace.placeid = placerecord.id
         self.db_session.commit()
 
+        blacklist = get_blacklist()
         for mytype in categories:
+            if mytype in blacklist:
+                continue
             my_type_record = KeyWords.query.filter(KeyWords.placeid == placerecord.id, KeyWords.placetype == mytype).first()
             if my_type_record is None:
                 keyword = KeyWords(placerecord.id, mytype)
@@ -171,6 +180,7 @@ class ys2:
         self._get_reviews(placerecord.id)
         if 'hours' in data:
             self._openinghours_to_db(data['hours'], placerecord.id)
+        return placerecord.id
 
 
     def _get_reviews(self, placeid, locale='en_AU'):
