@@ -34,7 +34,7 @@ def add_type_to_place(placeid, mytype):
     if my_type_record is None:
         keyword = KeyWords(placeid, mytype)
         db_session.add(keyword)
-    my_cuisine_record = CuisineList.query.filter(CuisineList.placetype == type).first()
+    my_cuisine_record = CuisineList.query.filter(CuisineList.placetype == mytype).first()
     if my_cuisine_record is None:
         my_cuisine_record = CuisineList(mytype, cuisine=True)
         db_session.add(my_cuisine_record)

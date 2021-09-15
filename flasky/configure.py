@@ -2,7 +2,6 @@
 This file should contain the middleware for configuring the reports.
 Setting API keys, Breakfast time and such
 '''
-
 from sqlalchemy.sql.expression import false
 from flasky.tar_helper import get_blacklist
 from flask import (
