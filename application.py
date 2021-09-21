@@ -2,7 +2,8 @@ import os
 from flask import Flask, config
 from flask.templating import render_template
 import flasky.db2 as db2
-import flasky.auth, flasky.tar, flasky.configure, flasky.joblist
+import flasky.auth, flasky.tar, flasky.configure, flasky.joblist, flasky.fbsearch
+
 
 def indexpage():
     return render_template('frontpage/frontpage.html')
@@ -19,6 +20,7 @@ application.register_blueprint(flasky.auth.bp)
 application.register_blueprint(flasky.tar.bp)
 application.register_blueprint(flasky.configure.bp)
 application.register_blueprint(flasky.joblist.bp)
+application.register_blueprint(flasky.fbsearch.bp)
 
 @application.teardown_appcontext
 def shutdown_session(exception=None):

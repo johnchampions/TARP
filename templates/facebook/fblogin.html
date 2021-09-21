@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Facebook Log in{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="center">
+    <div class="fb-login-button" data-size="xlarge" data-scope="public_profile">Sign in</div>
+</div>
+{% endblock %}

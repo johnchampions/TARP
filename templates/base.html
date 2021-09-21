@@ -1,7 +1,9 @@
 <!DOCTYPE html>
+<html xmlns:fb="http://ogp.me/ns/fb#" lang="en"></html>
 <head>
     <title>{% block title %}{% endblock %} - TARP</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css" />
+    <meta property="fb:app_id" content="{{ app_id }}" />
 </head>
 <nav>
     <h1>Trade Area Review Program</h1>
@@ -24,3 +26,27 @@
     {% endfor %}
     {% block content %}{% endblock %}
 </section>
+<script type="text/javascript">
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId : '{{ app_id }}',
+            status : true,
+            cookie : true,
+            version : 'v2.11',
+            xfbml : true,
+        });
+
+        FB.event.subscribe('auth.login', function(response) {
+            window.location = window.location;
+        });
+    };
+
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementsById(id)) {return;}
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>

@@ -1,9 +1,11 @@
+from datetime import datetime
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import FLOAT, Boolean, Float, TEXT
+from sqlalchemy.sql.sqltypes import FLOAT, Boolean, DateTime, Float, TEXT
 from flasky.db2 import Base
+from datetime import datetime
 
 class Users(Base):
     __tablename__ = 'users'
@@ -12,7 +14,11 @@ class Users(Base):
     username = Column(String(50), unique=True)
     password = Column(String(150))
     email = Column(String(120))
-    
+    created = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated = Column(DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+    profile_url = Column(String, nullable=False)
+    access_token = Column(String, nullable=False)
+
     def __init__(self, username=None, password=None, email=None):
         self.username = username
         self.password = password
