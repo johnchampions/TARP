@@ -288,10 +288,15 @@ def get_xls_report(path_to_file):
         data = flasky.reports.tarreport(jobnumber).create_tar_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
-    elif jobtype == 'uglyreport':
+    elif jobtype == 'RawReport':
         data = flasky.reports.uglyreport(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
+    elif jobtype == 'NewTarReport':
+        data = flasky.reports.new_tar_report(jobnumber).create_report()
+        converter = Converter()
+        converter.convert(data, Writer(mem))
+
     mem.seek(0)
     myreturnfile = flask.send_file(mem, attachment_filename=path_to_file,
         as_attachment=True, cache_timeout=0)

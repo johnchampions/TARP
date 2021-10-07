@@ -1,10 +1,12 @@
+from flask_sqlalchemy import SQLAlchemy
+#from flask_login
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import CHAR, FLOAT, Float, TEXT
+from sqlalchemy.sql.sqltypes import CHAR, FLOAT, Float, TEXT, Boolean
 #from flasky.db2 import Base
-from db2 import Base
+from .db2 import Base
 
 
 class Users(Base):
@@ -411,5 +413,25 @@ class LineList(Base):
         self.slng = slng
 
 
+class CuisineList(Base):
+    __tablename__ = 'cuisinelist'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    placetype = Column(TEXT)
+    coffee = Column(Boolean)
+    license = Column(Boolean)
+    cuisine = Column(Boolean)
+    blacklist = Column(Boolean)
 
+    def __init__(self, 
+            placetype=None,
+            coffee=None,
+            license=None,
+            cuisine=None,
+            blacklist=None):
+        self.placetype = placetype
+        self.coffee = coffee
+        self.license = license
+        self.cuisine = cuisine
+        self.blacklist = blacklist
 

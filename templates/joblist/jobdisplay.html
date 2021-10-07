@@ -6,10 +6,12 @@
 {% block content %}
 <p>Get more data in: </p>
 <ul>
-    <li><a href="/tar/downloads/uglyreport_{{ job['id'] }}.xlsx">Ugly dump</a></li>
+    <li><a href="/tar/downloads/RawReport_{{ job['id'] }}.xlsx">Raw Report</a></li>
     <li><a href="/tar/downloads/tarreport_{{ job['id'] }}.xlsx">Trade Area Report</a></li>
+    <li><a href="/tar/downloads/NewTarReport_{{ job['id'] }}.xlsx">New Trade Area Report</a></li>
     <li>More coming soon...</li>
 </ul>
+<input type="button" value="Refresh Data" onclick="location.reload()" />
 <div id="content">
     <h2>Search parameters</h2>
     <ul>
@@ -24,8 +26,19 @@
             {% endfor %}
         </ul>
     </ul>
-
- 
 </div>
-{% include "/joblist/restaurantlist.html" %}
+<table style="width:100%">
+    <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+    </tr>
+    {% for item in placerecords %}
+        <tr>
+            <td><a href="/tar/restaurants/{{ item['id'] }}">{{ item['placename'] }}</a></td>
+            <td>{{ item['vicinity'] }}</td>
+            <td>{{ item['phonenumber'] }}</td>
+        </tr>
+    {% endfor %}
+</table>
 {% endblock %}

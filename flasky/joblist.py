@@ -51,7 +51,6 @@ def get_places(jobid):
 
 @bp.route('/jobdisplay/<int:job_id>', methods=('GET',))
 def display_job(job_id):
-    threading.Thread(target=update_restaurants, args=(job_id,)).start()
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
     mydict = {
         'id': joblist_record.id,
@@ -62,7 +61,10 @@ def display_job(job_id):
         'searchcategories': get_search_categories(joblist_record.id),
         'roughcount': joblist_record.roughcount
     }
-    return render_template('/joblist/jobdisplay.html', job=mydict)
+    placerecords = get_restaurantlist(job_id)
+    placerecords=placerecords
+    return render_template('/joblist/jobdisplay.html', job=mydict, placerecords=placerecords)
+
 
 def update_restaurants(job_id):
     with application.application.app_context():
