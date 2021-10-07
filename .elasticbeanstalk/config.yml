@@ -1,0 +1,19 @@
+branch-defaults:
+  main:
+    environment: flasky
+    group-suffix: null
+  global:
+    application_name: flasky
+    branch: null
+    default_ec2_keyname: ssh for flasky
+    default_platform: Python 3.8
+    default_region: ap-southeast-2
+    include_git_submodules: true
+    instance_profile: null
+    platform name: null
+    platform_version: null
+    profile: eb-cli
+    repository: null
+    sc: git
+    workspace_type: Application
+    
