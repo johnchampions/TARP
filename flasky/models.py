@@ -1,9 +1,13 @@
+from flask_sqlalchemy import SQLAlchemy
+#from flask_login
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import FLOAT, Boolean, Float, TEXT
-from flasky.db2 import Base
+from sqlalchemy.sql.sqltypes import CHAR, FLOAT, Float, TEXT, Boolean
+#from flasky.db2 import Base
+from .db2 import Base
+
 
 class Users(Base):
     __tablename__ = 'users'
@@ -43,7 +47,7 @@ class KeyWords(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     placetype = Column(TEXT)
-        
+    
     def __init__(self, placeid=None, placetype=None):
         self.placeid = placeid
         self.placetype = placetype
@@ -315,6 +319,100 @@ class SearchCategories(Base):
         self.plugin = plugin
 
 
+class RegionData(Base):
+    __tablename__ = 'regiondata'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    sa2_maincode = Column(CHAR(9))
+    sa2_5_digit = Column(CHAR(5))
+    sa2_name = Column(TEXT)
+    sa3_name = Column(TEXT)
+    sa4_name = Column(TEXT)
+    state = Column(TEXT)
+    area = Column(Float)
+
+    def __init__(self, sa2_maincode = None,
+            sa2_5_digit = None,
+            sa2_name = None,
+            sa3_name = None,
+            sa4_name = None,
+            state = None,
+            area = None):
+        self.sa2_maincode = str(sa2_maincode)[:9]
+        self.sa2_5_digit = str(sa2_5_digit)[:5]
+        self.sa2_name = str(sa2_name)
+        self.sa3_name = sa3_name
+        self.sa4_name = sa4_name
+        self.state = state
+        self.area = area
+
+class Polygon(Base):
+    __tablename__ = 'polygon'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    region_id = Column(Integer, ForeignKey('regiondata.id'))
+    max_lng = Column(Float)
+    max_lat = Column(Float)
+    min_lng = Column(Float)
+    min_lat = Column(Float)
+    points = Column(Integer)
+
+    def __init__(self,
+            region_id=None,
+            max_lng=None,
+            max_lat=None,
+            min_lng=None,
+            min_lat=None,
+            points=None):
+        self.region_id = region_id
+        self.max_lng = max_lng
+        self.max_lat = max_lat
+        self.min_lng = min_lng
+        self.min_lat = min_lat
+        self.points = points
+
+class PointList(Base):
+    __tablename__ = 'pointlist'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    polygon_id = Column(Integer, ForeignKey('polygon.id'))
+    lat = Column(Float)
+    lng = Column(Float)
+    order = Column(Integer)
+
+    def __init__(self,
+            polygon_id=None,
+            lat=None,
+            lng=None,
+            order=None):
+        self.polygon_id = polygon_id
+        self.lat = float(lat)
+        self.lng = float(lng)
+        self.order = int(order)
+
+class LineList(Base):
+    __tablename__ = 'linelist'
+    __table_args__ = {'extend_existing': True }
+    id = Column(Integer, primary_key=True)
+    polygon_id = Column(Integer, ForeignKey('polygon.id'))
+    nlat = Column(Float)
+    nlng = Column(Float)
+    slat = Column(Float)
+    slng = Column(Float)
+    
+    def __init__(self,
+            polygon_id=None,
+            nlat=None,
+            nlng=None,
+            slat=None,
+            slng=None):
+        self.polygon_id = polygon_id
+        self.nlat = nlat
+        self.nlng = nlng
+        self.slat = slat
+        self.slng = slng
+
+
 class CuisineList(Base):
     __tablename__ = 'cuisinelist'
     __table_args__ = {'extend_existing': True }
@@ -336,3 +434,4 @@ class CuisineList(Base):
         self.license = license
         self.cuisine = cuisine
         self.blacklist = blacklist
+

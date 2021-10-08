@@ -4,6 +4,7 @@ from flask.templating import render_template
 import flasky.db2 as db2
 import flasky.auth, flasky.tar, flasky.configure, flasky.joblist
 
+
 def indexpage():
     return render_template('frontpage/frontpage.html')
 
@@ -12,7 +13,7 @@ def hello():
 
 
 application = Flask(__name__)
-application.config.from_pyfile('config.py', silent=True)
+application.config.from_pyfile('config.py')
 application.add_url_rule('/', 'index', indexpage)
 application.add_url_rule('/hello', 'hello', hello)
 application.register_blueprint(flasky.auth.bp)
@@ -27,3 +28,4 @@ def shutdown_session(exception=None):
 if __name__ == "__main__":
     application.debug = True
     application.run()
+

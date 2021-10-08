@@ -128,6 +128,13 @@ def is_keyword_in_config_keywords(configkeywords, keywordsrecords):
                 return 'Yes'
     return ''
 
+def getKeywords(records):
+    types_list = []
+    for mytype in records:
+        if mytype.placetype not in types_list:
+            types_list.append(mytype.placetype)
+    return ', '.join(types_list)
+
 
 class uglyreport:
     def __init__(self, jobnumber):
@@ -289,7 +296,6 @@ class new_tar_report:
     
     def create_report(self):
         output = []
-        
 
         coffeetypes = get_Keyword_type_list('coffee')
         licensedtypes = get_Keyword_type_list('license')
