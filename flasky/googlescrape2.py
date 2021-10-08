@@ -325,10 +325,7 @@ class gs2:
         db_session.commit()
         
         for mytype in types:
-            my_type_record = KeyWords.query.filter(KeyWords.placeid == placerecord.id, KeyWords.placetype == mytype).first()
-            if my_type_record is None:
-                keyword = KeyWords(placerecord.id, mytype)
-                db_session.add(keyword)
+            th.add_type_to_place(placerecord.id, mytype)
         db_session.commit()
         
         if 'opening_hours' in aresult:

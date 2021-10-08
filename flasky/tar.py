@@ -108,7 +108,6 @@ def search_postcodes():
         return render_template('/tar/postcode.html', record=get_postcode(postcode), restaurants=get_places_in_postcode(postcode))
     return render_template('tar/postcodesearch.html')
 
-
 def get_postcode(postcode):
     locality = []
     sa2 = []
@@ -135,8 +134,6 @@ def get_places_in_postcode(postcode):
         }
         restaurantlist.append(restaurant_dict)
     return restaurantlist
-
-
 
 @bp.route('/postcodes/<string:postcode>', methods=('GET',))
 def get_postcode_from_url(postcode):
