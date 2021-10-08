@@ -1,7 +1,6 @@
 branch-defaults:
-  main:
+  ABS-work:
     environment: flasky
-    group-suffix: null
   global:
     application_name: flasky
     branch: null
@@ -16,4 +15,22 @@ branch-defaults:
     repository: null
     sc: git
     workspace_type: Application
-    
+  main:
+    environment: flasky
+    group-suffix: null
+environment-defaults:
+  flasky:
+    branch: ABS-work
+    repository: origin
+global:
+  application_name: flasky
+  default_ec2_keyname: ssh for flasky
+  default_platform: Python 3.8 running on 64bit Amazon Linux 2
+  default_region: ap-southeast-2
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: eb-cli
+  sc: git
+  workspace_type: Application
