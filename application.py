@@ -1,8 +1,12 @@
 import os
-from flask import Flask, config
+from flask import Flask, app, config
 from flask.templating import render_template
-import flasky.db2 as db2
-import flasky.auth, flasky.tar, flasky.configure, flasky.joblist
+from flasky.db import db_session
+import flasky.auth
+import flasky.tar
+import flasky.configure
+import flasky.joblist
+import flasky.facebook
 
 
 def indexpage():
@@ -20,12 +24,15 @@ application.register_blueprint(flasky.auth.bp)
 application.register_blueprint(flasky.tar.bp)
 application.register_blueprint(flasky.configure.bp)
 application.register_blueprint(flasky.joblist.bp)
+application.register_blueprint(flasky.facebook.bp)
 
 @application.teardown_appcontext
 def shutdown_session(exception=None):
-    db2.db_session.remove()
+    db_session.remove()
 
 if __name__ == "__main__":
     application.debug = True
+    application.port = 443
+    application.ssl_context = 'adhoc'
     application.run()
 

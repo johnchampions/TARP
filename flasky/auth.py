@@ -13,8 +13,8 @@ from werkzeug.security import (
     check_password_hash,
     generate_password_hash
 )
-from flasky.db2 import db_session
-from flasky.models import Users
+from .db import db_session
+from .models import Users
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 

@@ -2,8 +2,8 @@
 This file should contain the middleware for configuring the reports.
 Setting API keys, Breakfast time and such
 '''
-from sqlalchemy.sql.expression import false
-from flasky.tar_helper import get_blacklist
+
+from .tar_helper import get_blacklist
 from flask import (
     Blueprint,
     g,
@@ -11,11 +11,10 @@ from flask import (
     request,
     flash
 )
-from flasky.auth import login_required
-from flasky.db2 import db_session, init_db
-from flasky.models import ConfigKeys, CuisineList, OpeningHours, JobResults, JobList, PostCode, SearchCategories
+from .auth import login_required
+from .db import db_session, init_db
+from .models import ConfigKeys, CuisineList, OpeningHours, JobResults, JobList, PostCode, SearchCategories
 import json
-from re import split
 
 timefields = ('sundayopen','sundayclose',
     'mondayopen','mondayclose',
@@ -29,6 +28,7 @@ timefields = ('sundayopen','sundayclose',
 bp = Blueprint('configure', __name__, url_prefix='/configure')
 
 @bp.route('', methods=('GET', 'POST'))
+@login_required
 def set_config():
     if request.method == 'POST':
         for key in request.form.keys():
@@ -46,6 +46,7 @@ def set_config():
     return render_template('config/config.html', values=values)
 
 @bp.route('/cleanopeninghours', methods=('GET',))
+@login_required
 def clean_opening_hours():
     OpeningHours.__mapper_args__['confirm_deleted_rows'] = False
     ohrecords = OpeningHours.query.filter().all()
@@ -64,12 +65,14 @@ def clean_opening_hours():
     return set_config()
 
 @bp.route('/resetdb', methods=('GET',))
+@login_required
 def resetdb():
     init_db()
     flash('You now have an initialised database')
     return set_config()
     
 @bp.route('/rejiggerjoblist')
+@login_required
 def rejigger_job_list():
     joblistrecords = JobList.query.all()
     for joblistrecord in joblistrecords:

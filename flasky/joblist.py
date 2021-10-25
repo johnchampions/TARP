@@ -1,26 +1,20 @@
-from flask.cli import with_appcontext
 from werkzeug.exceptions import abort
-from flasky.yelpscrape2 import ys2
+
+from .auth import login_required
 import json
 from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
 from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace
-from flask import (
-    Blueprint, current_app
-)
-from flasky.db2 import db_session
-from flasky.googlescrape2 import gs2
-from flasky.tar_helper import getapikey
-import threading
+from flask import Blueprint
 import time
 import application
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 
-
 @bp.route('/', methods=('GET',))
 @bp.route('', methods=('GET',))
-@bp.route('/joblist2', methods=('GET',))
+@bp.route('/joblist', methods=('GET',))
+@login_required
 def search_for_joblist():
     output = []
     joblistrecords = JobList.query.order_by(desc(JobList.id)).all()
@@ -48,8 +42,8 @@ def get_places(jobid):
     return output
 
 
-
 @bp.route('/jobdisplay/<int:job_id>', methods=('GET',))
+@login_required
 def display_job(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
     mydict = {
@@ -76,6 +70,7 @@ def update_restaurants(job_id):
             time.sleep(5)
 
 @bp.route('/jobrefresh/<int:job_id>', methods=('GET',))
+@login_required
 def refresh_job_places(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
     if joblist_record is None:
@@ -88,16 +83,14 @@ def refresh_place(id):
     refresh_places((id,))
     
 def refresh_places(idlist):
-    gs = gs2(getapikey('googleapikey'))
-    ys = ys2(getapikey('yelpapikey'))
     for id in idlist:
         placerecord = Places.query.filter(Places.id == id).first()
         if placerecord.googleplaceid is not None:
             gpid = GooglePlace.query.filter(GooglePlace.placeid == id).first().googleplace_id
-            gs.get_place_details((gpid,), refresh=True)
+            gs2.get_place_details((gpid,), refresh=True)
         if placerecord.yelpplaceid is not None:
             ysid = YelpPlace.query.filter(YelpPlace.placeid == id).first().yelpplace_id
-            ys.get_place_details((ysid,), refresh=True)
+            ys2.get_place_details((ysid,), refresh=True)
 
 def get_restaurantlist(jobid=0):
     output = []

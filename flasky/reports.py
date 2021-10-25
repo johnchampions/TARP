@@ -1,7 +1,5 @@
-from re import split
 from math import atan2, floor, radians, sin, sqrt, cos
-from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace, ZomatoPlace
-import json
+from flasky.models import CuisineList, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace, ZomatoPlace
 import flasky.tar_helper as helper
 
 

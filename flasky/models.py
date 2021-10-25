@@ -1,12 +1,11 @@
-from flask_sqlalchemy import SQLAlchemy
-#from flask_login
+#from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import CHAR, FLOAT, Float, TEXT, Boolean
 #from flasky.db2 import Base
-from .db2 import Base
+from .db import Base
 
 
 class Users(Base):
@@ -40,6 +39,7 @@ class ConfigKeys(Base):
 
     def __repr__(self):
        return f'<KeyName {self.keyname!r}, KeyValue {self.keyvalue!r}>'
+
 
 class KeyWords(Base):
     __tablename__ = 'types'
@@ -317,7 +317,6 @@ class SearchCategories(Base):
         self.jobid = jobid
         self.category = category
         self.plugin = plugin
-
 
 class RegionData(Base):
     __tablename__ = 'regiondata'

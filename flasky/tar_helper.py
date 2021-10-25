@@ -1,15 +1,14 @@
-from fuzzywuzzy import process, fuzz
-import datetime
 import urllib.request
 import json
-from flasky.db2 import db_session
-from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords
+
+from .db import db_session
+from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords, PostCode
+
 
 
 def getapikey(key_name):
     ck = ConfigKeys.query.filter(ConfigKeys.keyname == key_name).first()
     return ck.keyvalue
-
 
 def getapis():
     possible_apis = ('google', 'yelp', )
@@ -41,53 +40,20 @@ def add_type_to_place(placeid, mytype):
     db_session.commit()
     
 
-def removeRepeats(listOfDictionaries):
-    """Removes double entries from our list of restaraunts.
-    input: list of dictionaries
-    output: slightly shorter list of dictionaries."""
-    
-    myResult = []
-    myIds = []
-    for myDict in listOfDictionaries:
-        if not myDict["id"] in myIds:
-            myResult.append(myDict)
-            myIds.append(myDict["id"])
-    return myResult
-
-def remove_repeats_across_lists(firstlist, secondlist):
-    """Combines lists into one giant list and amalgamates scores and such
-    """
-    if len(firstlist) == 0:
-        return secondlist
-    if len(secondlist) == 0:
-        return firstlist
-
-    biglistofrestarauntnames = []
-    returnlist = []
-    for myrecord in firstlist:
-        biglistofrestarauntnames.append(myrecord["name"])
-    for myrecord in secondlist:
-        (highestname, score) = process.extractOne(myrecord["name"], biglistofrestarauntnames)
-        if score > 80:
-            myindex = biglistofrestarauntnames.index(highestname)
-            returnlist.append(smooshrecords(firstlist[myindex], myrecord))
-        else:
-            returnlist.append(myrecord)
-    return returnlist
-
-def smooshrecords(dict1, dict2):
-    """Combines two restaraunt records into one.  Averages out price_level
-    and rating accross the two dictionaries."""
-    returndict = dict1
-    pricelevel = int(((dict1['price_level'] * dict1['total_user_ratings']) + (dict2['price_level'] * dict2['total_user_ratings'])) / (dict1['total_user_ratings'] + dict2['total_user_ratings']))
-    returndict.update({'price_level': pricelevel})
-    rating = int(((dict1['rating'] * dict1['total_user_ratings']) + (dict2['rating'] * dict2['total_user_ratings'])) / (dict1['total_user_ratings'] + dict2['total_user_ratings']))
-    returndict.update({'rating': rating})
-    userratings = dict1['total_user_ratings'] + dict2['total_user_ratings']
-    returndict.update({'total_user_ratings': userratings})
-    returndict.update({'type': dict1['type'] + "," + dict2['type']})
-    return returndict
-
+def get_location_from_placeid(placeid):
+    myplace = Places.query.filter(Places.id == placeid).first()
+    if myplace is None:
+        raise Exception(f"Place {placeid} does not exist.")
+    if myplace.googleplaceid is not None:
+        myp = GooglePlace.query.filter(GooglePlace.id == myplace.googleplaceid).first()
+    elif myplace.yelpplaceid is not None:
+        myp = YelpPlace.query.filter(YelpPlace.id == myplace.yelpplaceid).first()
+    elif myplace.zomatoplaceid is not None:
+        myp = ZomatoPlace.query.filter( ZomatoPlace.id == myplace.zomatoplaceid).first()
+    else:
+        from . import googlescrape2
+        return googlescrape2.street_address_to_lat_lng(myplace.vicinity)
+    return dict(lat = myp.lat, lng = myp.lng)
 
 def get_state_from_postcode(postcode):
     record = PostCode.query.filter(PostCode.postcode == int(postcode)).first()
@@ -189,4 +155,37 @@ def get_urls(placeid):
     if (zr is not None) and (zr.website is not None):
         output.append(zr.website)
     return output
+
+def add_keywords(keywordlist, place_id):
+    if keywordlist is str:
+        myrecord = KeyWords(placeid=place_id, placetype = keywordlist)
+        db_session.add(myrecord)
+    else:
+        for keyword in keywordlist:
+            myrecord = KeyWords(placeid=place_id, placetype=keyword)
+            db_session.add(myrecord)
+    db_session.commit()
+
+
+def make_timing_string(placeid):
+    dayslist = ('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',)
+    oclist = ('open', 'close',)
+    timings = OpeningHours.query.filter(OpeningHours.placeid == placeid).first()
+    if timings is None:
+        return ''
+    output = ''
+    for day in dayslist:
+        for oc in oclist:
+            name = day + oc
+            exec ("%s" % (name,))
+            if timings.name is None:
+                foo = ''
+            else:
+                foo = timings.name
+            if oc == 'open':
+                output += day + ' ' + foo + ' - '
+            else:
+                output += foo + ','
+    return output
+
     
