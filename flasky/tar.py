@@ -1,25 +1,28 @@
-from . import gs
+from flask_user.decorators import login_required
+from werkzeug.utils import send_file
+from .gs import googlesearch, googleplace, street_address_to_lat_lng
 from . import zs
-from . import ys
+from .ys import yelpsearch
 from flask import (
     Blueprint,
     flash,
     render_template,
     request,
-    redirect
+    redirect,
+    send_file
 )
 from werkzeug.exceptions import abort
 from . import reports
-from .auth import login_required
 from .joblist import display_job
-import flasky.tar_helper as helper
+from .models import JobList, KeyWords, Places, PostCode, SearchCategories
+from . import tar_helper as helper
 import io
 import json
-from flasky.models import JobList, KeyWords, Places, PostCode, SearchCategories
+
 from json_excel_converter import Converter
 from json_excel_converter.xlsx import Writer
 from .db import db_session
-from threading import Thread
+import threading
 
 bp = Blueprint('tar', __name__, url_prefix='/tar')
 
@@ -28,12 +31,11 @@ bp = Blueprint('tar', __name__, url_prefix='/tar')
 def latlong():
     if request.method == 'POST':
         address = request.form['address']
-        myGoogleScrape = gs2(helper.getapikey('googleapikey'))
         error = None
         if not address:
             error = 'An address is required'
         try:
-            latlong = myGoogleScrape.streetAddressToLatLong(address)
+            latlong = street_address_to_lat_lng(address)
         except Exception as e:
             error = str(e)
         if error is None:
@@ -150,6 +152,7 @@ def search():
     if request.method == 'POST':
         error = None
         job_dict = {}
+        threads = list()
         address = request.form['address']
         radius = request.form['radius']
         if not address:
@@ -166,7 +169,7 @@ def search():
         db_session.commit()
         jobid = myjob.id
         try:
-            latlong = gs.street_address_to_lat_lng(address)
+            latlong = street_address_to_lat_lng(address)
         except:
             error = 'Could not find address'
             flash(error)
@@ -195,8 +198,11 @@ def search():
                         mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
                         db_session.add(mycategory)
                     try:
-                        mygooglesearch = gs.googlesearch(address, radius, types, keyword, minprice, maxprice)
+                        mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
                         googleplacelist = mygooglesearch.get_googleidlist()
+                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber': jobid})
+                        gt.start()
+                        job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
                 elif keyword != '':
@@ -204,16 +210,15 @@ def search():
                     mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
                     db_session.add(mycategory)
                     try:
-                        mygooglesearch = gs.googlesearch(address, radius, [], keyword, minprice, maxprice)
+                        mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
                         googleplacelist = mygooglesearch.get_googleidlist()
+                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, args=(jobid,))
+                        gt.start()
+                        job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
-            
-                Thread(target=mygooglesearch.getplaceidlist,).start()
-                job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
 
         if request.form.get('yelpplugin'):
-            #myys = ys2(helper.getapikey('yelpapikey'))
             categories = request.form.getlist('categories')
             term = request.form['keyword']
             if (not categories) and (term == ''):
@@ -232,23 +237,26 @@ def search():
                 job_dict['keyword'] = term
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='yelpkeyword')
                 db_session.add(myrecord)
-            yelpids = ys2.nearby_places(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
-            
-            yt = Thread(target=ys2.get_place_details, kwargs={'place_ids': yelpids, 'job_id':jobid})
-            yt.start()
-            job_dict['roughcount'] = job_dict['roughcount'] + len(yelpids)
+          
+            myyelpsearch = yelpsearch(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
+            yelpplacelist = myyelpsearch.get_yelpidlist()
+            if yelpplacelist is not None:
+                yt = threading.Thread(target=myyelpsearch.get_placeidlist, kwargs={'jobnumber': jobid})
+                yt.start()
+                job_dict['roughcount'] = job_dict['roughcount'] + len(yelpplacelist)
         
         if request.form.get('zomatoplugin'):
-            myzs = zs2()
             term = request.form['keyword']
             if term != '':
                 job_dict['keyword'] = term
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
             else:
                 myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
-            zomids = myzs.nearby_places(job_dict, radius, term)
-            job_dict['roughcount'] = job_dict['roughcount'] + len(zomids)
-            Thread(target=myzs.linklist_to_db, kwargs={'linklist':zomids, 'job_id': jobid}).start()
+            myzomatosearch = zs.zomatosearch(latlong, radius, keyword=term)
+            zomatoplacelist = myzomatosearch.get_zomatoidlist()
+            x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
+            x.start()
+            job_dict['roughcount'] = job_dict['roughcount'] + len(zomatoplacelist)
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
         if job_dict['roughcount'] == 0:
@@ -282,26 +290,26 @@ def get_xls_report(path_to_file):
     #TODO: Fix this bit...
     if jobtype == 'job':
         if jobformat == 'json':
-            proxyIO.write(flasky.reports.create_job_json(jobnumber))
+            proxyIO.write(reports.create_job_json(jobnumber))
         elif jobformat == 'xlsx':
-            data = (json.load(flasky.reports.create_job_json(jobnumber)))
+            data = (json.load(reports.create_job_json(jobnumber)))
             converter = Converter()
             converter.convert(data, Writer(mem))
     elif jobtype == 'tarreport':
-        data = flasky.reports.tarreport(jobnumber).create_tar_report()
+        data = reports.tarreport(jobnumber).create_tar_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
     elif jobtype == 'RawReport':
-        data = flasky.reports.uglyreport(jobnumber).create_report()
+        data = reports.uglyreport(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
     elif jobtype == 'NewTarReport':
-        data = flasky.reports.new_tar_report(jobnumber).create_report()
+        data = reports.new_tar_report(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
 
     mem.seek(0)
-    myreturnfile = flask.send_file(mem, attachment_filename=path_to_file,
+    myreturnfile = send_file(mem, attachment_filename=path_to_file,
         as_attachment=True, cache_timeout=0)
     if jobformat == 'csv':
         myreturnfile.mimetype = 'text/csv'

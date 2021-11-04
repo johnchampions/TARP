@@ -5,7 +5,9 @@ from .models import YelpPlace, Places, JobResults, OpeningHours
 from .tar_helper import add_type_to_place, getapikey
 import urllib.request, urllib.parse, urllib.error
 from json import loads
+from time import sleep
 
+url = "https://api.yelp.com/v3/businesses/search?"
 apikey = getapikey('yelpapikey')
 
 def dataFromURL(fullURL, url_params):
@@ -19,22 +21,25 @@ def dataFromURL(fullURL, url_params):
     try:
         response = urllib.request.urlopen(request)
     except urllib.error.URLError as e:
-        raise Exception("Unexpected Error: " + fullURL + " : " + e.reason)
+        return ''
+        #raise Exception("Unexpected Error: " + fullURL + " : " + e.reason)
     jsonData = loads(response.read())
+    sleep(3)
     return jsonData
 
 
 class yelpsearch:
     yelpidlist = []
-    url = "https://api.yelp.com/v3/businesses/search?"
     placeidlist = []
 
     def __init__(self,location, radius, categories, minprice=1, maxprice=4, keyword=''):
-        self.yelpidlist = self.nearby_places(location, radius, categories, minprice, maxprice, keyword)
-    
-    
+        self.nearby_places(location, radius, categories, minprice, maxprice, keyword)
+        
     def get_yelpidlist(self):
+        if self.yelpidlist is None:
+            return []
         return self.yelpidlist
+
 
     def nearby_places(self, location, radius, categories, minprice=1, maxprice=4, keyword=''):
         params = dict()
@@ -47,7 +52,7 @@ class yelpsearch:
             params['categories'] = ','.join(categories)
         if keyword != '':
             params['term'] = keyword
-        data = dataFromURL(self.url, params)
+        data = dataFromURL(url, params)
         if 'error_message' in data:
             raise Exception('YelpScrape2.nearbysearch: ' + data['error_message'])
         self.yelpidlist.extend(self.get_list_of_locations(data))
@@ -56,8 +61,9 @@ class yelpsearch:
 
     def get_list_of_locations(self, data):
         output = []
-        for business in data['businesses']:
-            output.append(business['id'])
+        if 'businesses' in data:
+            for business in data['businesses']:
+                output.append(business['id'])
         return output
     
     def nearby_search_next_page(self, params):
@@ -68,8 +74,9 @@ class yelpsearch:
         if offset + limit > 1000:
             limit = 1000 - offset
         params['limit'] = str(limit)
-        data = dataFromURL(self.url, params)
-        
+        data = dataFromURL(url, params)
+        if data == '':
+            return output
         if 'error_message' in data:
             raise Exception('YelpScrape2.nearbysearch: ' + data['error_message'])
         output.extend(self.get_list_of_locations(data))
@@ -80,23 +87,21 @@ class yelpsearch:
     def get_placeidlist(self, jobnumber=0):
         if len(self.placeidlist) > 0:
             return self.placeidlist
+        if self.yelpidlist is None:
+            return []
         for yelpid in self.yelpidlist:
             myyelpplace = yelpplace(yelpid)
             myyelpplace.get_yelpplaceid()
-            self.placeidlist.extend(myyelpplace.get_placeid())
+            self.placeidlist.append(myyelpplace.get_placeid())
             myyelpplace.set_categories()
             myyelpplace.openinghours_to_db()
             myyelpplace.set_jobnumber(jobnumber)
             mygooglesearch = gs.googlesearch(myyelpplace.get_location(),100,[], myyelpplace.get_placename())
             if len(mygooglesearch.get_googleidlist()) != 0:
                 mygoogleplace = gs.googleplace(mygooglesearch.get_googleidlist()[0])
+                mygoogleplace.get_googleplaceid()
                 mygoogleplace.set_placeid(myyelpplace.get_placeid())
                 mygoogleplace.set_categories()
-            myzomatosearch = zs.zomatosearch(myyelpplace.get_location(), 100, keyword=myyelpplace.get_placename())
-            if len(myzomatosearch.get_zomatoidlist()) != 0:
-                myzomatoplace = zs.zomatoplace(myzomatosearch.get_zomatoidlist()[0])
-                myzomatoplace.set_placeid(myyelpplace.get_placeid())
-                myzomatoplace.set_keywords()
         return self.placeidlist
 
 
@@ -153,6 +158,8 @@ class yelpplace:
             return self.placeid
         if self.yelpplacerecord.placeid is None:
             self.set_placeid()
+        else: 
+            self.placeid = self.yelpplacerecord.placeid
         return self.placeid
         
         
@@ -233,4 +240,5 @@ class yelpplace:
         return location
     
     def get_placename(self):
+        self.placerecord = Places.query.filter(Places.id == self.placeid).first()
         return self.placerecord.placename

@@ -10,12 +10,6 @@
     <input name="googleapikey" id="googleapikey" type="text" placeholder="{{ values['googleapikey'] }}" />
     <label for="yelpapikey">Yelp API Key</label>
     <input name="yelpapikey" id="yelpapikey" type="text" placeholder="{{ values['yelpapikey'] }}" />
-    <h2>Review Weightings</h2>
-    <p>The below weightings are how much a module will be weighted as to the reliability of their reviews.</p>
-    <label for="googlereviewweight">Google</label>
-    <input name="googlereviewweight" id="googlereviewweight" type="number" placeholder="{{ values['googlereviewweight'] }}" />
-    <label for="yelpreviewweight">Yelp</label>
-    <input name="yelpreviewweight" id="yelpreviewweight" type="number" placeholder="{{ values['yelpreviewweight'] }}" />
     <h2>Meal times</h2>
     <p>The below times are the times a restaurant must be open to count as being open for that meal.  e.g. If a place is open at 0800, chances are it serves breakfast.</p>
     <label for="breakfast">Breakfast Time</label>
@@ -36,8 +30,12 @@
     <input name="supperclose" id="supperclose" type="time" placeholder="{{ values['supperclose'] }}"/>
     <input value="Save" type="submit" />
 </form>
+<h2>User Management</h2>
+<p> user management is <a href="usermgmt" >HERE</a>.</p>
+
 <h2>Specialised Searches</h2>
 <p>Specialised Searches (Coffee, liquor etc... )are now <a href="configure/searchtypes">HERE</a>.</p>
+
 <h2>Database magic</h2>
 <p>This bit is reserved for John to do some cool stuff.  Don't use them unless specifically instructed by someone sensible... or John.</p>
 <ul>

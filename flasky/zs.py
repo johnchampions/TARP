@@ -32,6 +32,29 @@ headers = {
 
 url = "https://www.zomato.com/"
 
+def data_from_url(path, params=None):
+        if params is None:
+            response = requests.get(path, headers=headers)
+        else:
+            response = requests.get(path, params=params, headers=headers)
+        return get_preload_json(response.text)
+
+def get_preload_json(page_text):
+    soup = BeautifulSoup(page_text, 'html.parser')
+    s = soup.find_all('script')
+    for myscript in s:
+        mystring = str(myscript.string)
+        if mystring.strip().startswith('window.__PRELOADED_STATE__ = JSON.parse'):
+            mystring = mystring.strip()
+            mystring = mystring.replace('window.__PRELOADED_STATE__ = JSON.parse("', '')
+            mystring = mystring.replace('\\"', '"')
+            mystring = mystring[:-3]
+            mystring = mystring.replace('\\\\u003c', '<')
+            mystring = mystring.replace('\\\\"', '\\"')
+            mystring = mystring.replace('\\\\\\\\\\\"', '\\\\\\"')
+            return json.loads(mystring)
+    return {}
+
 
 class zomatosearch:
     zomatoidlist = []
@@ -45,6 +68,8 @@ class zomatosearch:
         self.zomatoidlist = self.nearby_places()
     
     def get_zomatoidlist(self):
+        if self.zomatoidlist is None:
+            return []
         return self.zomatoidlist
 
     def nearby_places(self):
@@ -60,7 +85,7 @@ class zomatosearch:
             return []
         cityurl =self.search_city_id(center)
         cityid = center['locationDetails']['cityId'] 
-        dineoutlinksearch = self.data_from_url(cityurl)
+        dineoutlinksearch = data_from_url(cityurl)
         for item in dineoutlinksearch['pages']['city'][str(cityid)]['sections']['SECTION_QUICK_SEARCH']['items']:
             if item['categoryType'] == 'dineout':
                 dineouturl = item['url']
@@ -135,23 +160,20 @@ class zomatosearch:
     def getplaceidlist(self, jobnumber=0):
         if len(self.placeidlist) > 0:
             return self.placeidlist
+        if self.zomatoidlist is None:
+            return []
         for zomatoid in self.zomatoidlist:
             myzomatoplace = zomatoplace(zomatoid)
             myzomatoplace.get_zomatoplaceid()
-            self.placeidlist.extend(myzomatoplace.get_placeid())
+            self.placeidlist.append(myzomatoplace.get_placeid())
             myzomatoplace.set_keywords()
             myzomatoplace.opening_hours_to_db()
             myzomatoplace.set_jobnumber(jobnumber)
-            mygooglesearch = googlesearch(myzomatoplace.get_location(),100,[], myzomatoplace.get_placename())
+            mygooglesearch = gs.googlesearch(myzomatoplace.get_location(),100,[], myzomatoplace.get_placename())
             if len(mygooglesearch.get_googleidlist()) != 0:
-                mygoogleplace = googleplace(mygooglesearch.get_googleidlist()[0])
+                mygoogleplace = gs.googleplace(mygooglesearch.get_googleidlist()[0])
                 mygoogleplace.set_placeid(myzomatoplace.get_placeid())
                 mygoogleplace.set_categories()
-            myyelpsearch = yelpsearch(myzomatoplace.get_location(), 100, [], keyword=myzomatoplace.get_placename())
-            if len(myyelpsearch.get_yelpidlist()) != 0:
-                myyelpplace = yelpplace(myyelpsearch.get_yelpidlist()[0])
-                myyelpplace.set_placeid(myzomatoplace.get_placeid())
-                myyelpplace.set_categories()
         return self.placeidlist
 
 
@@ -160,10 +182,10 @@ class zomatoplace:
     zomatoplaceid = 0
     zomatoid =''
     jobnumber = int()
-    myjson = dict()
     location = dict()
     zomatoplacerecord = ZomatoPlace()
     placerecord = Places()
+    myjson = dict()
 
     def __init__(self, zomatoid):
         self.zomatoid = zomatoid
@@ -177,42 +199,46 @@ class zomatoplace:
     def set_zomatoplaceid(self):
         myurl = url + self.zomatoid[1:]
         self.zomatoplacerecord = ZomatoPlace.query.filter(ZomatoPlace.website == myurl).first()
-        if self.zomatoplacerecord is None:
-            if 'pages' not in self.myjson:
-                return 0
-            zomatoplace_id=self.myjson['pages']['current']['resId']
-            rating = float(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['aggregate_rating'])
-            user_rating_total = int(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['votes'])
-            cuisine = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['cuisine_string']
-            website = myurl
-            business_status = self.get_business_status(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO'])
-            price_level = self.get_price_level(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS']['CFT_DETAILS']['cfts'])
-            lat = float(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['latitude'])
-            lng = float(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['longitude'])
-            self.zomatoplacerecord = ZomatoPlace(
-                zomatoplace_id=zomatoplace_id,
-                rating=rating,
-                user_rating_total=user_rating_total,
-                cuisine=cuisine,
-                website=website,
-                business_status= business_status,
-                price_level=price_level,
-                lat=lat,
-                lng=lng)
-            db_session.add(self.zomatoplacerecord)
-            db_session.commit()
+        if self.zomatoplacerecord is not None:
+            return self.zomatoplacerecord.id
+        if (self.myjson is None) or ('pages' not in self.myjson):
+            self.zomatoplaceid  = 0
+            return
+        zomatoplace_id=self.myjson['pages']['current']['resId']
+        rating = float(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['aggregate_rating'])
+        user_rating_total = int(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['rating']['votes'])
+        cuisine = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['cuisine_string']
+        website = myurl
+        business_status = self.get_business_status(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO'])
+        price_level = self.get_price_level(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS']['CFT_DETAILS']['cfts'])
+        lat = float(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['latitude'])
+        lng = float(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['longitude'])
+        self.zomatoplacerecord = ZomatoPlace(
+            zomatoplace_id=zomatoplace_id,
+            rating=rating,
+            user_rating_total=user_rating_total,
+            cuisine=cuisine,
+            website=website,
+            business_status= business_status,
+            price_level=price_level,
+            lat=lat,
+            lng=lng)
+        db_session.add(self.zomatoplacerecord)
+        db_session.commit()
         self.zomatoplaceid = self.zomatoplacerecord.id
 
     def get_placeid(self):
         if self.placeid > 0:
             return self.placeid
-        if self.zomatoplacerecord.placeid is None:
+        if (self.zomatoplacerecord is None) or (self.zomatoplacerecord.placeid is None):
             self.set_placeid()
+        else:
+            self.placeid = self.zomatoplacerecord.placeid
         return self.placeid
 
-    def set_placeid(self):
-        self.placerecord = Places.query.filter(Places.zomatoplaceid == self.get_zomatoplaceid()).first()
-        if self.placerecord is None:
+    def set_placeid(self, placeid=0):
+        self.placerecord = Places.query.filter(Places.id == placeid).first()
+        if (self.placerecord is None) and (self.myjson is not None):
             zomatoplace_id=self.myjson['pages']['current']['resId']
             place_name = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['name']
             phone_number = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['phoneDetails']['phoneStr']
@@ -223,28 +249,32 @@ class zomatoplace:
             if len(vicinity.split(', ')) > 1:
                 street2 = vicinity.split(', ')[1]
             suburb = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['locality_verbose']
-            placerecord = Places(placename=place_name, zomatoplaceid = self.get_zomatoplaceid(), vicinity=vicinity, street1=street1, street2=street2,
+            self.placerecord = Places(placename=place_name, zomatoplaceid = self.get_zomatoplaceid(), vicinity=vicinity, street1=street1, street2=street2,
                 suburb=suburb, postcode=post_code, phonenumber=phone_number)
-            db_session.add(placerecord)
+            db_session.add(self.placerecord)
             db_session.commit()
-        self.placeid = placerecord.id
-        placerecord.zomatoplaceid = self.get_zomatoplaceid()
-        zomatoplacerecord = ZomatoPlace.query.filter(ZomatoPlace.id == self.get_zomatoplaceid()).first()
-        zomatoplacerecord.placeid = self.placeid
+            self.placeid = self.placerecord.id
+        else:
+            self.placeid = placeid
+        self.placerecord.zomatoplaceid = self.get_zomatoplaceid()
+        self.zomatoplacerecord.placeid = self.placeid
         db_session.commit()
 
     def set_keywords(self):
-        zomatoplace_id=self.myjson['pages']['current']['resId']
-        datadict = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS']
-        keywords = []
-        for cuisine in datadict['CUISINES']['cuisines']:
-            keywords.append(cuisine['name'])
-        for highlight in datadict['HIGHLIGHTS']['highlights']:
-            keywords.append(highlight['text'])
-        for keyword in keywords:
-            add_type_to_place(self.get_placeid(), keyword)
+        if self.myjson is not None:
+            zomatoplace_id=self.myjson['pages']['current']['resId']
+            datadict = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS']
+            keywords = []
+            for cuisine in datadict['CUISINES']['cuisines']:
+                keywords.append(cuisine['name'])
+            for highlight in datadict['HIGHLIGHTS']['highlights']:
+                keywords.append(highlight['text'])
+            for keyword in keywords:
+                add_type_to_place(self.get_placeid(), keyword)
 
     def opening_hours_to_db(self):
+        if self.myjson is None:
+            return
         zomatoplace_id=self.myjson['pages']['current']['resId']
         if len(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['timing']['customised_timings']) == 0:
             return
@@ -316,30 +346,8 @@ class zomatoplace:
 
     def get_place_details(self):
         myurl = url + self.zomatoid[1:]
-        self.myjson = self.data_from_url(myurl)
+        return data_from_url(myurl)
 
-    def data_from_url(self, path, params=None):
-        if params is None:
-            response = requests.get(path, headers=headers)
-        else:
-            response = requests.get(path, params=params, headers=headers)
-        return self.get_preload_json(response.text)
-
-    def get_preload_json(self,page_text):
-        soup = BeautifulSoup(page_text, 'html.parser')
-        s = soup.find_all('script')
-        for myscript in s:
-            mystring = str(myscript.string)
-            if mystring.strip().startswith('window.__PRELOADED_STATE__ = JSON.parse'):
-                mystring = mystring.strip()
-                mystring = mystring.replace('window.__PRELOADED_STATE__ = JSON.parse("', '')
-                mystring = mystring.replace('\\"', '"')
-                mystring = mystring[:-3]
-                mystring = mystring.replace('\\\\u003c', '<')
-                mystring = mystring.replace('\\\\"', '\\"')
-                mystring = mystring.replace('\\\\\\\\\\\"', '\\\\\\"')
-                return json.loads(mystring)
-        return {}
 
     def get_business_status(self, datadict):
         if datadict['is_perm_closed']:
@@ -366,6 +374,7 @@ class zomatoplace:
         return location
     
     def get_placename(self):
+        self.placerecord = Places.query.filter(Places.id == self.placeid).first()
         return self.placerecord.placename
 
     

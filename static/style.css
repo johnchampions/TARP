@@ -9,6 +9,9 @@ h1 { font-family: futura; color: #000; margin: 1rem 0; text-transform: uppercase
 h2 h3 { font-family: futura; color: #ea0b0b; margin: 1rem 0; text-transform: uppercase;}
 a { color: #377ba8; }
 hr { border: none; border-top: 1px solid lightgray; }
+.no-margins { margin: 0px; }
+.with-margins { margin: 10px; }
+.col-centered { float: none; margin: 0 auto; }
 nav { background: #101a32; display: flex; align-items: center; padding: 0 0.5rem; }
 nav h1 { font-family: futura; color: #ea0b0b; margin: 1rem 0; background-color: #101a32; }
 nav h1 a { text-decoration: none; padding: 0.25rem 0.5rem; }

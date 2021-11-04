@@ -14,7 +14,7 @@ from werkzeug.security import (
     generate_password_hash
 )
 from .db import db_session
-from .models import Users
+from .models import User
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 

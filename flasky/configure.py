@@ -3,6 +3,7 @@ This file should contain the middleware for configuring the reports.
 Setting API keys, Breakfast time and such
 '''
 
+from flask_user.decorators import roles_required
 from .tar_helper import get_blacklist
 from flask import (
     Blueprint,
@@ -28,7 +29,7 @@ timefields = ('sundayopen','sundayclose',
 bp = Blueprint('configure', __name__, url_prefix='/configure')
 
 @bp.route('', methods=('GET', 'POST'))
-@login_required
+@roles_required('admin')
 def set_config():
     if request.method == 'POST':
         for key in request.form.keys():
@@ -46,7 +47,7 @@ def set_config():
     return render_template('config/config.html', values=values)
 
 @bp.route('/cleanopeninghours', methods=('GET',))
-@login_required
+@roles_required('admin')
 def clean_opening_hours():
     OpeningHours.__mapper_args__['confirm_deleted_rows'] = False
     ohrecords = OpeningHours.query.filter().all()
@@ -65,14 +66,14 @@ def clean_opening_hours():
     return set_config()
 
 @bp.route('/resetdb', methods=('GET',))
-@login_required
+@roles_required('admin')
 def resetdb():
     init_db()
     flash('You now have an initialised database')
     return set_config()
     
 @bp.route('/rejiggerjoblist')
-@login_required
+@roles_required('admin')
 def rejigger_job_list():
     joblistrecords = JobList.query.all()
     for joblistrecord in joblistrecords:
@@ -105,6 +106,7 @@ def rejigger_job_list():
     return set_config()
 
 @bp.route('/camelcaselocalities')
+@roles_required('admin')
 def camelcaselocalities():
     myrecords = PostCode.query.all()
     for record in myrecords:
@@ -114,6 +116,7 @@ def camelcaselocalities():
     return set_config()
 
 @bp.route('/removeblacklistentries')
+@roles_required('admin')
 def remove_blacklist_entries():
     blacklist = get_blacklist()
     for bannedword in blacklist:
@@ -125,6 +128,7 @@ def remove_blacklist_entries():
     return set_config()
 
 @bp.route('/searchtypes', methods=('GET', 'POST',))
+@roles_required('admin')
 def configure_searchtypes():
     if request.method == 'POST':
         categories = ('coffee','license','cuisine','blacklist')

@@ -1,6 +1,6 @@
+from flask_user.decorators import login_required
 from werkzeug.exceptions import abort
 
-from .auth import login_required
 import json
 from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
@@ -10,6 +10,7 @@ import time
 import application
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
+
 
 @bp.route('/', methods=('GET',))
 @bp.route('', methods=('GET',))

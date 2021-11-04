@@ -1,12 +1,15 @@
-import os
-from flask import Flask, app, config
+
+from flask import Flask
 from flask.templating import render_template
+from flask_user import UserManager
+from flask_sqlalchemy import SQLAlchemy
 from flasky.db import db_session
-import flasky.auth
+from flasky.models import User
 import flasky.tar
 import flasky.configure
 import flasky.joblist
 import flasky.facebook
+import flasky.usermgmt
 
 
 def indexpage():
@@ -18,13 +21,16 @@ def hello():
 
 application = Flask(__name__)
 application.config.from_pyfile('config.py')
+user_manager = UserManager(application, SQLAlchemy(application), UserClass=User)
+
 application.add_url_rule('/', 'index', indexpage)
 application.add_url_rule('/hello', 'hello', hello)
-application.register_blueprint(flasky.auth.bp)
 application.register_blueprint(flasky.tar.bp)
 application.register_blueprint(flasky.configure.bp)
 application.register_blueprint(flasky.joblist.bp)
 application.register_blueprint(flasky.facebook.bp)
+application.register_blueprint(flasky.usermgmt.bp)
+
 
 @application.teardown_appcontext
 def shutdown_session(exception=None):
@@ -32,7 +38,7 @@ def shutdown_session(exception=None):
 
 if __name__ == "__main__":
     application.debug = True
-    application.port = 443
-    application.ssl_context = 'adhoc'
+    #application.port = 443
+    #application.ssl_context = 'adhoc'
     application.run()
 

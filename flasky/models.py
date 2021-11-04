@@ -1,28 +1,14 @@
 #from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import CHAR, FLOAT, Float, TEXT, Boolean
-#from flasky.db2 import Base
+from sqlalchemy.sql.sqltypes import CHAR, FLOAT, DateTime, Float, TEXT, Boolean
 from .db import Base
+from flask_user import UserMixin
 
 
-class Users(Base):
-    __tablename__ = 'users'
-    __table_args__ = {'extend_existing': True}
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True)
-    password = Column(String(150))
-    email = Column(String(120))
-    
-    def __init__(self, username=None, password=None, email=None):
-        self.username = username
-        self.password = password
-        self.email = email
-
-    def __repr__(self):
-        return f'<User {self.username}!r>'
 
 class ConfigKeys(Base):
     __tablename__ = 'configkeys'
@@ -433,4 +419,33 @@ class CuisineList(Base):
         self.license = license
         self.cuisine = cuisine
         self.blacklist = blacklist
+
+
+
+class Role(Base):
+    __tablename__ = 'roles'
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(50), unique=True)
+
+class UserRoles(Base):
+    __tablename__ = 'user_roles'
+    id = Column(Integer(), primary_key=True)
+    user_id = Column(Integer(), ForeignKey('users.id', ondelete='CASCADE'))
+    role_id = Column(Integer(), ForeignKey('roles.id', ondelete='CASCADE'))
+    
+
+
+class User(Base, UserMixin):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    active = Column('is_active', Boolean, nullable=False, server_default='1')
+    username = Column(String(100, collation='NOCASE'), nullable=False, unique=True)
+    password = Column(String(255), nullable=False, server_default='')
+    email_confirmed_at = Column(DateTime())
+    first_name = Column(String(100, collation='NOCASE'), nullable=False, server_default='')
+    last_name = Column(String(100, collation='NOCASE'), nullable=False, server_default='')
+    roles = relationship('Role', secondary='user_roles')
+
+
+
 

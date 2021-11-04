@@ -10,7 +10,7 @@ apikey = getapikey('googleapikey')
 url = 'https://maps.googleapis.com/maps/api'
 business_status_dict = {
     'OPERATIONAL': 1,
-    'CLOSED_PERMENANTLY': 0,
+    'CLOSED_PERMANENTLY': 0,
     'CLOSED_TEMPORARILY': 2
 }
 
@@ -74,23 +74,27 @@ class googlesearch:
     location = dict()
 
     def __init__(self, location, radius, mytypes, keyword='', minprice=0, maxprice=4 ):
-        if location is str:
+        if type(location) is str:
             self.location = street_address_to_lat_lng(location)
+        else:
+            self.location = location
+        self.googleidlist = []
+        self.placeidlist = []
         if len(mytypes) == 0:
-            self.googleidlist = self.nearby_search_one_type(radius, '', keyword, minprice, maxprice)
+            self.nearby_search_one_type(radius, '', keyword, minprice, maxprice)
         for mytype in mytypes:
-            self.googleidlist.extend(self.nearby_search_one_type(radius, mytype, keyword, minprice, maxprice))
+            self.nearby_search_one_type(radius, mytype, keyword, minprice, maxprice)
         
     def nearby_search_one_type(self, radius, mytype, keyword='', minprice=0, maxprice=4):
         '''
         Finds a list of places nearby to the given location in the set radius.
         returns an array of google place ids
         '''
-        mylocation = street_address_to_lat_lng(self.location)
+        #mylocation = street_address_to_lat_lng(self.location)
         urldir = '/place/nearbysearch/json?'
         urldir += apikey
-        urldir += '&location=' + str(mylocation['lat']) + ',' + str(mylocation['lng'])
-        urldir += '&radius=' + radius
+        urldir += '&location=' + str(self.location['lat']) + ',' + str(self.location['lng'])
+        urldir += '&radius=' + str(radius)
         if keyword != '':
             urldir += '&keyword=' + urllib.parse.quote(keyword)
         if mytype != '':
@@ -99,9 +103,11 @@ class googlesearch:
         data = dataFromURL(url + urldir)
         if 'error_message' in data:
             raise Exception('Error: nearby_search: error message: ' + data['error_message'])
+        if data['results'] is None:
+            return
         for aresult in data['results']:
             if aresult['place_id'] not in self.googleidlist:
-                self.googleidlist.extend(aresult['place_id'])
+                self.googleidlist.append(aresult['place_id'])
         if 'next_page_token' in data:
             self.nearby_search_nextpage(data['next_page_token'])
 
@@ -119,11 +125,13 @@ class googlesearch:
             raise Exception('_nearby_search_nextpage: error_message: ' + data['error_message'])
         for aresult in data['results']:
             if aresult['place_id'] not in self.googleidlist:
-                self.googleidlist.extend(aresult['place_id'])
+                self.googleidlist.append(aresult['place_id'])
         if 'next_page_token' in data:
             self.nearby_search_nextpage(data['next_page_token'])
         
     def get_googleidlist(self):
+        if self.googleidlist is None:
+            return []
         return self.googleidlist
 
     def getplaceidlist(self, jobnumber=0):
@@ -132,20 +140,10 @@ class googlesearch:
         for googleid in self.googleidlist:
             mygoogleplace = googleplace(googleid)
             mygoogleplace.get_googleplaceid()
-            self.placeidlist.extend(mygoogleplace.get_placeid())
+            self.placeidlist.append(mygoogleplace.get_placeid())
             mygoogleplace.set_categories()
             mygoogleplace.openinghours_to_db()
             mygoogleplace.set_jobnumber(jobnumber)
-            myyelpsearch = ys.yelpsearch(mygoogleplace.get_location(), 100, [], keyword=mygoogleplace.get_placename())
-            if len(myyelpsearch.get_yelpidlist()) != 0:
-                myyelpplace = ys.yelpplace(myyelpsearch.get_yelpidlist()[0])
-                myyelpplace.set_placeid(mygoogleplace.get_placeid())
-                myyelpplace.set_categories()
-            myzomatosearch = zs.zomatosearch(mygoogleplace.get_location(), 100, keyword=mygoogleplace.get_placename())
-            if len(myzomatosearch.get_zomatoidlist()) != 0:
-                myzomatoplace = zs.zomatoplace(myzomatosearch.get_zomatoidlist()[0])
-                myzomatoplace.set_placeid(mygoogleplace.get_placeid())
-                myzomatoplace.set_keywords()
         return self.placeidlist
 
 
@@ -161,9 +159,10 @@ class googleplace:
 
     def __init__(self, googleid):
         self.googleid = googleid
-        self.myjson = self.get_place_details()
+        self.get_place_details()
 
     def get_place_details(self):
+        
         fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total']
         urldir = '/place/details/json?'
         urldir = urldir + apikey
@@ -176,12 +175,13 @@ class googleplace:
 
     def get_googleplaceid(self):
         if self.googleplaceid == 0:
-            self.set_googleplaceid()
+            self.googleplaceid = self.set_googleplaceid()
         return self.googleplaceid
     
     def set_googleplaceid(self):
         self.googleplacerecord = GooglePlace.query.filter(GooglePlace.googleplace_id == self.googleid).first()
         if self.googleplacerecord is not None:
+            self.googleplaceid = self.googleplacerecord.id
             return self.googleplacerecord.id
         aresult = self.myjson['result']
         business_status = business_status_dict[aresult['business_status']]
@@ -261,19 +261,25 @@ class googleplace:
 
 
     def set_categories(self):
+        if self.myjson is None:
+            self.get_place_details()
         types = self.myjson['result']['types']
         for mytype in types:
             add_type_to_place(self.get_placeid(), mytype)
 
     def openinghours_to_db(self):
-        open_hours_ob = self.myjson['opening_hours']
+        if self.get_placeid() == 0:
+            return
+        if 'opening_hours' not in self.myjson['result']:
+            return
+        open_hours_ob = self.myjson['result']['opening_hours']
         oh = OpeningHours.query.filter(OpeningHours.placeid == self.get_placeid()).first()
         if oh is None:
-            oh = OpeningHours(self.placeid)
+            oh = OpeningHours(self.get_placeid())
         for period in open_hours_ob['periods']:
             #open24 hours
             if (period['open']['day'] == 0) and (period['open']['time'] == '0000') and (period.get('close') is None):
-                oh = OpeningHours(self.placeid, '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359')
+                oh = OpeningHours(self.get_placeid(), '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359', '0000', '2359')
                 db_session.merge(oh)
                 db_session.commit()
                 return
@@ -315,6 +321,8 @@ class googleplace:
         self.placerecord.yelpplaceid = yelpplaceid
 
     def set_jobnumber(self, jobnumber):
+        if self.get_placeid() == 0:
+            return
         db_session.add(JobResults(placeid=self.get_placeid(), jobid=jobnumber))
         db_session.commit()
 

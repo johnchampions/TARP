@@ -26,8 +26,10 @@ def get_blacklist():
     return output
 
 def add_type_to_place(placeid, mytype):
+    if placeid == 0:
+        return
     blacklist = get_blacklist()
-    if type in blacklist:
+    if mytype in blacklist:
         return
     my_type_record = KeyWords.query.filter(KeyWords.placeid == placeid, KeyWords.placetype == mytype).first()
     if my_type_record is None:

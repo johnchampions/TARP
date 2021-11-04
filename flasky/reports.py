@@ -185,7 +185,7 @@ class tarreport:
         output = []
         
         coffeetypes = get_Keyword_type_list('coffee')
-        licensedtypes = get_Keyword_type_list('licensed')
+        licensedtypes = get_Keyword_type_list('license')
 
         for place in self.myplacesrecords:
             placerecord = Places.query.filter(Places.id == place.placeid).first()
