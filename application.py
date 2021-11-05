@@ -8,7 +8,7 @@ from flasky.models import User
 import flasky.tar
 import flasky.configure
 import flasky.joblist
-import flasky.facebook
+#import flasky.facebook
 import flasky.usermgmt
 
 
