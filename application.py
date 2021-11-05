@@ -28,7 +28,7 @@ application.add_url_rule('/hello', 'hello', hello)
 application.register_blueprint(flasky.tar.bp)
 application.register_blueprint(flasky.configure.bp)
 application.register_blueprint(flasky.joblist.bp)
-application.register_blueprint(flasky.facebook.bp)
+#application.register_blueprint(flasky.facebook.bp)
 application.register_blueprint(flasky.usermgmt.bp)
 
 
