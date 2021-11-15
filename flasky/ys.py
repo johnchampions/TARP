@@ -175,7 +175,7 @@ class yelpplace:
             placestate = self.myjson['location']['state']
             phone = '+61000000000'
             phone = self.myjson['phone']
-            self.placerecord = Places(placename, yelpplaceid=self.yelpplaceid, vicinity=vicinity, street1=street1, street2=street2,
+            self.placerecord = Places(placename, yelpplaceid=self.get_yelpplaceid(), vicinity=vicinity, street1=street1, street2=street2,
                 suburb=suburb, postcode=postcode, placestate=placestate, phonenumber=phone)
             db_session.add(self.placerecord)
             db_session.commit()

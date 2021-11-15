@@ -4,18 +4,21 @@
 {% endblock %}
 
 {% block content %}
+<a href="/usermgmt/newuser">New User</a>
 <form method="POST" name="myform">
 <table>
     <tr>
     <th>User name</th>
     <th>Admin</th>
     <th>Delete</th>
+    <th></th>
     </tr>
     {% for user in userlist %}
     <tr>
         <td>{{ user['username'] }}</td>
         <td><input type="checkbox" name="{{ user['username'] }}.role" value="admin" {% if user['admin']  %}checked{% endif %} /></td>
         <td><input type="checkbox" name="{{ user['username'] }}.delete" value="delete" /></td>
+        <td><a href="/usermgmt/edituser/{{ user['id'] }}">Edit</a></td>
     </tr>
     {% endfor %}
 </table>

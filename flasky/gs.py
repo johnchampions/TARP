@@ -184,7 +184,10 @@ class googleplace:
             self.googleplaceid = self.googleplacerecord.id
             return self.googleplacerecord.id
         aresult = self.myjson['result']
-        business_status = business_status_dict[aresult['business_status']]
+        if 'business_status' in aresult:
+            business_status = business_status_dict[aresult['business_status']]
+        else:
+            business_status = 1
         viewportnelat = aresult['geometry']['viewport']['northeast']['lat']
         viewportnelng = aresult['geometry']['viewport']['northeast']['lng']
         viewportswlat = aresult['geometry']['viewport']['southwest']['lat']

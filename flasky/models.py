@@ -1,8 +1,6 @@
-#from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
-from sqlalchemy.sql.expression import column, text
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import CHAR, FLOAT, DateTime, Float, TEXT, Boolean
 from .db import Base

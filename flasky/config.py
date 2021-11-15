@@ -11,5 +11,6 @@ USER_APP_NAME = "Trade Area Review Program"      # Shown in and email templates 
 USER_ENABLE_EMAIL = False        # Enable email authentication
 USER_ENABLE_USERNAME = True    # Disable username authentication
 USER_EMAIL_SENDER_EMAIL = 'noreply@championsofchange.com.au'
+USER_ENABLE_REGISTER = False
 
 
