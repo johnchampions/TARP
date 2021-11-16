@@ -51,7 +51,7 @@ def edit_user(user_id):
             return render_template('/usermgmt/edituser.html', record=output)
         else:
             flash(error)
-            return url_for('usermgmt.displaydialog')
+            return redirect('/usermgmt/')
     if request.method == 'POST':
         my_password_manager = PasswordManager(current_app)
         my_role_record = Role.query.filter(Role.name == 'admin').first()
@@ -75,7 +75,7 @@ def edit_user(user_id):
             db_session.commit()
         if error is not None:
             flash(error)
-            return url_for('usermgmt.edit_user', user_id=user_id)
+            return redirect('/usermgmt/edituser/' + str(user_id))
         return redirect('/usermgmt/')
 
 @bp.route('/newuser', methods=('GET','POST',))
