@@ -1,7 +1,7 @@
 from . import gs
 from . import zs
 from .db import db_session
-from .models import YelpPlace, Places, JobResults, OpeningHours
+from .models import YelpPlace, Places, JobResults, OpeningHours, JobList
 from .tar_helper import add_type_to_place, getapikey
 import urllib.request, urllib.parse, urllib.error
 from json import loads
@@ -102,6 +102,9 @@ class yelpsearch:
                 mygoogleplace.get_googleplaceid()
                 mygoogleplace.set_placeid(myyelpplace.get_placeid())
                 mygoogleplace.set_categories()
+        myjob = JobList.query.filter(JobList.id == jobnumber).first()
+        myjob.yelpcomplete = True
+        db_session.commit()
         return self.placeidlist
 
 

@@ -8,7 +8,7 @@ from . import gs
 from .tar_helper import add_type_to_place
 from re import search
 from . import ys
-from .models import ZomatoPlace, Places, OpeningHours, JobResults
+from .models import ZomatoPlace, Places, OpeningHours, JobResults, JobList
 from .db import db_session
 
 headers = { 
@@ -174,6 +174,9 @@ class zomatosearch:
                 mygoogleplace = gs.googleplace(mygooglesearch.get_googleidlist()[0])
                 mygoogleplace.set_placeid(myzomatoplace.get_placeid())
                 mygoogleplace.set_categories()
+        myjob = JobList.query.filter(JobList.id == jobnumber).first()
+        myjob.zomatocomplete = True
+        db_session.commit()
         return self.placeidlist
 
 

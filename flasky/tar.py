@@ -152,7 +152,6 @@ def search():
     if request.method == 'POST':
         error = None
         job_dict = {}
-        threads = list()
         address = request.form['address']
         radius = request.form['radius']
         if not address:
@@ -161,7 +160,6 @@ def search():
             error = 'A radius is required.'
         job_dict['address'] = address
         job_dict['radius'] = radius
-        
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
         myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
@@ -178,6 +176,10 @@ def search():
         job_dict['lng'] = latlong['lng']
         myjob.lat = latlong['lat'],
         myjob.lng = latlong['lng']
+        minprice = request.form['minprice']
+        maxprice = request.form['maxprice']
+        myjob.maxprice = request.form['minprice']
+        myjob.maxprice = request.form['minprice']
 
         if request.form.get('googleplugin') is not None:
             googleplacelist = ()
@@ -187,10 +189,6 @@ def search():
                 if keyword == '':
                     error = 'A google type or a keyword is required'
             else:    
-                minprice = request.form['minprice']
-                maxprice = request.form['maxprice']
-                myjob.maxprice = request.form['minprice']
-                myjob.maxprice = request.form['minprice']
                 googleplacelist = []
                 if len(types) > 0:
                     job_dict['types'] = types
@@ -202,7 +200,6 @@ def search():
                         googleplacelist = mygooglesearch.get_googleidlist()
                         gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber': jobid})
                         gt.start()
-                        job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
                 elif keyword != '':
@@ -217,17 +214,15 @@ def search():
                         job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
+                job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+                myjob.googleplugin = len(googleplacelist)
+                myjob.googlecomplete = False
 
         if request.form.get('yelpplugin'):
             categories = request.form.getlist('categories')
             term = request.form['keyword']
             if (not categories) and (term == ''):
                 error = 'A yelp category or a keyword is required'
-            else:
-                minprice = request.form['minprice']
-                maxprice = request.form['maxprice']
-                myjob.maxprice = request.form['minprice']
-                myjob.maxprice = request.form['minprice']
             if len(categories) > 0:
                 job_dict['categories'] = categories
                 for category in categories:
@@ -237,14 +232,14 @@ def search():
                 job_dict['keyword'] = term
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='yelpkeyword')
                 db_session.add(myrecord)
-          
             myyelpsearch = yelpsearch(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
             yelpplacelist = myyelpsearch.get_yelpidlist()
             if yelpplacelist is not None:
                 yt = threading.Thread(target=myyelpsearch.get_placeidlist, kwargs={'jobnumber': jobid})
                 yt.start()
                 job_dict['roughcount'] = job_dict['roughcount'] + len(yelpplacelist)
-        
+                myjob.yelpplugin = len(yelpplacelist)
+                myjob.yelpcomplete = False
         if request.form.get('zomatoplugin'):
             term = request.form['keyword']
             if term != '':
@@ -257,6 +252,8 @@ def search():
             x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
             x.start()
             job_dict['roughcount'] = job_dict['roughcount'] + len(zomatoplacelist)
+            myjob.zomatoplugin = len(zomatoplacelist)
+            myjob.zomatocomplete = False
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
         if job_dict['roughcount'] == 0:

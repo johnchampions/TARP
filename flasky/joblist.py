@@ -47,6 +47,7 @@ def get_places(jobid):
 @login_required
 def display_job(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
+
     mydict = {
         'id': joblist_record.id,
         'address': joblist_record.address,
@@ -54,11 +55,18 @@ def display_job(job_id):
         'lat': joblist_record.lat,
         'lng': joblist_record.lng,
         'searchcategories': get_search_categories(joblist_record.id),
-        'roughcount': joblist_record.roughcount
+        'roughcount': joblist_record.roughcount,
+        'finished': is_finished(joblist_record)
     }
     placerecords = get_restaurantlist(job_id)
     placerecords=placerecords
     return render_template('/joblist/jobdisplay.html', job=mydict, placerecords=placerecords)
+
+def is_finished(joblist_record):
+    return (joblist_record.googleplugin == 0 or joblist_record.googlecomplete) and (joblist_record.yelpplugin == 0 or joblist_record.yelpcomplete) and (joblist_record.zomatoplugin == 0 or joblist_record.zomatocomplete)
+        
+
+
 
 
 def update_restaurants(job_id):

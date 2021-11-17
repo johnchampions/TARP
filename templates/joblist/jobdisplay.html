@@ -18,6 +18,7 @@
         <li>Latitude: {{ job['lat'] }}</li>
         <li>Lonitude: {{ job['lng'] }}</li>
         <li>Search count rough guess: {{ job['roughcount'] }}</li>
+        <li>Finished?: {% if job.finished %}Yes{% endif %}{% if not job.finished %}No{% endif %}</li>
         <ul>
             {% for parameter in job['searchcategories'] %}
                 <li>{{ parameter }}</li>

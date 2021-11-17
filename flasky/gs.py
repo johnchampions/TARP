@@ -1,6 +1,6 @@
 from . import ys
 from . import zs
-from .models import GooglePlace, Places, OpeningHours, JobResults
+from .models import GooglePlace, JobList, Places, OpeningHours, JobResults
 from .db import db_session
 from .tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
@@ -144,7 +144,11 @@ class googlesearch:
             mygoogleplace.set_categories()
             mygoogleplace.openinghours_to_db()
             mygoogleplace.set_jobnumber(jobnumber)
+        myjob = JobList.query.filter(JobList.id == jobnumber).first()
+        myjob.googlecomplete = True
+        db_session.commit()
         return self.placeidlist
+
 
 
 class googleplace:
