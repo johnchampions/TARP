@@ -149,8 +149,6 @@ class googlesearch:
         db_session.commit()
         return self.placeidlist
 
-
-
 class googleplace:
     placeid = 0
     googleplaceid = 0
@@ -166,19 +164,23 @@ class googleplace:
         self.get_place_details()
 
     def get_place_details(self):
-        
-        fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total']
-        urldir = '/place/details/json?'
-        urldir = urldir + apikey
-        urldir = urldir + '&place_id='
-        urldir = urldir + str(self.googleid)
-        urldir = urldir + '&fields='
-        urldir = urldir + ','.join(fields)
-        fullurl = url + urldir
-        self.myjson = dataFromURL(fullurl)
+        self.googleplacerecord = GooglePlace.query.filter(GooglePlace.googleplace_id == self.googleid).first()
+        if self.googleplacerecord is not None:
+            self.get_placeid()
+            self.get_googleplaceid()
+        else:
+            fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total']
+            urldir = '/place/details/json?'
+            urldir = urldir + apikey
+            urldir = urldir + '&place_id='
+            urldir = urldir + str(self.googleid)
+            urldir = urldir + '&fields='
+            urldir = urldir + ','.join(fields)
+            fullurl = url + urldir
+            self.myjson = dataFromURL(fullurl)
 
     def get_googleplaceid(self):
-        if self.googleplaceid == 0:
+        if (self.googleplaceid == 0) or (self.googleplaceid is None):
             self.googleplaceid = self.set_googleplaceid()
         return self.googleplaceid
     
@@ -232,13 +234,16 @@ class googleplace:
     def get_placeid(self):
         if self.placeid > 0:
             return self.placeid
-        if self.googleplacerecord.placeid is None:
+        if (self.googleplacerecord is None) or (self.googleplacerecord.placeid is None):
             self.set_placeid()
+        self.placeid = self.googleplacerecord.placeid
         return self.placeid
 
     def set_placeid(self, placeid=0):
         self.placerecord = Places.query.filter(Places.id == placeid).first()
         if self.placerecord is None:
+            if self.myjson is None:
+                self.get_place_details()
             aresult = self.myjson['result']
             name = aresult['name']
             address_components = aresult['address_components']
@@ -270,12 +275,12 @@ class googleplace:
     def set_categories(self):
         if self.myjson is None:
             self.get_place_details()
-        types = self.myjson['result']['types']
-        for mytype in types:
-            add_type_to_place(self.get_placeid(), mytype)
+            types = self.myjson['result']['types']
+            for mytype in types:
+                add_type_to_place(self.get_placeid(), mytype)
 
     def openinghours_to_db(self):
-        if self.get_placeid() == 0:
+        if (self.get_placeid() == 0) or ('result' not in self.myjson) :
             return
         if 'opening_hours' not in self.myjson['result']:
             return

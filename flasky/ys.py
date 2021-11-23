@@ -130,7 +130,9 @@ class yelpplace:
     def set_yelpplaceid(self):
         self.yelpplacerecord = YelpPlace.query.filter(YelpPlace.yelpplace_id == self.yelpid).first()
         if self.yelpplacerecord is not None:
+            self.yelpplaceid = self.yelpplacerecord.id
             return self.yelpplacerecord.id
+        self.get_place_details()
         business_status = 1
         if self.myjson['is_closed']:
             business_status = 0
@@ -161,8 +163,7 @@ class yelpplace:
             return self.placeid
         if self.yelpplacerecord.placeid is None:
             self.set_placeid()
-        else: 
-            self.placeid = self.yelpplacerecord.placeid
+        self.placeid = self.yelpplacerecord.placeid
         return self.placeid
         
         
@@ -190,20 +191,30 @@ class yelpplace:
         db_session.commit()
 
     def set_categories(self):
-        for category in self.myjson['categories']:
-            add_type_to_place(self.get_placeid(), category['title'])
+        if self.myjson is None:
+            self.get_place_details()
+        if self.myjson is not None:
+            for category in self.myjson['categories']:
+                add_type_to_place(self.get_placeid(), category['title'])
 
 
     def get_place_details(self):
-        myurl = 'https://api.yelp.com/v3/businesses/'
-        params = dict()
-        urldir = myurl + self.yelpid
-        data = dataFromURL(urldir, params)
-        return data
+        self.yelpplacerecord = YelpPlace.query.filter(YelpPlace.yelpplace_id == self.yelpid).first()
+        if self.yelpplacerecord is not None:
+            self.get_placeid()
+            self.get_yelpplaceid()
+        else:
+            myurl = 'https://api.yelp.com/v3/businesses/'
+            params = dict()
+            urldir = myurl + self.yelpid
+            data = dataFromURL(urldir, params)
+            return data
         
 
     def openinghours_to_db(self):
-        if 'hours' not in self.myjson:
+        if self.myjson is None:
+            return
+        if (self.get_placeid() == 0) or ('hours' not in self.myjson):
             return
         open_hours_ob = self.myjson['hours']
         if OpeningHours.query.filter(OpeningHours.placeid == self.get_placeid()).first() is None:

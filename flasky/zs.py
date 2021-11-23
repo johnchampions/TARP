@@ -34,9 +34,15 @@ url = "https://www.zomato.com/"
 
 def data_from_url(path, params=None):
         if params is None:
-            response = requests.get(path, headers=headers)
+            try:
+                response = requests.get(path, headers=headers)
+            except:
+                return dict()
         else:
-            response = requests.get(path, params=params, headers=headers)
+            try:
+                response = requests.get(path, params=params, headers=headers)
+            except:
+                return dict()
         return get_preload_json(response.text)
 
 def get_preload_json(page_text):
@@ -94,8 +100,8 @@ class zomatosearch:
 
     def latlongtocenter(self, lat, lng):
         path = f'{url}webroutes/location/get?lat={lat}&lon={lng}'
-        response = requests.get(path, headers=headers)
         try:
+            response = requests.get(path, headers=headers)
             output = json.loads(response.text)
         except:
             output = None
@@ -241,7 +247,7 @@ class zomatoplace:
 
     def set_placeid(self, placeid=0):
         self.placerecord = Places.query.filter(Places.id == placeid).first()
-        if (self.placerecord is None) and (self.myjson is not None):
+        if (self.placerecord is None) and (self.myjson is not None) and (len(self.myjson) > 0):
             zomatoplace_id=self.myjson['pages']['current']['resId']
             place_name = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['name']
             phone_number = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_CONTACT']['phoneDetails']['phoneStr']
@@ -259,12 +265,14 @@ class zomatoplace:
             self.placeid = self.placerecord.id
         else:
             self.placeid = placeid
+        if self.placerecord is None:
+            return
         self.placerecord.zomatoplaceid = self.get_zomatoplaceid()
         self.zomatoplacerecord.placeid = self.placeid
         db_session.commit()
 
     def set_keywords(self):
-        if self.myjson is not None:
+        if (self.myjson is not None) and (len(self.myjson) > 0):
             zomatoplace_id=self.myjson['pages']['current']['resId']
             datadict = self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_RES_DETAILS']
             keywords = []
@@ -276,7 +284,7 @@ class zomatoplace:
                 add_type_to_place(self.get_placeid(), keyword)
 
     def opening_hours_to_db(self):
-        if self.myjson is None:
+        if (self.myjson is None) or (len(self.myjson) == 0):
             return
         zomatoplace_id=self.myjson['pages']['current']['resId']
         if len(self.myjson['pages']['restaurant'][str(zomatoplace_id)]['sections']['SECTION_BASIC_INFO']['timing']['customised_timings']) == 0:
@@ -331,6 +339,8 @@ class zomatoplace:
             timingstring = str(int(timingstring.replace('pm','')) + 1200)
         if search('12midnight', timingstring):
             timingstring = '0000'
+        if search('12noon', timingstring):
+            timingstring = '1200'
         return timingstring    
 
     def get_index_of_days(self, daysstring):
@@ -349,6 +359,12 @@ class zomatoplace:
 
     def get_place_details(self):
         myurl = url + self.zomatoid[1:]
+        my_record = ZomatoPlace.query.filter(ZomatoPlace.website == myurl).first()
+        if my_record is not None:
+            self.zomatoplacerecord = my_record
+            self.placeid = self.zomatoplacerecord.placeid
+            self.zomatoplaceid = self.zomatoplacerecord.id
+            return
         return data_from_url(myurl)
 
 
@@ -368,8 +384,9 @@ class zomatoplace:
         return int(output)
     
     def set_jobnumber(self, jobnumber):
-        db_session.add(JobResults(placeid=self.get_placeid(), jobid=jobnumber))
-        db_session.commit()
+        if self.get_placeid() > 0:
+            db_session.add(JobResults(placeid=self.get_placeid(), jobid=jobnumber))
+            db_session.commit()
 
     def get_location(self):
         location = dict(lat = self.zomatoplacerecord.lat,
@@ -379,10 +396,6 @@ class zomatoplace:
     def get_placename(self):
         self.placerecord = Places.query.filter(Places.id == self.placeid).first()
         return self.placerecord.placename
-
-    
-    
-
 
 
 
