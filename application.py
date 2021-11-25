@@ -13,7 +13,7 @@ import flasky.usermgmt
 
 
 def indexpage():
-    return render_template('frontpage/frontpage.html')
+    return render_template('/frontpage/frontpage.html')
 
 def hello():
     return "<h1 style='color:green'>Hello There!</h1>"
