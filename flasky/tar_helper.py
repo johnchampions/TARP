@@ -1,6 +1,5 @@
 import urllib.request
 import json
-
 from .db import db_session
 from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords, PostCode
 
@@ -53,8 +52,8 @@ def get_location_from_placeid(placeid):
     elif myplace.zomatoplaceid is not None:
         myp = ZomatoPlace.query.filter( ZomatoPlace.id == myplace.zomatoplaceid).first()
     else:
-        from . import googlescrape2
-        return googlescrape2.street_address_to_lat_lng(myplace.vicinity)
+        from . import gs
+        return gs.street_address_to_lat_lng(myplace.vicinity)
     return dict(lat = myp.lat, lng = myp.lng)
 
 def get_state_from_postcode(postcode):

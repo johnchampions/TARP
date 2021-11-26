@@ -194,10 +194,17 @@ class tarreport:
             gprecord = GooglePlace.query.filter(GooglePlace.placeid == place.placeid).first()
             yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first()
             zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first()
+            if gprecord:
+                pluscode = gprecord.pluscode
+            else:
+                pluscode = ''
             thisplace = {
                 'Name': placerecord.placename,
                 'Distance': distance_between_places(self.myjob.lat, self.myjob.lng, self.getlat(gprecord, yelprecord), self.getlng(gprecord, yelprecord)),
                 'Address': placerecord.vicinity,
+                'Plus Code' : pluscode,
+                'Latitude' : helper.get_location_from_placeid(placerecord.id)['lat'],
+                'Longitude' : helper.get_location_from_placeid(placerecord.id)['lng'],
                 'KeyWords': getKeywords(keywordsrecords),
                 'Coffee': self.is_keyword_in_config_keywords(coffeetypes, keywordsrecords),
                 'Licensed': self.is_keyword_in_config_keywords(licensedtypes, keywordsrecords),
@@ -249,6 +256,7 @@ class tarreport:
         for myday in mylistofdays:
             if mydict[myday + 'open'] is None or mydict[myday + 'close'] is None:
                 continue
+            
             myopen = int(mydict[myday + 'open'])
             myclose = int(mydict[myday + 'close'])
             if myclose < myopen:
@@ -304,11 +312,17 @@ class new_tar_report:
             yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first() or YelpPlace(placeid=place, rating=0, user_ratings_total=0)
             zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first() or ZomatoPlace(placeid=place, rating=0,user_rating_total=0, cuisine='')
             keywordsrecords = KeyWords.query.filter(KeyWords.placeid == place.placeid).all()
-            
+            if gprecord:
+                pluscode = gprecord.pluscode
+            else:
+                pluscode = ''
             thisplace = {
                 'Name' : placerecord.placename,
                 'Distance': rounded_distance_between_places(self.myjob.lat, self.myjob.lng, getlat((gprecord, yelprecord, zomatorecord)), getlng((gprecord, yelprecord, zomatorecord))),
                 'Address': placerecord.vicinity,
+                'Plus Code' : pluscode,
+                'Latitude' : helper.get_location_from_placeid(placerecord.id)['lat'],
+                'Longitude' : helper.get_location_from_placeid(placerecord.id)['lng'],
                 'Cuisine': zomatorecord.cuisine,
                 'Coffee': is_keyword_in_config_keywords(coffeetypes, keywordsrecords),
                 'Licensed': is_keyword_in_config_keywords(licensedtypes, keywordsrecords),

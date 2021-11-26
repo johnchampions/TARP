@@ -87,12 +87,13 @@ class GooglePlace(Base):
     googleplace_id = Column(TEXT)
     placeurl = Column(TEXT)
     website = Column(TEXT)
+    pluscode = Column(TEXT)
 
     def __init__(self, placeid=None, business_status=None, viewportnelat=None,
             viewportnelng=None, viewportswlat=None, viewportswlng=None, 
             lat=None, lng=None, price_level=None, rating=None,
             user_ratings_total=None, googleplace_id=None, placeurl=None, 
-            website=None):
+            website=None, pluscode=None):
         self.placeid = placeid
         self.business_status = business_status
         self.viewportnelat = viewportnelat
@@ -107,6 +108,7 @@ class GooglePlace(Base):
         self.googleplace_id = googleplace_id
         self.placeurl = placeurl
         self.website = website
+        self.pluscode = pluscode
 
 
 class YelpPlace(Base):

@@ -169,7 +169,7 @@ class googleplace:
             self.get_placeid()
             self.get_googleplaceid()
         else:
-            fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total']
+            fields = ['place_id', 'rating', 'address_component', 'business_status', 'geometry', 'name', 'type', 'vicinity', 'url', 'website','international_phone_number', 'opening_hours', 'price_level', 'user_ratings_total', 'plus_code']
             urldir = '/place/details/json?'
             urldir = urldir + apikey
             urldir = urldir + '&place_id='
@@ -200,6 +200,7 @@ class googleplace:
         viewportswlng = aresult['geometry']['viewport']['southwest']['lng']
         lat = aresult['geometry']['location']['lat']
         lng = aresult['geometry']['location']['lng']
+        pluscode = aresult['plus_code']['global_code']
         price_level = 0
         if 'price_level' in aresult:
             price_level = aresult['price_level']
@@ -226,7 +227,8 @@ class googleplace:
             user_ratings_total=user_ratings_total,
             googleplace_id=self.googleid, 
             placeurl=placeurl, 
-            website=website)
+            website=website,
+            pluscode=pluscode)
         db_session.add(self.googleplacerecord)
         db_session.commit()
         return self.googleplacerecord.id
