@@ -154,18 +154,22 @@ class googleplace:
     googleplaceid = 0
     myjson = dict()
     googleid = ""
+
     jobnumber = int()
     location = dict()
     googleplacerecord = GooglePlace()
     placerecord = Places()
+    refresh = False
 
-    def __init__(self, googleid):
+    def __init__(self, googleid, refresh=False):
         self.googleid = googleid
+        self.refresh = refresh
         self.get_place_details()
+        
 
     def get_place_details(self):
         self.googleplacerecord = GooglePlace.query.filter(GooglePlace.googleplace_id == self.googleid).first()
-        if self.googleplacerecord is not None:
+        if (self.googleplacerecord is not None) and (not self.refresh):
             self.get_placeid()
             self.get_googleplaceid()
         else:
@@ -188,7 +192,10 @@ class googleplace:
         self.googleplacerecord = GooglePlace.query.filter(GooglePlace.googleplace_id == self.googleid).first()
         if self.googleplacerecord is not None:
             self.googleplaceid = self.googleplacerecord.id
-            return self.googleplacerecord.id
+            if not self.refresh:
+                return self.googleplacerecord.id
+        if 'result' not in self.myjson:
+            return 0
         aresult = self.myjson['result']
         if 'business_status' in aresult:
             business_status = business_status_dict[aresult['business_status']]
@@ -238,14 +245,19 @@ class googleplace:
             return self.placeid
         if (self.googleplacerecord is None) or (self.googleplacerecord.placeid is None):
             self.set_placeid()
-        self.placeid = self.googleplacerecord.placeid
-        return self.placeid
+        if self.googleplacerecord is not None:
+            self.placeid = self.googleplacerecord.placeid
+            return self.placeid
+        else:
+            return 0
 
     def set_placeid(self, placeid=0):
         self.placerecord = Places.query.filter(Places.id == placeid).first()
         if self.placerecord is None:
             if self.myjson is None:
                 self.get_place_details()
+            if 'result' not in self.myjson: 
+                return
             aresult = self.myjson['result']
             name = aresult['name']
             address_components = aresult['address_components']
@@ -270,8 +282,9 @@ class googleplace:
         else:
             self.placeid = placeid
         self.placerecord.googleplaceid = self.get_googleplaceid()
-        self.googleplacerecord.placeid = self.placeid
-        db_session.commit()
+        if self.googleplaceid > 0:
+            self.googleplacerecord.placeid = self.placeid
+            db_session.commit()
 
 
     def set_categories(self):

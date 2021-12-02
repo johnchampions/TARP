@@ -1,6 +1,6 @@
+import flask_user
 from flask_user.decorators import login_required
 from werkzeug.exceptions import abort
-
 import json
 from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
@@ -9,6 +9,7 @@ from flask import Blueprint
 import time
 import application
 
+
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 
 
@@ -16,9 +17,10 @@ bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 @bp.route('', methods=('GET',))
 @bp.route('/joblist', methods=('GET',))
 @login_required
-def search_for_joblist():
+def search_for_joblist(getall=False):
     output = []
-    joblistrecords = JobList.query.order_by(desc(JobList.id)).all()
+    userid = flask_user.current_user.id
+    joblistrecords = JobList.query.filter(JobList.userid == userid).order_by(desc(JobList.id)).all()
     for joblistrecord in joblistrecords:
         mydict = {'id': joblistrecord.id,
             'address': joblistrecord.address,
@@ -63,11 +65,7 @@ def display_job(job_id):
     return render_template('/joblist/jobdisplay.html', job=mydict, placerecords=placerecords)
 
 def is_finished(joblist_record):
-    return (joblist_record.googleplugin == 0 or joblist_record.googlecomplete) and (joblist_record.yelpplugin == 0 or joblist_record.yelpcomplete) and (joblist_record.zomatoplugin == 0 or joblist_record.zomatocomplete)
-        
-
-
-
+    return (joblist_record.googleplugin == 0 or joblist_record.googlecomplete)  and  (joblist_record.yelpplugin == 0 or joblist_record.yelpcomplete) and (joblist_record.zomatoplugin == 0 or joblist_record.zomatocomplete)
 
 def update_restaurants(job_id):
     with application.application.app_context():

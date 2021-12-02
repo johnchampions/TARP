@@ -99,9 +99,10 @@ class yelpsearch:
             mygooglesearch = gs.googlesearch(myyelpplace.get_location(),100,[], myyelpplace.get_placename())
             if len(mygooglesearch.get_googleidlist()) != 0:
                 mygoogleplace = gs.googleplace(mygooglesearch.get_googleidlist()[0])
-                mygoogleplace.get_googleplaceid()
-                mygoogleplace.set_placeid(myyelpplace.get_placeid())
-                mygoogleplace.set_categories()
+                googleplaceid = mygoogleplace.get_googleplaceid()
+                if googleplaceid > 0:
+                    mygoogleplace.set_placeid(myyelpplace.get_placeid())
+                    mygoogleplace.set_categories()
         myjob = JobList.query.filter(JobList.id == jobnumber).first()
         myjob.yelpcomplete = True
         db_session.commit()

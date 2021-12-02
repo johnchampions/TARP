@@ -14,8 +14,12 @@ from flask import (
 )
 from .auth import login_required
 from .db import db_session, init_db
-from .models import ConfigKeys, CuisineList, OpeningHours, JobResults, JobList, PostCode, SearchCategories
+from .models import ConfigKeys, CuisineList, GooglePlace, OpeningHours, JobResults, JobList, Places, PostCode, SearchCategories, YelpPlace, ZomatoPlace
 import json
+from .gs import googleplace
+from .ys import yelpplace
+from .zs import zomatoplace
+
 
 timefields = ('sundayopen','sundayclose',
     'mondayopen','mondayclose',
@@ -166,3 +170,33 @@ def get_cuisine_types():
             'blacklist' : record.blacklist}
         output.append(mydict)
     return output
+
+@bp.route('/updateplaces')
+@roles_required('admin')
+def refresh_places():
+    myplacerecords = Places.query.all()
+    for myplacerecord in myplacerecords:
+        if myplacerecord.googleplaceid is not None:
+            my_google_place_record = GooglePlace.query.filter(GooglePlace.id == myplacerecord.googleplaceid).first()
+            try:
+                my_googleplace = googleplace(my_google_place_record.googleplace_id, refresh=True)
+                my_googleplace.set_googleplaceid()
+                my_googleplace.set_placeid(myplacerecord.id)
+                my_googleplace.set_categories()
+                my_googleplace.openinghours_to_db()
+            except:
+                pass
+        if myplacerecord.yelpplaceid is not None:
+            my_yelp_place_record = YelpPlace.query.filter(YelpPlace.id == myplacerecord.yelpplaceid).first()
+            try:
+                my_yelpplace = yelpplace(my_yelp_place_record.yelpplace_id, refresh=True)
+                my_yelpplace.set_yelpplaceid()
+                my_yelpplace.set_placeid(myplacerecord.id)
+                my_yelpplace.set_categories()
+                my_yelpplace.openinghours_to_db()
+            except:
+                pass
+    db_session.commit()
+    flash('updated places')
+    return set_config()
+      

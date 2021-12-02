@@ -1,3 +1,4 @@
+import flask_user
 from flask_user.decorators import login_required
 from werkzeug.utils import send_file
 from .gs import googlesearch, googleplace, street_address_to_lat_lng
@@ -162,7 +163,7 @@ def search():
         job_dict['radius'] = radius
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
-        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0, userid=flask_user.current_user.id)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id

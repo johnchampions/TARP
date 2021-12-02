@@ -256,7 +256,8 @@ class JobList(Base):
     userid = Column(Integer)
 
     def __init__(self, jobjson=None, jobtype=None, address=None, radius=None, lat=None, lng=None,
-        maxprice=None, minprice=None, roughcount=None, userid=None):
+        maxprice=None, minprice=None, roughcount=None, userid=None, googleplugin=0, yelpplugin=0,
+        zomatoplugin=0, googlecomplete=False, yelpcomplete=False, zomatocomplete=False):
         self.jobjson = jobjson
         self.jobtype = jobtype
         self.address = address
@@ -267,6 +268,12 @@ class JobList(Base):
         self.minprice = minprice
         self.roughcount = roughcount
         self.userid = userid
+        self.googleplugin = googleplugin
+        self.googlecomplete = googlecomplete
+        self.yelpplugin = yelpplugin
+        self.yelpcomplete = yelpcomplete
+        self.zomatoplugin = zomatoplugin
+        self.zomatocomplete = zomatocomplete
 
 
 class PostCode(Base):
