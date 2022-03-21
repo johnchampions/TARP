@@ -3,6 +3,9 @@ This file should contain the middleware for configuring the reports.
 Setting API keys, Breakfast time and such
 '''
 
+from crypt import methods
+from os import abort
+from tarfile import RECORDSIZE
 from flask_user.decorators import roles_required
 from .tar_helper import get_blacklist
 from flask import (
@@ -14,7 +17,7 @@ from flask import (
 )
 from .auth import login_required
 from .db import db_session, init_db
-from .models import ConfigKeys, CuisineList, GooglePlace, OpeningHours, JobResults, JobList, Places, PostCode, SearchCategories, YelpPlace, ZomatoPlace
+from .models import CategoryList, ConfigKeys, CuisineList, GooglePlace, OpeningHours, JobResults, JobList, Places, PostCode, SearchCategories, YelpPlace, ZomatoPlace, CategoryToType
 import json
 from .gs import googleplace
 from .ys import yelpplace
@@ -200,3 +203,114 @@ def refresh_places():
     flash('updated places')
     return set_config()
       
+
+@bp.route('/categories')
+@roles_required('admin')
+def categories():
+    mycategoriesrecords = CategoryList.query.all()
+    output = []
+    for mycategoriesrecord in mycategoriesrecords:
+        output.append(mycategoriesrecord.__dict__)
+    return render_template('config/categories.html', categories=output)
+
+@bp.route('/categories/<int:id>', methods=('GET', 'POST'))
+@roles_required('admin')
+def edit_category(id):
+    error = None
+    categoryrecord = CategoryList.query.filter(CategoryList.id == id).first()
+    if categoryrecord is None:
+        abort(404, f"Category id {id} doesn't exist.")
+    if request.method == 'POST':
+        '''Need to add edit name shite'''
+        categoryname = request.form['categoryname']
+        if not categoryname:
+            error = 'You really need a name for a category as categorising something as nothing starts messing with the nature of reality.'
+        categorycomment = request.form['categorycomment']
+        if not categorycomment:
+            categorycomment = ""
+        categoryrecord.name = categoryname
+        categoryrecord.comment = categorycomment
+        cuisinelistrecords = CuisineList.query.all()
+        keys = request.form.keys()
+        for cuisinelistrecord in cuisinelistrecords:
+            if cuisinelistrecord in keys:
+                db_session.merge(CategoryToType(id, cuisinelistrecord.id))
+            else:
+                db_session.delete(CategoryToType(id, cuisinelistrecord.id))
+        db_session.commit()
+    output = []
+    placetypesrecords = CuisineList.query.all()
+    for placetypesrecord in placetypesrecords:
+        output.append({'id' : placetypesrecord.id,
+            'placetype' : placetypesrecord.placetype,
+            'checked' : CategoryToType.query.filter(CategoryToType.category == id, CategoryToType.cuisineid == placetypesrecord.id).first() is not None})
+    if error is None:
+        flash('Category Saved')
+        return render_template('config/editcategory.html', category=categoryrecord.__dict__, typelist=output)
+    flash(error)
+
+
+@bp.route('/categories/add', methods=('GET', 'POST'))
+@roles_required('admin')
+def add_category():
+    if request.method == 'POST':
+        categoryname = request.form['categoryname']
+        if not categoryname:
+            error = 'You really need a name for a category as categorising something as nothing starts messing with the nature of reality.'
+        else :
+            categoryrecord.name = categoryname
+            categorycomment = request.form['categorycomment']
+            if not categorycomment:
+                categorycomment = ""
+            categoryrecord.comment = categorycomment
+            categoryrecord = CategoryList(categoryname)
+            db_session.add(categoryrecord)
+            cuisinelistrecords = CuisineList.query.all()
+            keys = request.form.keys()
+            for cuisinelistrecord in cuisinelistrecords:
+                if cuisinelistrecord in keys:
+                    db_session.merge(CategoryToType(id, cuisinelistrecord.id))
+            db_session.commit()
+            output = []
+            placetypesrecords = CuisineList.query.all()
+            for placetypesrecord in placetypesrecords:
+                output.append({'id' : placetypesrecord.id,
+                    'placetype' : placetypesrecord.placetype,
+                    'checked' : CategoryToType.query.filter(CategoryToType.category == id, CategoryToType.cuisineid == placetypesrecord.id).first() is not None})
+            if error is None:
+                flash('Category Saved')
+            return render_template('config/editcategory.html', category=categoryrecord.__dict__, typelist=output)
+    elif request.method == 'GET':
+        category = {
+            'name' : '',
+            'comment' : ''
+        }
+        output = []
+        placetypesrecords = CuisineList.query.all()
+        for placetypesrecord in placetypesrecords:
+            output.append({'id' : placetypesrecord.id,
+                'placetype' : placetypesrecord.placetype,
+                'checked' : False})
+        return render_template('config/editcategory.html', category=category, typelist=output)
+    flash(error)
+
+@bp.route('/categories/delete/<int:id>', methods=('GET', 'POST'))
+@roles_required('admin')
+def delete_category(id):
+    error = None
+    if request.method == 'POST':
+        categoryrecord = CategoryList.query.filter(CategoryList.id == id).first()
+        if categoryrecord is None:
+            error = "Trying to delete something that doesn't exist gives me a headache"
+        if id == 1:
+            error = "You really shouldnt delete the exclusion list.  John will weep."
+        if error is None:
+            db_session.delete(categoryrecord)
+            db_session.commit()
+            flash('Category Deleted')
+            return categories()
+    flash(error)
+
+
+
+
