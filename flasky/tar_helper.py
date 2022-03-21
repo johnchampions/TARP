@@ -2,7 +2,7 @@ import urllib.request
 import json
 from .db import db_session
 from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords, PostCode
-
+from openlocationcode import openlocationcode
 
 
 def getapikey(key_name):
@@ -53,13 +53,22 @@ def get_location_from_placeid(placeid):
         myp = ZomatoPlace.query.filter( ZomatoPlace.id == myplace.zomatoplaceid).first()
     else:
         from . import gs
-        return gs.street_address_to_lat_lng(myplace.vicinity)
+        try:
+            return gs.street_address_to_lat_lng(myplace.vicinity)
+        except:
+            return dict(lat = 0.0, lng = 0.0)
+    if (myp.lat is None) or (myp.lng is None):
+        return dict(lat = 0.0, lng = 0.0)
     return dict(lat = myp.lat, lng = myp.lng)
 
 def get_state_from_postcode(postcode):
     record = PostCode.query.filter(PostCode.postcode == int(postcode)).first()
     return record.postcodestate
     
+def get_pluscode_from_placeid(placeid):
+    my_location = get_location_from_placeid(placeid)
+    return openlocationcode.encode(my_location['lat'], my_location['lng'])
+
 
 def dataFromURL(fullURL):
     """Grabs a file off the internet.

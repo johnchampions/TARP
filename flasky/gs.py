@@ -5,6 +5,7 @@ from .db import db_session
 from .tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
 import urllib.parse
+from openlocationcode import openlocationcode
 
 apikey = getapikey('googleapikey')
 url = 'https://maps.googleapis.com/maps/api'
@@ -241,7 +242,7 @@ class googleplace:
         return self.googleplacerecord.id
 
     def get_placeid(self):
-        if self.placeid > 0:
+        if (self.placeid is not None) and (self.placeid > 0):
             return self.placeid
         if (self.googleplacerecord is None) or (self.googleplacerecord.placeid is None):
             self.set_placeid()
@@ -267,6 +268,7 @@ class googleplace:
             postcode = _get_address_component(address_components, 'postal_code')
             vicinity = street1 + ', ' + suburb + ' ' + restaurantstate + ', ' + postcode
             phonenumber = '+61000000000'
+            pluscode = self.get_pluscode()
             if 'international_phone_number' in aresult:
                 phonenumber = aresult['international_phone_number'].replace(' ', '')
             self.placerecord = Places(placename=name, 
@@ -275,7 +277,8 @@ class googleplace:
                 vicinity=vicinity, 
                 postcode=postcode, 
                 placestate=restaurantstate, 
-                phonenumber=phonenumber)
+                phonenumber=phonenumber,
+                pluscode=pluscode)
             db_session.add(self.placerecord)
             db_session.commit()
             self.placeid = self.placerecord.id            
@@ -357,6 +360,11 @@ class googleplace:
         location = dict(lat = self.googleplacerecord.lat,
             lng = self.googleplacerecord.lng)
         return location
+    
+    def get_pluscode(self):
+        mylocation = self.get_location()
+        return openlocationcode.encode(mylocation['lat'], mylocation['lng'])
+        
     
 
 
