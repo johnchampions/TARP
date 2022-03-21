@@ -464,5 +464,27 @@ class User(Base, UserMixin):
     roles = relationship('Role', secondary='user_roles')
 
 
+class CategoryList(Base):
+    __tablename__ = 'categorylist'
+    id = Column(Integer, primary_key=True)
+    name = Column(TEXT)
+    comment = Column(TEXT)
 
+    def __init__(self,
+            name=None,
+            comment=None):
+        self.name = name
+        self.comment = comment
+
+class CategoryToType(Base):
+    __tablename__ = 'categorytotype'
+    id = Column(Integer, primary_key=True)
+    categoryid = Column(Integer, ForeignKey('categorylist.id', ondelete='CASCADE'))
+    cuisineid = Column(Integer, ForeignKey('cuisinelist.id', ondelete='CASCADE'))
+
+    def __init__(self,
+            categoryid=None,
+            cuisineid=None):
+        self.categoryid = categoryid
+        self.cuisineid = cuisineid
 
