@@ -52,10 +52,11 @@ class Places(Base):
     postcode = Column(TEXT)
     placestate = Column(TEXT)
     phonenumber = Column(TEXT)
+    pluscode = Column(TEXT)
 
     def __init__(self, placename=None, parentplace=None, googleplaceid=None, 
             yelpplaceid=None, zomatoplaceid=None, vicinity=None, street1=None, street2=None,
-            suburb=None, postcode=None, placestate=None, phonenumber=None):
+            suburb=None, postcode=None, placestate=None, phonenumber=None, pluscode=None):
         self.placename = placename
         self.parentplace = parentplace
         self.googleplaceid = googleplaceid
@@ -68,6 +69,7 @@ class Places(Base):
         self.postcode = postcode
         self.placestate = placestate
         self.phonenumber = phonenumber
+        self.pluscode = pluscode
     
 class GooglePlace(Base):
     __tablename__ = 'googleplace'

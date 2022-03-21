@@ -6,6 +6,7 @@ from .tar_helper import add_type_to_place, getapikey
 import urllib.request, urllib.parse, urllib.error
 from json import loads
 from time import sleep
+from openlocationcode import openlocationcode
 
 url = "https://api.yelp.com/v3/businesses/search?"
 apikey = getapikey('yelpapikey')
@@ -180,8 +181,9 @@ class yelpplace:
             placestate = self.myjson['location']['state']
             phone = '+61000000000'
             phone = self.myjson['phone']
+            pluscode = self.get_pluscode()
             self.placerecord = Places(placename, yelpplaceid=self.get_yelpplaceid(), vicinity=vicinity, street1=street1, street2=street2,
-                suburb=suburb, postcode=postcode, placestate=placestate, phonenumber=phone)
+                suburb=suburb, postcode=postcode, placestate=placestate, phonenumber=phone, pluscode=pluscode)
             db_session.add(self.placerecord)
             db_session.commit()
             self.placeid = self.placerecord.id    
@@ -257,3 +259,7 @@ class yelpplace:
     def get_placename(self):
         self.placerecord = Places.query.filter(Places.id == self.placeid).first()
         return self.placerecord.placename
+
+    def get_pluscode(self):
+        mylocation = self.get_location()
+        return openlocationcode.encode(mylocation['lat'], mylocation['lng'])

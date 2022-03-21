@@ -10,6 +10,7 @@ from re import search
 from . import ys
 from .models import ZomatoPlace, Places, OpeningHours, JobResults, JobList
 from .db import db_session
+from openlocationcode import openlocationcode
 
 headers = { 
     'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -397,6 +398,9 @@ class zomatoplace:
         self.placerecord = Places.query.filter(Places.id == self.placeid).first()
         return self.placerecord.placename
 
+    def get_pluscode(self):
+        mylocation = self.get_location()
+        return openlocationcode.encode(mylocation.lat, mylocation.lng)
 
 
     
