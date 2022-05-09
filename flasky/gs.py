@@ -208,7 +208,8 @@ class googleplace:
         viewportswlng = aresult['geometry']['viewport']['southwest']['lng']
         lat = aresult['geometry']['location']['lat']
         lng = aresult['geometry']['location']['lng']
-        pluscode = aresult['plus_code']['global_code']
+        if 'plus_code' in aresult:
+            pluscode = aresult['plus_code']['global_code']
         price_level = 0
         if 'price_level' in aresult:
             price_level = aresult['price_level']
