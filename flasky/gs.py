@@ -294,6 +294,7 @@ class googleplace:
     def set_categories(self):
         if self.myjson is None:
             self.get_place_details()
+        if (self.myjson is not None) and ('result' in self.myjson):
             types = self.myjson['result']['types']
             for mytype in types:
                 add_type_to_place(self.get_placeid(), mytype)

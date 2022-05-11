@@ -66,8 +66,6 @@ def get_preload_json(page_text):
 class zomatosearch:
     zomatoidlist = []
     placeidlist = []
-
-
     def __init__(self, location, radius, keyword=''):
         self.radius = radius
         self.keyword = keyword

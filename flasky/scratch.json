@@ -1,0 +1,4 @@
+CREATE TABLE `joblist` (\n
+  `id` int NOT NULL AUTO_INCREMENT,\n
+    `jobjson` text,\n
+      `jobtype` text,\n  `address` text,\n  `radius` int DEFAULT NULL,\n  `lat` float DEFAULT NULL,\n  `lng` float DEFAULT NULL,\n  `maxprice` int DEFAULT NULL,\n  `minprice` int DEFAULT NULL,\n  `roughcount` int DEFAULT NULL,\n  `googleplugin` int DEFAULT \'0\',\n  `yelpplugin` int DEFAULT \'0\',\n  `zomatoplugin` int DEFAULT \'0\',\n  `googlecomplete` tinyint DEFAULT \'0\',\n  `yelpcomplete` tinyint DEFAULT \'0\',\n  `zomatocomplete` tinyint DEFAULT \'0\',\n  `userid` int DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `userid_idx` (`userid`),\n  CONSTRAINT `userid` FOREIGN KEY (`userid`) REFERENCES `users` (`id`)\n) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci'
