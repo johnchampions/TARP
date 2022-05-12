@@ -5,7 +5,7 @@ from .db import db_session
 from .tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
 import urllib.parse
-from openlocationcode import openlocationcode
+import openlocationcode
 
 apikey = getapikey('googleapikey')
 url = 'https://maps.googleapis.com/maps/api'
