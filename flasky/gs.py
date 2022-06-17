@@ -5,7 +5,7 @@ from .db import db_session
 from .tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
 import urllib.parse
-import openlocationcode
+from openlocationcode import openlocationcode
 
 apikey = getapikey('googleapikey')
 url = 'https://maps.googleapis.com/maps/api'
@@ -210,6 +210,8 @@ class googleplace:
         lng = aresult['geometry']['location']['lng']
         if 'plus_code' in aresult:
             pluscode = aresult['plus_code']['global_code']
+        else:
+            pluscode = openlocationcode.encode(lat, lng)
         price_level = 0
         if 'price_level' in aresult:
             price_level = aresult['price_level']
