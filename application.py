@@ -16,13 +16,12 @@ def indexpage():
     return render_template('/frontpage/frontpage.html')
 
 def hello():
-    return "<h1 style='color:green'>Hello There!</h1>"
+    return "<h1 style='color:green'>Hello There!!!</h1>"
 
 
 application = Flask(__name__)
 application.config.from_pyfile('config.py')
 user_manager = UserManager(application, SQLAlchemy(application), UserClass=User)
-
 application.add_url_rule('/', 'index', indexpage)
 application.add_url_rule('/hello', 'hello', hello)
 application.register_blueprint(flasky.tar.bp)

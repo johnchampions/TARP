@@ -309,7 +309,7 @@ class JobResults(Base):
         self.jobid = jobid
 
 class SearchCategories(Base):
-    __tablename__ = 'SearchCategories'
+    __tablename__ = 'searchcategories'
     __table_args__ = {'extend_existing': True }
     id = Column(Integer, primary_key=True)
     jobid = Column(Integer, ForeignKey('joblist.id'))

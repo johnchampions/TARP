@@ -2,7 +2,7 @@ import urllib.request
 import json
 from .db import db_session
 from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords, PostCode
-from openlocationcode import openlocationcode
+import openlocationcode
 
 
 def getapikey(key_name):
