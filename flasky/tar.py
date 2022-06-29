@@ -236,8 +236,7 @@ def search():
             myyelpsearch = yelpsearch(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
             yelpplacelist = myyelpsearch.get_yelpidlist()
             if yelpplacelist is not None:
-                yt = threading.Thread(target=myyelpsearch.get_placeidlist, kwargs={'jobnumber': jobid})
-                yt.start()
+                myyelpsearch.get_placeidlist(jobid)
                 job_dict['roughcount'] = job_dict['roughcount'] + len(yelpplacelist)
                 myjob.yelpplugin = len(yelpplacelist)
                 myjob.yelpcomplete = False
