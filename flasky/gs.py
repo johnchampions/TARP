@@ -6,6 +6,7 @@ from .tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
 import urllib.parse
 from openlocationcode import openlocationcode
+import threading
 
 apikey = getapikey('googleapikey')
 url = 'https://maps.googleapis.com/maps/api'
@@ -83,8 +84,19 @@ class googlesearch:
         self.placeidlist = []
         if len(mytypes) == 0:
             self.nearby_search_one_type(radius, '', keyword, minprice, maxprice)
+        threads = []
         for mytype in mytypes:
-            self.nearby_search_one_type(radius, mytype, keyword, minprice, maxprice)
+            process = threading.Thread(target=self.nearby_search_one_type, kwargs={
+                'radius': radius,
+                'mytype': mytype,
+                'keyword': '',
+                'minprice': minprice,
+                'maxprice': maxprice})
+            process.start()
+            threads.append(process)
+        for process in threads:
+            process.join()
+
         
     def nearby_search_one_type(self, radius, mytype, keyword='', minprice=0, maxprice=4):
         '''
@@ -138,17 +150,26 @@ class googlesearch:
     def getplaceidlist(self, jobnumber=0):
         if len(self.placeidlist) > 0:
             return self.placeidlist
+        threads = []
         for googleid in self.googleidlist:
-            mygoogleplace = googleplace(googleid)
-            mygoogleplace.get_googleplaceid()
-            self.placeidlist.append(mygoogleplace.get_placeid())
-            mygoogleplace.set_categories()
-            mygoogleplace.openinghours_to_db()
-            mygoogleplace.set_jobnumber(jobnumber)
+            process = threading.Thread(target=self._get_place_id_list, kwargs={'googleid': googleid, 'jobnumber': jobnumber})
+            process.start()
+            threads.append(process)
+        for process in threads:
+            process.join()
         myjob = JobList.query.filter(JobList.id == jobnumber).first()
         myjob.googlecomplete = True
         db_session.commit()
         return self.placeidlist
+
+    def _get_place_id_list(self, googleid, jobnumber=0):
+        mygoogleplace = googleplace(googleid)
+        mygoogleplace.get_googleplaceid()
+        self.placeidlist.append(mygoogleplace.get_placeid())
+        mygoogleplace.set_categories()
+        mygoogleplace.openinghours_to_db()
+        mygoogleplace.set_jobnumber(jobnumber)
+
 
 class googleplace:
     placeid = 0
