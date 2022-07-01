@@ -198,9 +198,8 @@ def search():
                         db_session.add(mycategory)
                     try:
                         mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
-                        googleplacelist = mygooglesearch.get_googleidlist()
-                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber': jobid})
-                        gt.start()
+                        googleplacelist = mygooglesearch.get_googleidlist(jobid)
+                        mygooglesearch.getplaceidlist(jobid)
                     except Exception as e:
                         error = str(e)
                 elif keyword != '':
@@ -210,8 +209,7 @@ def search():
                     try:
                         mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
                         googleplacelist = mygooglesearch.get_googleidlist()
-                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, args=(jobid,))
-                        gt.start()
+                        mygooglesearch.getplaceidlist(jobid)
                         job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
