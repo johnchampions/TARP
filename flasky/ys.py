@@ -1,3 +1,4 @@
+from queue import Queue
 from . import gs
 from . import zs
 from .db import db_session
@@ -18,6 +19,7 @@ def dataFromURL(fullURL, url_params):
     input: full URL of the file
     output: a string containing the server response, usually a file
     """
+    print(fullURL)
     params = urllib.parse.urlencode(url_params)
     request = urllib.request.Request(fullURL + params)
     request.add_header("Authorization", apikey)
@@ -30,19 +32,19 @@ def dataFromURL(fullURL, url_params):
             if 'error' in jsonData.keys():
                 errorcount = errorcount + 1
             else:
-                return jsonData            
+                return jsonData 
+
         except urllib.error.URLError as e:
-                errorcount = errorcount + 1
-        sleep(random.random() * 10)
+            errorcount = errorcount + 1
+            sleep(random.random() * 10)
     return ''
         
-
-    
 
 
 class yelpsearch:
     yelpidlist = []
     placeidlist = []
+    q = Queue()
 
     def __init__(self,location, radius, categories, minprice=1, maxprice=4, keyword=''):
         self.nearby_places(location, radius, categories, minprice, maxprice, keyword)
@@ -101,17 +103,35 @@ class yelpsearch:
             return self.placeidlist
         if self.yelpidlist is None:
             return []
-        threads = []
+        for i in range(5):
+            worker = threading.Thread(target=self._get_single_place, args=(self.q,))
+            worker.setDaemon(True)
+            worker.start()
         for yelpid in self.yelpidlist:
-            process = threading.Thread(target=self.get_single_place, kwargs={'yelpid': yelpid, 'jobnumber': jobnumber})
-            process.start()
-            threads.append(process)
-        for process in threads:
-            process.join()
+            self.q.put((yelpid, jobnumber))
+        self.q.join()
         myjob = JobList.query.filter(JobList.id == jobnumber).first()
         myjob.yelpcomplete = True
         db_session.commit()
         return self.placeidlist
+
+    def _get_single_place(self, myqueue):
+        while True:
+            yelpid, jobnumber = myqueue.get()
+            myyelpplace = yelpplace(yelpid)
+            myyelpplace.get_yelpplaceid()
+            self.placeidlist.append(myyelpplace.get_placeid())
+            myyelpplace.set_categories()
+            myyelpplace.openinghours_to_db()
+            myyelpplace.set_jobnumber(jobnumber)
+            mygooglesearch = gs.googlesearch(myyelpplace.get_location(),100,[], myyelpplace.get_placename())
+            if len(mygooglesearch.get_googleidlist()) != 0:
+                mygoogleplace = gs.googleplace(mygooglesearch.get_googleidlist()[0])
+                googleplaceid = mygoogleplace.get_googleplaceid()
+                if googleplaceid > 0:
+                    mygoogleplace.set_placeid(myyelpplace.get_placeid())
+                    mygoogleplace.set_categories()
+            myqueue.task_done()    
 
     def get_single_place(self, yelpid, jobnumber):
         myyelpplace = yelpplace(yelpid)
