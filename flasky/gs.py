@@ -1,3 +1,4 @@
+from queue import Queue
 from . import ys
 from . import zs
 from .models import GooglePlace, JobList, Places, OpeningHours, JobResults
@@ -6,6 +7,7 @@ from .tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
 import urllib.parse
 from openlocationcode import openlocationcode
+import threading
 
 apikey = getapikey('googleapikey')
 url = 'https://maps.googleapis.com/maps/api'
@@ -73,6 +75,8 @@ class googlesearch:
     googleidlist = []
     placeidlist = []
     location = dict()
+    q = Queue()
+    typeq = Queue()
 
     def __init__(self, location, radius, mytypes, keyword='', minprice=0, maxprice=4 ):
         if type(location) is str:
@@ -83,8 +87,41 @@ class googlesearch:
         self.placeidlist = []
         if len(mytypes) == 0:
             self.nearby_search_one_type(radius, '', keyword, minprice, maxprice)
+            return
+        for i in range(5):
+            worker = threading.Thread(target=self._nearby_search_one_type, args=(self.typeq,))
+            worker.setDaemon(True)
+            worker.start()
         for mytype in mytypes:
-            self.nearby_search_one_type(radius, mytype, keyword, minprice, maxprice)
+            self.typeq.put((radius, mytype, '', minprice, maxprice))
+        self.typeq.join()
+
+
+    def _nearby_search_one_type(self, myqueue):
+        while True:
+            radius, mytype, keyword, minprice, maxprice = myqueue.get()
+            urldir = '/place/nearbysearch/json?'
+            urldir += apikey
+            urldir += '&location=' + str(self.location['lat']) + ',' + str(self.location['lng'])
+            urldir += '&radius=' + str(radius)
+            if keyword != '':
+                urldir += '&keyword=' + urllib.parse.quote(keyword)
+            if mytype != '':
+                urldir += '&type=' + mytype
+            urldir += '&fields=place_id'
+            data = dataFromURL(url + urldir)
+            if 'error_message' in data:
+                raise Exception('Error: nearby_search: error message: ' + data['error_message'])
+            if data['results'] is None:
+                myqueue.task_done()
+            for aresult in data['results']:
+                if aresult['place_id'] not in self.googleidlist:
+                    self.googleidlist.append(aresult['place_id'])
+            if 'next_page_token' in data:
+                sleep(5)
+                self.nearby_search_nextpage(data['next_page_token'])
+            myqueue.task_done()
+
         
     def nearby_search_one_type(self, radius, mytype, keyword='', minprice=0, maxprice=4):
         '''
@@ -110,6 +147,7 @@ class googlesearch:
             if aresult['place_id'] not in self.googleidlist:
                 self.googleidlist.append(aresult['place_id'])
         if 'next_page_token' in data:
+            sleep(5)
             self.nearby_search_nextpage(data['next_page_token'])
 
         
@@ -120,7 +158,6 @@ class googlesearch:
         output: list of restaraunt dictionaries
         '''
         urldir = "&".join( ('/place/nearbysearch/json?pagetoken=' + token, apikey,))
-        sleep(sleeptime)
         data = dataFromURL(url + urldir)
         if 'error_message' in data:
             raise Exception('_nearby_search_nextpage: error_message: ' + data['error_message'])
@@ -138,17 +175,29 @@ class googlesearch:
     def getplaceidlist(self, jobnumber=0):
         if len(self.placeidlist) > 0:
             return self.placeidlist
+        for i in range(5):
+            worker = threading.Thread(target=self._get_place_id_list, args=(self.q,))
+            worker.setDaemon(True)
+            worker.start()
         for googleid in self.googleidlist:
+            self.q.put((googleid, jobnumber))
+        self.q.join()
+        myjob = JobList.query.filter(JobList.id == jobnumber).first()
+        myjob.googlecomplete = True
+        db_session.commit()
+        return self.placeidlist
+
+    def _get_place_id_list(self, myqueue):
+        while True:
+            googleid, jobnumber = myqueue.get()
             mygoogleplace = googleplace(googleid)
             mygoogleplace.get_googleplaceid()
             self.placeidlist.append(mygoogleplace.get_placeid())
             mygoogleplace.set_categories()
             mygoogleplace.openinghours_to_db()
             mygoogleplace.set_jobnumber(jobnumber)
-        myjob = JobList.query.filter(JobList.id == jobnumber).first()
-        myjob.googlecomplete = True
-        db_session.commit()
-        return self.placeidlist
+            myqueue.task_done()
+
 
 class googleplace:
     placeid = 0

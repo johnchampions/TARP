@@ -1,7 +1,7 @@
 import flask_user
 from flask_user.decorators import login_required
 from werkzeug.utils import send_file
-from .gs import googlesearch, googleplace, street_address_to_lat_lng
+from .gs import googlesearch, street_address_to_lat_lng
 from . import zs
 from .ys import yelpsearch
 from flask import (
@@ -199,8 +199,7 @@ def search():
                     try:
                         mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
                         googleplacelist = mygooglesearch.get_googleidlist()
-                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber': jobid})
-                        gt.start()
+                        mygooglesearch.getplaceidlist(jobid)
                     except Exception as e:
                         error = str(e)
                 elif keyword != '':
@@ -210,8 +209,7 @@ def search():
                     try:
                         mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
                         googleplacelist = mygooglesearch.get_googleidlist()
-                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, args=(jobid,))
-                        gt.start()
+                        mygooglesearch.getplaceidlist(jobid)
                         job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
@@ -236,8 +234,7 @@ def search():
             myyelpsearch = yelpsearch(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
             yelpplacelist = myyelpsearch.get_yelpidlist()
             if yelpplacelist is not None:
-                yt = threading.Thread(target=myyelpsearch.get_placeidlist, kwargs={'jobnumber': jobid})
-                yt.start()
+                myyelpsearch.get_placeidlist(jobid)
                 job_dict['roughcount'] = job_dict['roughcount'] + len(yelpplacelist)
                 myjob.yelpplugin = len(yelpplacelist)
                 myjob.yelpcomplete = False
@@ -305,7 +302,6 @@ def get_xls_report(path_to_file):
         data = reports.new_tar_report(jobnumber).create_report()
         converter = Converter()
         converter.convert(data, Writer(mem))
-
     mem.seek(0)
     myreturnfile = send_file(mem, attachment_filename=path_to_file,
         as_attachment=True, cache_timeout=0)
