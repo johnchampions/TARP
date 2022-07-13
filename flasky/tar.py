@@ -209,7 +209,8 @@ def search():
                     try:
                         mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
                         googleplacelist = mygooglesearch.get_googleidlist()
-                        mygooglesearch.getplaceidlist(jobid)
+                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber':jobid})
+                        gt.start()
                         job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                     except Exception as e:
                         error = str(e)
@@ -234,7 +235,8 @@ def search():
             myyelpsearch = yelpsearch(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
             yelpplacelist = myyelpsearch.get_yelpidlist()
             if yelpplacelist is not None:
-                myyelpsearch.get_placeidlist(jobid)
+                yt = threading.Thread(target=myyelpsearch.get_placeidlist, args=(jobid,))
+                yt.start()
                 job_dict['roughcount'] = job_dict['roughcount'] + len(yelpplacelist)
                 myjob.yelpplugin = len(yelpplacelist)
                 myjob.yelpcomplete = False
