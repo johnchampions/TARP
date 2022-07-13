@@ -1,7 +1,8 @@
 import requests
 import json
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options 
+from selenium.webdriver.common.by import By
 from time import sleep
 from bs4 import BeautifulSoup
 from . import gs 
@@ -34,17 +35,18 @@ headers = {
 url = "https://www.zomato.com/"
 
 def data_from_url(path, params=None):
-        if params is None:
-            try:
+    print(path)
+    if params is None:
+        try:
                 response = requests.get(path, headers=headers)
-            except:
-                return dict()
-        else:
-            try:
-                response = requests.get(path, params=params, headers=headers)
-            except:
-                return dict()
-        return get_preload_json(response.text)
+        except:
+            return dict()
+    else:
+        try:
+            response = requests.get(path, params=params, headers=headers)
+        except:
+            return dict()
+    return get_preload_json(response.text)
 
 def get_preload_json(page_text):
     soup = BeautifulSoup(page_text, 'html.parser')
@@ -123,13 +125,17 @@ class zomatosearch:
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
-
+        print(f'Selenium: {url}')
         driver.get(url)
         try:
-            sort_by_distance = driver.find_element_by_xpath("//*[@id='root']/div[2]/div[6]/div/div/div[2]/div/div/i")
+            Filters = driver.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[6]/div/div/div[1]/div')
+            Filters.click()
+            sort_by_distance = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/article/section[2]/div/section/section[5]/label/span')
+            sort_by_distance.click()
+            apply = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/section/div/button[2]/span/span')
+            apply.click()
         except:
             return []
-        sort_by_distance.click()
         can_scroll = True
         last_height = driver.execute_script("return document.body.scrollHeight")
         sleep(3)
