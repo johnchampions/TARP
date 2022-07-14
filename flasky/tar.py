@@ -247,7 +247,7 @@ def search():
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
             else:
                 myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
-            myzomatosearch = zs.zomatosearch(latlong, radius, keyword=term)
+            myzomatosearch = zs.zomatosearch(latlong, radius, address=address, keyword=term)
             zomatoplacelist = myzomatosearch.get_zomatoidlist()
             x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
             x.start()

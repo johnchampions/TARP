@@ -1,8 +1,12 @@
 import requests
 import json
+
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options 
+from selenium.webdriver.chrome.service import Service
+
 from time import sleep
 from bs4 import BeautifulSoup
 from . import gs 
@@ -68,11 +72,12 @@ def get_preload_json(page_text):
 class zomatosearch:
     zomatoidlist = []
     placeidlist = []
-    def __init__(self, location, radius, keyword=''):
+    def __init__(self, location, radius, address, keyword=''):
         self.radius = radius
         self.keyword = keyword
         self.location = location
         self.zomatoidlist = self.nearby_places()
+        self.address = address
     
     def get_zomatoidlist(self):
         if self.zomatoidlist is None:
@@ -125,9 +130,17 @@ class zomatosearch:
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
+        map_coordinates = {'latitude': self.location['lat'],
+            'longitude': self.location['lng'],
+            'accuracy': 50}
+        driver.execute_cdp_cmd("Emulation.setGeolocationOverride", map_coordinates)
         print(f'Selenium: {url}')
         driver.get(url)
         try:
+            addressbox = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/header/nav/ul[2]/li[1]/div/div/div[1]/input')
+            addressbox.send_keys(self.address)
+            addressbox.send_keys(Keys.ARROW_DOWN)
+            addressbox.send_keys(Keys.ENTER)
             Filters = driver.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[6]/div/div/div[1]/div')
             Filters.click()
             sort_by_distance = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/article/section[2]/div/section/section[5]/label/span')
