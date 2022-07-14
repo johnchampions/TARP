@@ -4,6 +4,8 @@ import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.chrome.service import Service
 
@@ -76,8 +78,9 @@ class zomatosearch:
         self.radius = radius
         self.keyword = keyword
         self.location = location
-        self.zomatoidlist = self.nearby_places()
         self.address = address
+        self.zomatoidlist = self.nearby_places()
+        
     
     def get_zomatoidlist(self):
         if self.zomatoidlist is None:
@@ -136,9 +139,12 @@ class zomatosearch:
         driver.execute_cdp_cmd("Emulation.setGeolocationOverride", map_coordinates)
         print(f'Selenium: {url}')
         driver.get(url)
+        wait = WebDriverWait(driver, 10)
         try:
-            addressbox = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/header/nav/ul[2]/li[1]/div/div/div[1]/input')
+            addressbox = wait.until(EC.element_to_be_clickable(By.XPATH, '/html/body/div[1]/div[2]/div[2]/header/nav/ul[2]/li[1]/div/div/div[1]/input'))
+            addressbox.click()
             addressbox.send_keys(self.address)
+            sleep(1)
             addressbox.send_keys(Keys.ARROW_DOWN)
             addressbox.send_keys(Keys.ENTER)
             Filters = driver.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[6]/div/div/div[1]/div')
@@ -182,8 +188,9 @@ class zomatosearch:
             return int(myint)
 
     def getplaceidlist(self, jobnumber=0):
-        if len(self.placeidlist) > 0:
-            return self.placeidlist
+        #if len(self.placeidlist) > 0:
+
+        #    return self.placeidlist
         if self.zomatoidlist is None:
             return []
         for zomatoid in self.zomatoidlist:
