@@ -41,7 +41,6 @@ headers = {
 url = "https://www.zomato.com/"
 
 def data_from_url(path, params=None):
-    print(path)
     if params is None:
         try:
                 response = requests.get(path, headers=headers)
@@ -137,7 +136,6 @@ class zomatosearch:
             'longitude': self.location['lng'],
             'accuracy': 50}
         driver.execute_cdp_cmd("Emulation.setGeolocationOverride", map_coordinates)
-        print(f'Selenium: {url}')
         driver.get(url)
         wait = WebDriverWait(driver, 10)
         try:
