@@ -15,11 +15,10 @@ url = "https://api.yelp.com/v3/businesses/search?"
 apikey = getapikey('yelpapikey')
 
 def dataFromURL(fullURL, url_params):
-    """Grabs a file off the internet.
+    """Grabs a off the internet.
     input: full URL of the file
     output: a string containing the server response, usually a file
     """
-    print(fullURL)
     params = urllib.parse.urlencode(url_params)
     request = urllib.request.Request(fullURL + params)
     request.add_header("Authorization", apikey)

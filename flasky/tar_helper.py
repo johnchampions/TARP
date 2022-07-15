@@ -75,7 +75,6 @@ def dataFromURL(fullURL):
     input: full URL of the file
     output: a string containing the server response, usually a file
     """
-    print(fullURL)
     request = urllib.request.Request(fullURL)
     try:
         response = urllib.request.urlopen(request)
