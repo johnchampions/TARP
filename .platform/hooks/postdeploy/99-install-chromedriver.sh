@@ -2,7 +2,7 @@
 [ "$UID" -eq 0 ] || exec sudo "$0" "$@"
 fullver=$(google-chrome --version)
 set $fullver
-IFS=.
+IFS=%20
 read -ra ARR <<< $3
 IFS= 
 chromever=$(echo ${ARR[0]})
