@@ -2,10 +2,7 @@
 [ "$UID" -eq 0 ] || exec sudo "$0" "$@"
 fullver=$(google-chrome --version)
 set $fullver
-IFS=%20
-read -ra ARR <<< $3
-IFS= 
-chromever=$(echo ${ARR[0]})
+chromever=$(echo "${3%%.*}")
 cd /tmp/
 sudo wget https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$chromever
 cdver=$(cat LATEST_RELEASE_$chromever)
