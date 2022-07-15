@@ -140,7 +140,7 @@ class zomatosearch:
             driver.get(url)
             wait = WebDriverWait(driver, 10)
         except:
-            raise Exception('zomato connection error')
+            print('zomato connection error')
         try:
             addressbox = wait.until(EC.element_to_be_clickable(By.XPATH, '/html/body/div[1]/div[2]/div[2]/header/nav/ul[2]/li[1]/div/div/div[1]/input'))
             addressbox.click()
@@ -155,7 +155,7 @@ class zomatosearch:
             apply = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/section/div/button[2]/span/span')
             apply.click()
         except:
-            raise Exception('zomato interaction error')
+            print('zomato interaction error')
         can_scroll = True
         last_height = driver.execute_script("return document.body.scrollHeight")
         sleep(3)
