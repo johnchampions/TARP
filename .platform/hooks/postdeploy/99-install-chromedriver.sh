@@ -5,7 +5,7 @@ set $fullver
 IFS=.
 read -ra ARR <<< $3
 IFS= 
-chromever=$(echo ${ARR[0]}.${ARR[1]}.${ARR[2]})
+chromever=$(echo ${ARR[0]})
 cd /tmp/
 sudo wget https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$chromever
 cdver=$(cat LATEST_RELEASE_$chromever)
