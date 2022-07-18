@@ -77,7 +77,7 @@ def dataFromURL(fullURL):
     """
     request = urllib.request.Request(fullURL)
     try:
-        response = urllib.request.urlopen(request)
+        response = urllib.request.urlopen(request, timeout=10)
     except urllib.error.URLError as e:
         raise Exception("Unexpected Error: " + fullURL)
     jsonData = json.loads(response.read())

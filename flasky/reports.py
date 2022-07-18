@@ -80,8 +80,14 @@ def is_open_for_meal(mealtime, mealtimeclose, placeid):
     for myday in mylistofdays:
         if mydict[myday + 'open'] is None or mydict[myday + 'close'] is None:
             continue
-        myopen = int(mydict[myday + 'open'])
-        myclose = int(mydict[myday + 'close'])
+        if mydict[myday + 'open'].isdigit():
+            myopen = int(mydict[myday + 'open'])
+        else:
+            myopen = 0
+        if mydict[myday + 'close'].isdigit():
+            myclose = int(mydict[myday + 'close'])
+        else: 
+            myclose = 0
         if myclose < myopen:
             myclose = 2359
         if (myopen < mealtimeclose) and (myclose > mealtime):

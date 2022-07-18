@@ -43,12 +43,12 @@ url = "https://www.zomato.com/"
 def data_from_url(path, params=None):
     if params is None:
         try:
-                response = requests.get(path, headers=headers)
+                response = requests.get(path, headers=headers, timeout=10)
         except:
             return dict()
     else:
         try:
-            response = requests.get(path, params=params, headers=headers)
+            response = requests.get(path, params=params, headers=headers,timeout=10)
         except:
             return dict()
     return get_preload_json(response.text)
@@ -94,34 +94,9 @@ class zomatosearch:
         }
         if self.keyword != '':
             params['term'] = self.keyword
-        center = self.latlongtocenter(self.location['lat'], self.location['lng'])
-        if center is None:
-            return []
-        cityurl =self.search_city_id(center)
-        cityid = center['locationDetails']['cityId'] 
-        dineoutlinksearch = data_from_url(cityurl)
-        for item in dineoutlinksearch['pages']['city'][str(cityid)]['sections']['SECTION_QUICK_SEARCH']['items']:
-            if item['categoryType'] == 'dineout':
-                dineouturl = item['url']
-        linklist = self.selenium_get(dineouturl)
+        linklist = self.selenium_get(url)
         return linklist
 
-    def latlongtocenter(self, lat, lng):
-        path = f'{url}webroutes/location/get?lat={lat}&lon={lng}'
-        try:
-            response = requests.get(path, headers=headers)
-            output = json.loads(response.text)
-        except:
-            output = None
-        return output
-
-    def search_city_id(self, latlongtocenter):
-        #returns suburbs and collections in json
-        path = url + 'webapi/searchapi.php'
-        params = {'city' : latlongtocenter['locationDetails']['cityId'] }
-        response = requests.get(path, headers=headers, params=params)
-        output = json.loads(response.text)
-        return output['results']['locations']['city']['city_data']['urls']['info']
 
     def selenium_get(self, url):
         chrome_options = Options()
@@ -132,30 +107,45 @@ class zomatosearch:
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
+        
         map_coordinates = {'latitude': self.location['lat'],
             'longitude': self.location['lng'],
             'accuracy': 50}
+        driver.execute_cdp_cmd('Browser.grantPermissions', {'origin': url, 'permissions': ['geolocation']},)
         driver.execute_cdp_cmd("Emulation.setGeolocationOverride", map_coordinates)
         try:
             driver.get(url)
             wait = WebDriverWait(driver, 10)
         except:
             print('zomato connection error')
+            driver.quit()
+            return []
         try:
-            addressbox = wait.until(EC.element_to_be_clickable(By.XPATH, '/html/body/div[1]/div[2]/div[2]/header/nav/ul[2]/li[1]/div/div/div[1]/input'))
+            driver.delete_all_cookies()
+            addressbox = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[3]/div[2]/div[2]/div/div[1]/input')
             addressbox.click()
-            addressbox.send_keys(self.address)
             sleep(1)
             addressbox.send_keys(Keys.ARROW_DOWN)
             addressbox.send_keys(Keys.ENTER)
-            Filters = driver.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[6]/div/div/div[1]/div')
+            sleep(1)
+            dineout = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[4]/div[1]/div/div[2]/a')
+            dineout.click()
+            sleep(1)
+           
+            Filters = driver.find_element(By.XPATH, "(//*[contains(text(), 'Filters')] | //*[@value='Filters'])")
             Filters.click()
+            sleep(1)
             sort_by_distance = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/article/section[2]/div/section/section[5]/label/span')
             sort_by_distance.click()
+            sleep(1)
             apply = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/section/div/button[2]/span/span')
             apply.click()
+            sleep(1)
+            
         except:
             print('zomato interaction error')
+            driver.quit()
+            return []
         can_scroll = True
         last_height = driver.execute_script("return document.body.scrollHeight")
         sleep(3)
