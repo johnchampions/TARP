@@ -88,6 +88,7 @@ class zomatosearch:
         return self.zomatoidlist
 
     def nearby_places(self):
+        print('sz.nearby_places')
         params = {
             'radius' : str(self.radius),
             'latitude' : str(self.location['lat']),
@@ -99,6 +100,7 @@ class zomatosearch:
         return linklist
 
     def selenium_get(self, url):
+        print('selenium_get')
         chrome_options = Options()
         chrome_options.add_argument('--disable-extensions')
         chrome_options.add_argument('--disable-gpu')
@@ -106,8 +108,9 @@ class zomatosearch:
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
+        print('selenium_get before driver')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
-        
+        print('selenium_get driver')
         map_coordinates = {'latitude': self.location['lat'],
             'longitude': self.location['lng'],
             'accuracy': 50}
