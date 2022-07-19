@@ -103,7 +103,7 @@ class zomatosearch:
         chrome_options.add_argument('--disable-extensions')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
+        #chrome_options.add_argument('--headless')
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
@@ -121,13 +121,13 @@ class zomatosearch:
             return []
         try:
             driver.delete_all_cookies()
-            addressbox = driver.find_element(By.XPATH, '/html/body/div[1]/div[2]/div[3]/div[2]/div[2]/div/div[1]/input')
+            addressbox = driver.find_element(By.XPATH, "//input[1]")
             addressbox.click()
             sleep(1)
             addressbox.send_keys(Keys.ARROW_DOWN)
             addressbox.send_keys(Keys.ENTER)
             sleep(1)
-            dineout = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[4]/div[1]/div/div[2]/a')
+            dineout = driver.find_element(By.XPATH, "(//*[contains(text(), 'Dining Out')] | //*[@value='Dining Out'])")
             dineout.click()
             sleep(1)
             Filters = driver.find_element(By.XPATH, "(//*[contains(text(), 'Filters')] | //*[@value='Filters'])")
@@ -136,11 +136,12 @@ class zomatosearch:
             sort_by_distance = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/article/section[2]/div/section/section[5]/label/span')
             sort_by_distance.click()
             sleep(1)
-            apply = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/section/div/button[2]/span/span')
+            apply = driver.find_element(By.XPATH, "/html/body/div[2]/div/div[2]/section[2]/section/div/button[2]")
             apply.click()
             sleep(1)
         except:
             print('zomato interaction error')
+            print(driver.page_source)
             driver.quit()
             return []
         can_scroll = True
