@@ -36,6 +36,7 @@ def shutdown_session(exception=None):
     db_session.remove()
 
 if __name__ == "__main__":
+    print("Hello from flasky.")
     application.debug = True
     #application.port = 443
     #application.ssl_context = 'adhoc'

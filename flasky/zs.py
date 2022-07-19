@@ -74,6 +74,7 @@ class zomatosearch:
     zomatoidlist = []
     placeidlist = []
     def __init__(self, location, radius, address, keyword=''):
+        print("Hello from zs")
         self.radius = radius
         self.keyword = keyword
         self.location = location
@@ -97,7 +98,6 @@ class zomatosearch:
         linklist = self.selenium_get(url)
         return linklist
 
-
     def selenium_get(self, url):
         chrome_options = Options()
         chrome_options.add_argument('--disable-extensions')
@@ -115,7 +115,6 @@ class zomatosearch:
         driver.execute_cdp_cmd("Emulation.setGeolocationOverride", map_coordinates)
         try:
             driver.get(url)
-            wait = WebDriverWait(driver, 10)
         except:
             print('zomato connection error')
             driver.quit()
@@ -131,7 +130,6 @@ class zomatosearch:
             dineout = driver.find_element(By.XPATH, '/html/body/div[1]/div/div[4]/div[1]/div/div[2]/a')
             dineout.click()
             sleep(1)
-           
             Filters = driver.find_element(By.XPATH, "(//*[contains(text(), 'Filters')] | //*[@value='Filters'])")
             Filters.click()
             sleep(1)
@@ -141,7 +139,6 @@ class zomatosearch:
             apply = driver.find_element(By.XPATH, '/html/body/div[2]/div/div[2]/section[2]/section/div/button[2]/span/span')
             apply.click()
             sleep(1)
-            
         except:
             print('zomato interaction error')
             driver.quit()
