@@ -1,5 +1,6 @@
 import flask_user
 from flask_user.decorators import login_required
+from sqlalchemy import outparam
 from werkzeug.exceptions import abort
 import json
 from flask.templating import render_template
@@ -7,7 +8,7 @@ from sqlalchemy.sql.expression import desc
 from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace
 from flask import Blueprint
 import time
-import application
+import config
 
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
@@ -107,3 +108,21 @@ def get_restaurantlist(jobid=0):
         if myplace is not None:
             output.append(myplace.__dict__)
     return output
+
+def get_incomplete_zomato_jobs(refresh=False):
+    output = []
+    if refresh:
+        myJoblist = JobList.query.filter(JobList.zomatoplugin > 0, JobList.zomatocomplete  == 0).all()
+        if myJoblist is None:
+            application.config.ZOMATO_SEARCH = False
+        else:
+            application.config.ZOMATO_SEARCH = True
+            for jobby in myJoblist:
+                output.append(jobby.id)
+    return output
+
+@bp.route('zomjob', methods=('GET',))
+def get_zomato_jobs():
+    mydict = {'jobsAvailable': application.config.ZOMATO_SEARCH,
+        'joblist': get_incomplete_zomato_jobs()}
+    return json.dumps(mydict)
