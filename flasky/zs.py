@@ -53,6 +53,14 @@ def data_from_url(path, params=None):
             return dict()
     return get_preload_json(response.text)
 
+def get_job_list(keymatch):
+    #TODO: add thesevalues
+    
+    url = f'http://flasky.eba-hw3xm2pn.ap-southeast-2.elasticbeanstalk.com/joblist/zomjob/{keymatch}'
+    response = requests.get(url, timeout=10)
+    return json.loads(response.text.encode('UTF-8'))
+
+
 def get_preload_json(page_text):
     soup = BeautifulSoup(page_text, 'html.parser')
     s = soup.find_all('script')
@@ -419,4 +427,19 @@ class zomatoplace:
         return openlocationcode.encode(mylocation.lat, mylocation.lng)
 
 
-    
+def main():
+    while True:
+        jobdict = get_job_list('Z0OMarTo3')
+        if jobdict['jobsAvailable']:
+            for job_number in jobdict['joblist']:
+                my_job_record = JobList.query.filter(JobList.id == job_number).first()
+                location = {'lat': my_job_record.lat, 'lng': my_job_record.ln}
+                my_zomato_search = zomatosearch(location=location, radius=my_job_record.radius, address=my_job_record.address)
+                zomato_place_list = my_zomato_search.getplaceidlist(job_number)
+                my_job_record.roughcount = my_job_record.roughcount + len(zomato_place_list)
+                db_session.commit()
+        sleep(600)
+
+
+if __name__ == "__main__":
+    main()
