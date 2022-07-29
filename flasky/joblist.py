@@ -9,7 +9,7 @@ from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCatego
 from flask import Blueprint
 import time
 import config
-
+import application
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 

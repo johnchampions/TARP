@@ -10,5 +10,3 @@ while True:
     website_is_up = status_code == 200
     print(website_is_up)
     sleep(10)
-
-

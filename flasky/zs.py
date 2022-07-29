@@ -18,6 +18,7 @@ from . import ys
 from .models import ZomatoPlace, Places, OpeningHours, JobResults, JobList
 from .db import db_session
 from openlocationcode import openlocationcode
+import config
 
 headers = { 
     'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -56,7 +57,7 @@ def data_from_url(path, params=None):
 def get_job_list(keymatch):
     #TODO: add thesevalues
     
-    url = f'http://flasky.eba-hw3xm2pn.ap-southeast-2.elasticbeanstalk.com/joblist/zomjob/{keymatch}'
+    url = f'{config.URL}joblist/zomjob/{keymatch}'
     response = requests.get(url, timeout=10)
     return json.loads(response.text.encode('UTF-8'))
 

@@ -10,3 +10,6 @@ wget -q https://chromedriver.storage.googleapis.com/$cdver/chromedriver_linux64.
 unzip chromedriver_linux64.zip
 mv chromedriver /usr/bin/chromedriver
 chromedriver --version
+
+
+cloudflare api token bxaCOTJs4GXUIdpGK0_m7dtexSrUPijzTtSwmG6V
