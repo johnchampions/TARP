@@ -18,6 +18,7 @@ from re import search
 from flasky.models import ZomatoPlace, Places, OpeningHours, JobResults, JobList
 from flasky.db import db_session
 from openlocationcode import openlocationcode
+import config
 
 headers = { 
     'Accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
