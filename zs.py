@@ -11,12 +11,12 @@ from selenium.webdriver.chrome.service import Service
 
 from time import sleep
 from bs4 import BeautifulSoup
-from . import gs 
-from .tar_helper import add_type_to_place
+import flasky.gs as gs
+import config
+from flasky.tar_helper import add_type_to_place
 from re import search
-from . import ys
-from .models import ZomatoPlace, Places, OpeningHours, JobResults, JobList
-from .db import db_session
+from flasky.models import ZomatoPlace, Places, OpeningHours, JobResults, JobList
+from flasky.db import db_session
 from openlocationcode import openlocationcode
 
 headers = { 
@@ -56,7 +56,7 @@ def data_from_url(path, params=None):
 def get_job_list(keymatch):
     #TODO: add thesevalues
     
-    url = f'http://flasky.eba-hw3xm2pn.ap-southeast-2.elasticbeanstalk.com/joblist/zomjob/{keymatch}'
+    url = f'{config.URL}joblist/zomjob/{keymatch}'
     response = requests.get(url, timeout=10)
     return json.loads(response.text.encode('UTF-8'))
 
@@ -113,11 +113,11 @@ class zomatosearch:
         chrome_options.add_argument('--disable-extensions')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--headless')
+        #chrome_options.add_argument('--headless')
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent="' + headers['User-agent'] + '"')
         print('selenium_get before driver')
-        driver = webdriver.Chrome('chromedriver', chrome_options=chrome_options)
+        driver = webdriver.Chrome('chromedriver', options=chrome_options)
         print('selenium_get driver')
         map_coordinates = {'latitude': self.location['lat'],
             'longitude': self.location['lng'],
@@ -125,20 +125,21 @@ class zomatosearch:
         driver.execute_cdp_cmd('Browser.grantPermissions', {'origin': url, 'permissions': ['geolocation']},)
         driver.execute_cdp_cmd("Emulation.setGeolocationOverride", map_coordinates)
         try:
+            driver.delete_all_cookies()
             driver.get(url)
         except:
             print('zomato connection error')
             driver.quit()
             return []
         try:
-            driver.delete_all_cookies()
+
             addressbox = driver.find_element(By.XPATH, "//input[1]")
             addressbox.click()
             sleep(1)
             addressbox.send_keys(Keys.ARROW_DOWN)
             addressbox.send_keys(Keys.ENTER)
             sleep(1)
-            dineout = driver.find_element(By.XPATH, "(//*[contains(text(), 'Dining Out')] | //*[@value='Dining Out'])")
+            dineout = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[4]/div[1]/div/div[2]/a")
             dineout.click()
             sleep(1)
             Filters = driver.find_element(By.XPATH, "(//*[contains(text(), 'Filters')] | //*[@value='Filters'])")
@@ -429,11 +430,11 @@ class zomatoplace:
 
 def main():
     while True:
-        jobdict = get_job_list('Z0OMarTo3')
+        jobdict = get_job_list('Z')
         if jobdict['jobsAvailable']:
             for job_number in jobdict['joblist']:
                 my_job_record = JobList.query.filter(JobList.id == job_number).first()
-                location = {'lat': my_job_record.lat, 'lng': my_job_record.ln}
+                location = {'lat': my_job_record.lat, 'lng': my_job_record.lng}
                 my_zomato_search = zomatosearch(location=location, radius=my_job_record.radius, address=my_job_record.address)
                 zomato_place_list = my_zomato_search.getplaceidlist(job_number)
                 my_job_record.roughcount = my_job_record.roughcount + len(zomato_place_list)

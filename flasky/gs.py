@@ -1,9 +1,7 @@
 from queue import Queue
-from . import ys
-from . import zs
-from .models import GooglePlace, JobList, Places, OpeningHours, JobResults
-from .db import db_session
-from .tar_helper import getapikey, dataFromURL, add_type_to_place
+from flasky.models import GooglePlace, JobList, Places, OpeningHours, JobResults
+from flasky.db import db_session
+from flasky.tar_helper import getapikey, dataFromURL, add_type_to_place
 from time import sleep
 import urllib.parse
 from openlocationcode import openlocationcode

@@ -21,7 +21,7 @@ from .models import CategoryList, ConfigKeys, CuisineList, GooglePlace, OpeningH
 import json
 from .gs import googleplace
 from .ys import yelpplace
-from .zs import zomatoplace
+#from .zs import zomatoplace
 
 
 timefields = ('sundayopen','sundayclose',

@@ -2,7 +2,7 @@ import flask_user
 from flask_user.decorators import login_required
 from werkzeug.utils import send_file
 from .gs import googlesearch, street_address_to_lat_lng
-from . import zs
+#from . import zs
 from .ys import yelpsearch
 from flask import (
     Blueprint,
@@ -247,17 +247,17 @@ def search():
                 myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
             else:
                 myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
-            myzomatosearch = zs.zomatosearch(latlong, radius, address=address, keyword=term)
-            zomatoplacelist = myzomatosearch.get_zomatoidlist()
-            x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
-            x.start()
-            job_dict['roughcount'] = job_dict['roughcount'] + len(zomatoplacelist)
-            myjob.zomatoplugin = len(zomatoplacelist)
+            #myzomatosearch = zs.zomatosearch(latlong, radius, address=address, keyword=term)
+            #zomatoplacelist = myzomatosearch.get_zomatoidlist()
+            #x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
+            #x.start()
+            #job_dict['roughcount'] = job_dict['roughcount'] + len(zomatoplacelist)
+            #myjob.zomatoplugin = len(zomatoplacelist)
             myjob.zomatocomplete = False
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
-        if job_dict['roughcount'] == 0:
-            error = 'That search had no hits.'
+        #if job_dict['roughcount'] == 0:
+        #    error = 'That search had no hits.'
         if error is None:
             return  redirect('/joblist/jobdisplay/' + str(jobid))
         flash(error)

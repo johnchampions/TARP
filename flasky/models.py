@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import CHAR, FLOAT, DateTime, Float, TEXT, Boolean
-from .db import Base
+from flasky.db import Base
 from flask_user import UserMixin
 
 

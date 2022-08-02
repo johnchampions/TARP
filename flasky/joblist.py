@@ -95,10 +95,10 @@ def refresh_places(idlist):
         placerecord = Places.query.filter(Places.id == id).first()
         if placerecord.googleplaceid is not None:
             gpid = GooglePlace.query.filter(GooglePlace.placeid == id).first().googleplace_id
-            gs2.get_place_details((gpid,), refresh=True)
+            gs.get_place_details((gpid,), refresh=True)
         if placerecord.yelpplaceid is not None:
             ysid = YelpPlace.query.filter(YelpPlace.placeid == id).first().yelpplace_id
-            ys2.get_place_details((ysid,), refresh=True)
+            ys.get_place_details((ysid,), refresh=True)
 
 def get_restaurantlist(jobid=0):
     output = []
@@ -109,20 +109,19 @@ def get_restaurantlist(jobid=0):
             output.append(myplace.__dict__)
     return output
 
-def get_incomplete_zomato_jobs(refresh=False):
+def get_incomplete_zomato_jobs():
     output = []
-    if refresh:
-        myJoblist = JobList.query.filter(JobList.zomatoplugin > 0, JobList.zomatocomplete  == 0).all()
-        if myJoblist is None:
-            application.config.ZOMATO_SEARCH = False
-        else:
-            application.config.ZOMATO_SEARCH = True
-            for jobby in myJoblist:
-                output.append(jobby.id)
+    myJoblist = JobList.query.filter(JobList.zomatoplugin > 0, JobList.zomatocomplete  == 0).all()
+    for jobby in myJoblist:
+        output.append(jobby.id)
     return output
 
-@bp.route('zomjob', methods=('GET',))
-def get_zomato_jobs():
-    mydict = {'jobsAvailable': application.config.ZOMATO_SEARCH,
-        'joblist': get_incomplete_zomato_jobs()}
+@bp.route('/zomjob/<key>', methods=('GET',))
+def get_zomato_jobs(key):
+    if key != 'Z':
+        return '{"error": "Insufficient beer in diet."}'
+    job_list = get_incomplete_zomato_jobs()
+    jobs_avail = len(job_list) > 0
+    mydict = {'jobsAvailable': jobs_avail,
+        'joblist': job_list}
     return json.dumps(mydict)

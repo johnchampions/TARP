@@ -1,6 +1,5 @@
 from queue import Queue
 from . import gs
-from . import zs
 from .db import db_session
 from .models import YelpPlace, Places, JobResults, OpeningHours, JobList
 from .tar_helper import add_type_to_place, getapikey
