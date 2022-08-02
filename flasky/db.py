@@ -1,5 +1,5 @@
 from sqlalchemy.log import echo_property
-from flasky.config import SQLALCHEMY_DATABASE_URI as dbstring
+from config import SQLALCHEMY_DATABASE_URI as dbstring
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
