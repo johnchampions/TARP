@@ -1,4 +1,4 @@
-ENVIRONMENT = 'GOGO'
+ENVIRONMENT = ''
 
 if ENVIRONMENT == 'DEV':
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://flasky:Merkin12@192.168.1.23:3306/flasky'
