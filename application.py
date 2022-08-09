@@ -22,10 +22,10 @@ def hello():
 
 
 application = Flask(__name__)
-turbo = Turbo()
+#turbo = Turbo()
 application.config.from_pyfile('config.py')
 user_manager = UserManager(application, SQLAlchemy(application), UserClass=User)
-turbo.init_app(application)
+#turbo.init_app(application)
 application.add_url_rule('/', 'index', indexpage)
 application.add_url_rule('/hello', 'hello', hello)
 application.register_blueprint(flasky.tar.bp)
