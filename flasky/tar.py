@@ -254,7 +254,7 @@ def search():
             #x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
             #x.start()
             #job_dict['roughcount'] = job_dict['roughcount'] + len(zomatoplacelist)
-            #myjob.zomatoplugin = len(zomatoplacelist)
+            myjob.zomatoplugin = 1
             myjob.zomatocomplete = False
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
