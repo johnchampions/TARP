@@ -42,7 +42,7 @@ def dataFromURL(fullURL, url_params):
 class yelpsearch:
     yelpidlist = []
     placeidlist = []
-    q = Queue()
+    
 
     def __init__(self,location, radius, categories, minprice=1, maxprice=4, keyword=''):
         self.nearby_places(location, radius, categories, minprice, maxprice, keyword)
@@ -101,13 +101,15 @@ class yelpsearch:
             return self.placeidlist
         if self.yelpidlist is None:
             return []
+        q = Queue()
         for i in range(5):
-            worker = threading.Thread(target=self._get_single_place, args=(self.q,))
+            worker = threading.Thread(target=self._get_single_place, args=(q,))
             worker.setDaemon(True)
             worker.start()
         for yelpid in self.yelpidlist:
-            self.q.put((yelpid, jobnumber))
-        self.q.join()
+            q.put((yelpid, jobnumber))
+        q.join()
+        del(q)
         myjob = JobList.query.filter(JobList.id == jobnumber).first()
         myjob.yelpcomplete = True
         db_session.commit()

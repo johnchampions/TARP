@@ -152,6 +152,8 @@ def get_postcode_from_url(postcode):
 def search():
     if request.method == 'POST':
         error = None
+        gt = None
+        yt = None
         job_dict = {}
         address = request.form['address']
         radius = request.form['radius']
@@ -258,10 +260,19 @@ def search():
         db_session.commit()
         #if job_dict['roughcount'] == 0:
         #    error = 'That search had no hits.'
-        if error is None:
-            return  redirect('/joblist/jobdisplay/' + str(jobid))
-        flash(error)
-    return render_template('/tar/googlesearch.html')
+        try:
+            if error is None:
+                return redirect('/joblist/jobdisplay/' + str(jobid))
+            else:
+                flash(error)
+                return render_template('/tar/googlesearch.html')
+        finally:
+            if yt is not None:
+                yt.join()
+            if gt is not None:
+                gt.join()
+    else: 
+        return render_template('/tar/googlesearch.html')
 
 
 @bp.route('/downloads/<path:path_to_file>')

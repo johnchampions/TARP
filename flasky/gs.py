@@ -15,9 +15,6 @@ business_status_dict = {
     'CLOSED_TEMPORARILY': 2
 }
 
-typeq = Queue()
-q = Queue()
-
 def street_address_to_lat_lng(street_address):
     '''
     Converts a street address to a latitude/longitude dictionary
@@ -76,8 +73,6 @@ class googlesearch:
     googleidlist = []
     placeidlist = []
     location = dict()
-    
-    #typeq = Queue()
 
     def __init__(self, location, radius, mytypes, keyword='', minprice=0, maxprice=4 ):
         if type(location) is str:
@@ -89,6 +84,7 @@ class googlesearch:
         if len(mytypes) == 0:
             self.nearby_search_one_type(radius, '', keyword, minprice, maxprice)
             return
+        typeq = Queue()
         for i in range(5):
             worker = threading.Thread(target=self._nearby_search_one_type, args=(typeq,))
             worker.setDaemon(False)
@@ -96,7 +92,7 @@ class googlesearch:
         for mytype in mytypes:
             typeq.put((radius, mytype, '', minprice, maxprice))
         typeq.join()
-
+        del(typeq)
 
     def _nearby_search_one_type(self, myqueue):
         while True:
@@ -176,6 +172,7 @@ class googlesearch:
     def getplaceidlist(self, jobnumber=0):
         if len(self.placeidlist) > 0:
             return self.placeidlist
+        q = Queue()
         for i in range(5):
             worker = threading.Thread(target=self._get_place_id_list, args=(q,))
             worker.setDaemon(False)
@@ -183,6 +180,7 @@ class googlesearch:
         for googleid in self.googleidlist:
             q.put((googleid, jobnumber))
         q.join()
+        del(q)
         myjob = JobList.query.filter(JobList.id == jobnumber).first()
         myjob.googlecomplete = True
         db_session.commit()
