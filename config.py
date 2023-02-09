@@ -7,7 +7,7 @@ if ENVIRONMENT == 'GOGO':
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://flasky:Merkin12@172.30.64.1:3306/flasky'
     URL = 'http://127.0.0.1:5000/'
 if ENVIRONMENT == 'PROD':
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://flask:Merkin12@flaskydb-instance-1.ckzo2f8bjq9z.ap-southeast-2.rds.amazonaws.com:3306/flasky'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://flask:Merkin12@flasky.ckzo2f8bjq9z.ap-southeast-2.rds.amazonaws.com:3306/flasky'
     URL = 'http://flasky.eba-hw3xm2pn.ap-southeast-2.elasticbeanstalk.com/'
 
 
