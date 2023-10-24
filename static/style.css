@@ -13,7 +13,7 @@ hr { border: none; border-top: 1px solid lightgray; }
 .with-margins { margin: 10px; }
 .col-centered { float: none; margin: 0 auto; }
 nav { background: #101a32; display: flex; align-items: center; padding: 0 0.5rem; }
-nav h1 { font-family: futura; color: #ea0b0b; margin: 1rem 0; background-color: #101a32; }
+nav h1 { font-family: futura; color: #ea0b0b; margin: 1rem 0; background-color: #101a32; text-align: }
 nav h1 a { text-decoration: none; padding: 0.25rem 0.5rem; }
 nav ul  { display: flex; list-style: none; margin: 0; padding: 0; }
 nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; color: #fff;}

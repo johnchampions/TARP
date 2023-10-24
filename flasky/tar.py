@@ -3,7 +3,7 @@ from flask_user.decorators import login_required
 from werkzeug.utils import send_file
 from .gs import googlesearch, street_address_to_lat_lng
 #from . import zs
-from .ys import yelpsearch
+#from .ys import yelpsearch
 from flask import (
     Blueprint,
     flash,

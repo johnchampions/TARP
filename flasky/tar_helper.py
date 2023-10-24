@@ -10,7 +10,7 @@ def getapikey(key_name):
     return ck.keyvalue
 
 def getapis():
-    possible_apis = ('google', 'yelp', )
+    possible_apis = ('google', )
     my_output = []
     for api in possible_apis:
         if getapikey(api + 'apikey') is not None:
