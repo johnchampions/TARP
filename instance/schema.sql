@@ -30,7 +30,6 @@ CREATE TABLE configkeys (
     keyname TEXT UNIQUE NOT NULL,
     keyvalue TEXT NOT NULL,
     keytype TEXT NOT NULL
-
 );
 
 CREATE TABLE restaurants (

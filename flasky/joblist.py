@@ -5,11 +5,13 @@ from werkzeug.exceptions import abort
 import json
 from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
-from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories, YelpPlace
+from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories
 from flask import Blueprint
 import time
 import config
 import application
+
+from . import gs
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 
@@ -96,9 +98,6 @@ def refresh_places(idlist):
         if placerecord.googleplaceid is not None:
             gpid = GooglePlace.query.filter(GooglePlace.placeid == id).first().googleplace_id
             gs.get_place_details((gpid,), refresh=True)
-        if placerecord.yelpplaceid is not None:
-            ysid = YelpPlace.query.filter(YelpPlace.placeid == id).first().yelpplace_id
-            ys.get_place_details((ysid,), refresh=True)
 
 def get_restaurantlist(jobid=0):
     output = []

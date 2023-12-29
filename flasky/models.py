@@ -16,7 +16,7 @@ class ConfigKeys(Base):
     keyvalue = Column(TEXT)
     keytype = Column(String(20))
 
-    def __init__(self, keyname=None, keyvalue=None, keytype=None):
+    def __init__(self, keyname=None, keyvalue=None, keytype='string'):
         self.keyname = keyname
         self.keyvalue = keyvalue
         self.keytype = keytype
