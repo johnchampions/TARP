@@ -4,11 +4,7 @@
 {% endblock %}
 
 {% block content %}
-<p>Get more data in: </p>
-<ul>
-    <li><a href="/tar/downloads/tarreport_{{ job['id'] }}.xlsx">Trade Area Report</a></li>
-    <li><a href="/tar/downloads/NewTarReport_{{ job['id'] }}.xlsx">New Trade Area Report</a></li>
-</ul>
+<p>Get more data in: <a href="/tar/downloads/TAReport_{{ job['id'] }}.xlsx">Trade Area Report</a></p>
 <input type="button" value="Refresh Data" onclick="location.reload()" />
 <div id="content">
     <h2>Search parameters</h2>
