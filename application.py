@@ -3,7 +3,7 @@ from flask import Flask
 from flask.templating import render_template
 from flask_user import UserManager
 from flask_sqlalchemy import SQLAlchemy
-from turbo_flask import Turbo
+# from turbo_flask import Turbo
 from flasky.db import db_session
 from flasky.models import User
 import flasky.tar

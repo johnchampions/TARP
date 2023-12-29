@@ -94,18 +94,16 @@ def is_open_for_meal(mealtime, mealtimeclose, placeid):
             return 'Yes'
     return ''
 
-def getlat(records=None):
-    for record in records:
-        if record is not None:
-            if record.lat is not None:
-                return record.lat
+def getlat(record=None):
+    if record is not None:
+        if record.lat is not None:
+            return record.lat
     return 0.0
 
-def getlng(records=None):
-    for record in records:
-        if record is not None:
-            if record.lng is not None:
-                return record.lng
+def getlng(record=None):
+    if record is not None:
+        if record.lng is not None:
+            return record.lng
     return 0.0
 
 def get_price_level(records):
@@ -157,14 +155,6 @@ class uglyreport:
             if gprecord is None:
                 gprecord = GooglePlace()
             placerecord = {**gprecord.__dict__, **placerecord }
-            yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first()
-            if yelprecord is None:
-                yelprecord = YelpPlace()
-            placerecord = {**yelprecord.__dict__, **placerecord }
-            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first()
-            if zomatorecord is None:
-                zomatorecord = ZomatoPlace()
-            placerecord = {**zomatorecord.__dict__, **placerecord }
             ohrecord = OpeningHours.query.filter(OpeningHours.placeid == place.placeid).first()
             if ohrecord is None:
                 ohrecord = OpeningHours()
@@ -182,8 +172,11 @@ class tarreport:
         self.jobnumber = jobnumber
         self.meals = {}
         for meal in self.mymeals:
-            self.meals[meal] = helper.getapikey(meal).replace(':', '')
-            self.meals[meal + 'close'] = helper.getapikey(meal +'close').replace(':', '')
+            try:
+                self.meals[meal] = helper.getapikey(meal).replace(':', '')
+                self.meals[meal + 'close'] = helper.getapikey(meal +'close').replace(':', '')
+            except:
+                raise Exception("It appears that mealtimes have not been configured")
         self.myjob = JobList.query.filter(JobList.id == self.jobnumber).first()
         self.myplacesrecords = JobResults.query.filter(JobResults.jobid == self.jobnumber).all()
 
@@ -315,8 +308,6 @@ class new_tar_report:
         for place in self.myplacesrecords:
             placerecord = Places.query.filter(Places.id == place.placeid).first()
             gprecord = GooglePlace.query.filter(GooglePlace.placeid == place.placeid).first() or GooglePlace(placeid=place, rating=0, user_ratings_total=0)
-            yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first() or YelpPlace(placeid=place, rating=0, user_ratings_total=0)
-            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first() or ZomatoPlace(placeid=place, rating=0,user_rating_total=0, cuisine='')
             keywordsrecords = KeyWords.query.filter(KeyWords.placeid == place.placeid).all()
             if gprecord:
                 pluscode = gprecord.pluscode
@@ -324,12 +315,11 @@ class new_tar_report:
                 pluscode = ''
             thisplace = {
                 'Name' : placerecord.placename,
-                'Distance': rounded_distance_between_places(self.myjob.lat, self.myjob.lng, getlat((gprecord, yelprecord, zomatorecord)), getlng((gprecord, yelprecord, zomatorecord))),
+                'Distance': rounded_distance_between_places(self.myjob.lat, self.myjob.lng, getlat(gprecord), getlng(gprecord)),
                 'Address': placerecord.vicinity,
                 'Plus Code' : pluscode,
                 'Latitude' : helper.get_location_from_placeid(placerecord.id)['lat'],
                 'Longitude' : helper.get_location_from_placeid(placerecord.id)['lng'],
-                'Cuisine': zomatorecord.cuisine,
                 'Coffee': is_keyword_in_config_keywords(coffeetypes, keywordsrecords),
                 'Licensed': is_keyword_in_config_keywords(licensedtypes, keywordsrecords),
                 'Breakfast': is_open_for_meal(self.meals['breakfast'], self.meals['breakfastclose'], place.placeid),
@@ -338,12 +328,7 @@ class new_tar_report:
                 'Late': is_open_for_meal(self.meals['supper'], self.meals['supperclose'], place.placeid),
                 'Google Rating' : gprecord.rating,
                 'Google User Ratings' : gprecord.user_ratings_total,
-                'Yelp Rating' : yelprecord.rating,
-                'Yelp User Ratings' : yelprecord.user_ratings_total,
-                'Zomato Rating' : zomatorecord.rating,
-                'Zomato User Ratings' : zomatorecord.user_ratings_total,
-                'Zomato Price Per Couple' : zomatorecord.price_level,
-                'Subjective Price Level' : get_price_level((gprecord,yelprecord,)),
+                'Subjective Price Level' : get_price_level((gprecord,)),
                 'KeyWords': getKeywords(keywordsrecords)
             }
             output.append(thisplace)

@@ -9,9 +9,6 @@ receiver_address = 'john@champions.tech'
 mail_content = '''Hello John,
 This is a test of the smtp system.  See how you go.
 '''
-
-
-
 def emailinfo(stringtosend):
     if stringtosend is str:
         message = MIMEMultipart()
