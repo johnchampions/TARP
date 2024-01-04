@@ -244,7 +244,7 @@ CREATE TABLE `roles` (
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `searchcategories` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -275,7 +275,7 @@ CREATE TABLE `users` (
   `last_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `user_roles` (
   `user_id` int DEFAULT NULL,
@@ -286,7 +286,7 @@ CREATE TABLE `user_roles` (
   KEY `roles.id_idx` (`role_id`),
   CONSTRAINT `roles.id` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
   CONSTRAINT `users.id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE `yelpplace` (
@@ -325,7 +325,6 @@ CREATE TABLE `zomatoplace` (
 
 INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', 'string');
 INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('yelpapikey', 'Bearer spf4KDBHyyC_RFAjsGq_x3bj1XJSk-tWW797udceKCQtXtwjHtIDw2KeZ1aMWrvgcCLkmfZi3G2A1nLcU5k77qko8syWYcgOWO_xZAKtRMxarOVkp5Fm461jFzX5XnYx', 'string');
-
-
-INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', 'string');
-INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('yelpapikey', 'Bearer spf4KDBHyyC_RFAjsGq_x3bj1XJSk-tWW797udceKCQtXtwjHtIDw2KeZ1aMWrvgcCLkmfZi3G2A1nLcU5k77qko8syWYcgOWO_xZAKtRMxarOVkp5Fm461jFzX5XnYx', 'string');
+INSERT INTO roles (name) VALUES ('admin');
+INSERT INTO users (username, password, is_active, first_name, last_name) VALUES ('arg', '$2b$12$E0zTUAot1FPyr9km7ONMDeD9BNPmpuhy9VEr50cbPCEgSROi0Uwgm', 1, 'Admin', 'Man');
+INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);

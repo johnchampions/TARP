@@ -259,3 +259,6 @@ CREATE TABLE zomatoplace (
 
 INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', 'string');
 INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('yelpapikey', 'Bearer spf4KDBHyyC_RFAjsGq_x3bj1XJSk-tWW797udceKCQtXtwjHtIDw2KeZ1aMWrvgcCLkmfZi3G2A1nLcU5k77qko8syWYcgOWO_xZAKtRMxarOVkp5Fm461jFzX5XnYx', 'string');
+INSERT INTO roles (name) VALUES ('admin');
+INSERT INTO users (username, password, is_active, first_name, last_name) VALUES ('arg', '$2b$12$E0zTUAot1FPyr9km7ONMDeD9BNPmpuhy9VEr50cbPCEgSROi0Uwgm', 1, 'Admin', 'Man');
+INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
