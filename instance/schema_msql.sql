@@ -322,9 +322,42 @@ CREATE TABLE `zomatoplace` (
   CONSTRAINT `zomatoplace_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `googlesupportedtypes` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `checked` tinyint NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', 'string');
-INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('yelpapikey', 'Bearer spf4KDBHyyC_RFAjsGq_x3bj1XJSk-tWW797udceKCQtXtwjHtIDw2KeZ1aMWrvgcCLkmfZi3G2A1nLcU5k77qko8syWYcgOWO_xZAKtRMxarOVkp5Fm461jFzX5XnYx', 'string');
+
 INSERT INTO roles (name) VALUES ('admin');
 INSERT INTO users (username, password, is_active, first_name, last_name) VALUES ('arg', '$2b$12$E0zTUAot1FPyr9km7ONMDeD9BNPmpuhy9VEr50cbPCEgSROi0Uwgm', 1, 'Admin', 'Man');
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
+
+INSERT INTO googlesupportedtypes (description, value) VALUES ('Airport', 'airport');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('Amusement Park', 'amusement_park');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('Aquarium', 'aquarium');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('airport', 'Airport');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('amusement_park', 'Amusement Park');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('aquarium', 'Aquarium');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('art_gallery', 'Art Gallery');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('bakery', 'Bakery');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('bar', 'Bar');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('bowling_alley', 'Bowling Alley');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('cafe', 'Cafe');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('casino', 'Casino');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('convenience_store', 'Convenience Store');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('gas_station', 'Gas Station');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('liquor_store', 'Liquor Store');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('lodging', 'Lodging');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('meal_delivery', 'Mwal Delivery');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('meal_takeaway', 'Meal Takeaway');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('night_club', 'Night Club');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('restaurant', 'Restaurant');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('shopping_mall', 'Shopping Mall');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('spa', 'Spa');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('stadium', 'Stadium');
+INSERT INTO googlesupportedtypes (description, value) VALUES ('supermarket', 'Supermarket')
