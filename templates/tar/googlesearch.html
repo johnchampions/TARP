@@ -31,7 +31,8 @@
     <div id="googlediv" style="display: block;">
         <h2>Google options</h2>
         <label for="types">Place Types</label><br />
-        <table>
+        {% for shortlist in 
+                 %}
             <tr>
                 <td><input type="checkbox" name="type" value="airport" checked />Airport</td>
                 <td><input type="checkbox" name="type" value="amusement_park" checked />Amusement park</td>
