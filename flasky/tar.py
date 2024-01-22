@@ -152,7 +152,6 @@ def search():
     if request.method == 'POST':
         error = None
         gt = None
-        yt = None
         job_dict = {}
         address = request.form['address']
         radius = request.form['radius']
@@ -173,7 +172,7 @@ def search():
         except:
             error = 'Could not find address'
             flash(error)
-            return render_template('/tar/googlesearch.html')
+            return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         job_dict['lat'] = latlong['lat']
         job_dict['lng'] = latlong['lng']
         myjob.lat = latlong['lat'],
@@ -226,11 +225,11 @@ def search():
                 return redirect('/joblist/jobdisplay/' + str(jobid))
             else:
                 flash(error)
-                return render_template('/tar/googlesearch.html')
+                return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         finally:
             pass
     else: 
-        return render_template('/tar/googlesearch.html')
+        return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
 
 
 @bp.route('/downloads/<path:path_to_file>')

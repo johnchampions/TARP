@@ -1,7 +1,7 @@
 import urllib.request
 import json
 from .db import db_session
-from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords, PostCode
+from flasky.models import ConfigKeys, CuisineList, GooglePlace, JobList, OpeningHours, Places, YelpPlace, ZomatoPlace, KeyWords, PostCode, GoogleSupportedTypes
 import openlocationcode
 
 
@@ -185,4 +185,6 @@ def make_timing_string(placeid):
                 output += foo + ','
     return output
 
-    
+def get_google_supported_types();
+    output = GoogleSupportedTypes.query.all()
+    return output

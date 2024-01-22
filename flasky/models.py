@@ -488,3 +488,19 @@ class CategoryToType(Base):
         self.categoryid = categoryid
         self.cuisineid = cuisineid
 
+class GoogleSupportedTypes(Base):
+    __tablename__ = 'googlesupportedtypes'
+    id = Column(Integer, primary_key=True)
+    description = Column(TEXT)
+    value = Column(TEXT)
+    checked = (Boolean)
+
+    def __init__(self,
+                description=None,
+                value=None,
+                checked=True):
+        self.description = description
+        self.value = value
+        self.checked = checked
+
+
