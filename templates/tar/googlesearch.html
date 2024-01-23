@@ -6,14 +6,6 @@
 {% block content %}
 <div id="searchform">
 <form method="POST" name="myform">
-    <h3>Search plugins</h3>
-    <table>
-        <tr>
-            <td style="width: 10%;"><label for="googleplugin">Google</label></td>
-            <td><input type="checkbox" name="googleplugin" id="googleplugin" onclick="showplugin('google')" checked/></td>
-        </tr>
-    </table>
-    
     <div id="shareddiv">
         <label for="address">Address</label>
         <input name="address" id="address" /><br />
@@ -31,36 +23,9 @@
     <div id="googlediv" style="display: block;">
         <h2>Google options</h2>
         <label for="types">Place Types</label><br />
-        {% for shortlist in 
-                 %}
-            <tr>
-                <td><input type="checkbox" name="type" value="airport" checked />Airport</td>
-                <td><input type="checkbox" name="type" value="amusement_park" checked />Amusement park</td>
-                <td><input type="checkbox" name="type" value="bakery" checked />Bakery</td>
-                <td><input type="checkbox" name="type" value="bar" checked />Bar</td>
-            </tr>
-            <tr>
-                <td><input type="checkbox" name="type" value="bowling_alley" checked />Bowling Alley</td>
-                <td><input type="checkbox" name="type" value="cafe" checked />Cafe</td>
-                <td><input type="checkbox" name="type" value="casino" checked />Casino</td>
-                <td><input type="checkbox" name="type" value="convenience_store" checked />Convenience Store</td>
-            </tr>
-            <tr>
-                <td><input type="checkbox" name="type" value="liquor_store" checked />Liquor Store</td>
-                <td><input type="checkbox" name="type" value="meal_delivery" checked />Meal Delivery</td>
-                <td><input type="checkbox" name="type" value="meal_takeaway" checked />Meal Takeaway</td>
-                <td><input type="checkbox" name="type" value="night_club" checked />Night Club</td>
-            </tr>
-            <tr>
-                <td><input type="checkbox" name="type" value="restaurant" checked />Restaurant</td>
-                <td><input type="checkbox" name="type" value="shopping_mall" checked />Shopping Mall</td>
-                <td><input type="checkbox" name="type" value="stadium" checked />Stadium</td>
-                <td><input type="checkbox" name="type" value="supermarket" checked />Supermarket</td>
-            </tr>
-            <tr>
-                <td><input type="checkbox" name="type" value="university" checked />University</td>
-            </tr>
-        </table>
+        {% for item in recordlist %}
+            <p><input type="checkbox" name="type" value="{{ item.value }}" {% if item.checked %} checked {% endif %}/>{{ item.description }}</p>
+        {% endfor %}
     </div>
     <br />
     <input value="Search" type="submit" onclick="displaysearching()" />

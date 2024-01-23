@@ -175,48 +175,48 @@ def search():
             return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         job_dict['lat'] = latlong['lat']
         job_dict['lng'] = latlong['lng']
-        myjob.lat = latlong['lat'],
+        myjob.lat = latlong['lat']
         myjob.lng = latlong['lng']
         minprice = request.form['minprice']
         maxprice = request.form['maxprice']
         myjob.maxprice = request.form['minprice']
         myjob.maxprice = request.form['minprice']
 
-        if request.form.get('googleplugin') is not None:
-            googleplacelist = ()
-            types = request.form.getlist('type')
-            keyword = request.form['keyword']
-            if len(types) == 0:
-                if keyword == '':
-                    error = 'A google type or a keyword is required'
-            else:    
-                googleplacelist = []
-                if len(types) > 0:
-                    job_dict['types'] = types
-                    for mytype in types:
-                        mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
-                        db_session.add(mycategory)
-                    try:
-                        mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
-                        googleplacelist = mygooglesearch.get_googleidlist()
-                        mygooglesearch.getplaceidlist(jobid)
-                    except Exception as e:
-                        error = str(e)
-                elif keyword != '':
-                    job_dict['keyword'] = keyword
-                    mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
+        googleplacelist = ()
+        types = request.form.getlist('type')
+        keyword = request.form['keyword']
+        if len(types) == 0:
+            if keyword == '':
+                error = 'A google type or a keyword is required'
+        else:    
+            googleplacelist = []
+            if len(types) > 0:
+                job_dict['types'] = types
+                for mytype in types:
+                    mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
                     db_session.add(mycategory)
-                    try:
-                        mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
-                        googleplacelist = mygooglesearch.get_googleidlist()
-                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber':jobid})
-                        gt.start()
-                        job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-                    except Exception as e:
-                        error = str(e)
-                job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-                myjob.googleplugin = len(googleplacelist)
-                myjob.googlecomplete = False
+                try:
+                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                except Exception as e:
+                    error = str(e)
+            elif keyword != '':
+                job_dict['keyword'] = keyword
+                mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
+                db_session.add(mycategory)
+                try:
+                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    #gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber':jobid})
+                    #gt.start()
+                    mygooglesearch.getplaceidlist(jobid)
+                    job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+                except Exception as e:
+                    error = str(e)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+            myjob.googleplugin = len(googleplacelist)
+            myjob.googlecomplete = False
 
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
@@ -260,7 +260,7 @@ def get_xls_report(path_to_file):
             data = (json.load(reports.create_job_json(jobnumber)))
             converter = Converter()
             converter.convert(data, Writer(mem))
-    elif jobtype == 'tarreport':
+    elif jobtype == 'TAReport':
         try:
             data = reports.tarreport(jobnumber).create_tar_report()
         except Exception as e:

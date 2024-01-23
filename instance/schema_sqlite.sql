@@ -74,6 +74,7 @@ CREATE TABLE googleplace (
   price_level int DEFAULT NULL,
   rating float DEFAULT NULL,
   user_ratings_total int DEFAULT NULL,
+  googleplace_id text,
   placeurl text,
   website text,
   pluscode text
@@ -272,28 +273,25 @@ INSERT INTO roles (name) VALUES ('admin');
 INSERT INTO users (username, password, is_active, first_name, last_name) VALUES ('arg', '$2b$12$E0zTUAot1FPyr9km7ONMDeD9BNPmpuhy9VEr50cbPCEgSROi0Uwgm', 1, 'Admin', 'Man');
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
 
-INSERT INTO googlesupportedtypes (description, value) VALUES ('Airport', 'airport');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('Amusement Park', 'amusement_park');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('Aquarium', 'aquarium');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('airport', 'Airport');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('amusement_park', 'Amusement Park');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('aquarium', 'Aquarium');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('art_gallery', 'Art Gallery');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('bakery', 'Bakery');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('bar', 'Bar');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('bowling_alley', 'Bowling Alley');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('cafe', 'Cafe');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('casino', 'Casino');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('convenience_store', 'Convenience Store');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('gas_station', 'Gas Station');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('liquor_store', 'Liquor Store');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('lodging', 'Lodging');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('meal_delivery', 'Mwal Delivery');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('meal_takeaway', 'Meal Takeaway');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('night_club', 'Night Club');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('restaurant', 'Restaurant');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('shopping_mall', 'Shopping Mall');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('spa', 'Spa');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('stadium', 'Stadium');
-INSERT INTO googlesupportedtypes (description, value) VALUES ('supermarket', 'Supermarket');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('airport', 'Airport');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('amusement_park', 'Amusement Park');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('aquarium', 'Aquarium');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('art_gallery', 'Art Gallery');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('bakery', 'Bakery');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('bar', 'Bar');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('bowling_alley', 'Bowling Alley');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('cafe', 'Cafe');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('casino', 'Casino');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('convenience_store', 'Convenience Store');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('gas_station', 'Gas Station');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('liquor_store', 'Liquor Store');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('lodging', 'Lodging');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('meal_delivery', 'Meal Delivery');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('meal_takeaway', 'Meal Takeaway');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('night_club', 'Night Club');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('restaurant', 'Restaurant');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('shopping_mall', 'Shopping Mall');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('spa', 'Spa');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('stadium', 'Stadium');
+INSERT INTO googlesupportedtypes (value, description) VALUES ('supermarket', 'Supermarket');
 
