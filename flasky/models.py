@@ -493,12 +493,12 @@ class GoogleSupportedTypes(Base):
     id = Column(Integer, primary_key=True)
     description = Column(TEXT)
     value = Column(TEXT)
-    checked = (Boolean)
+    checked = Column(Boolean)
 
     def __init__(self,
                 description=None,
                 value=None,
-                checked=True):
+                checked = True):
         self.description = description
         self.value = value
         self.checked = checked

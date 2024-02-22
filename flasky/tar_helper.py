@@ -185,6 +185,10 @@ def make_timing_string(placeid):
                 output += foo + ','
     return output
 
-def get_google_supported_types():
+def get_google_types():
     output = GoogleSupportedTypes.query.all()
+    if output is None:
+        return []
     return output
+
+    
