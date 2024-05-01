@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Facebook play{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<script>
+    FB.getLoginStatus(function(response) {
+        statusChangeCallback(response);
+    });
+</script>
+{% endblock %}

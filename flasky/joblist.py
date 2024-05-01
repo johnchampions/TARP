@@ -1,5 +1,5 @@
-import flask_user
-from flask_user.decorators import login_required
+#import flask_user
+#from flask_user.decorators import login_required
 from sqlalchemy import outparam
 from werkzeug.exceptions import abort
 import json
@@ -9,7 +9,7 @@ from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCatego
 from flask import Blueprint
 import time
 import config
-import application
+#import application
 
 from . import gs
 
@@ -19,7 +19,7 @@ bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 @bp.route('/', methods=('GET',))
 @bp.route('', methods=('GET',))
 @bp.route('/joblist', methods=('GET',))
-@login_required
+#@login_required
 def search_for_joblist(getall=False):
     output = []
     userid = flask_user.current_user.id
@@ -49,7 +49,7 @@ def get_places(jobid):
 
 
 @bp.route('/jobdisplay/<int:job_id>', methods=('GET',))
-@login_required
+#@login_required
 def display_job(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
 
@@ -80,7 +80,7 @@ def update_restaurants(job_id):
             time.sleep(5)
 
 @bp.route('/jobrefresh/<int:job_id>', methods=('GET',))
-@login_required
+#@login_required
 def refresh_job_places(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
     if joblist_record is None:

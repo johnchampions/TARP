@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Categories{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<a href="/categories/add">Add a new category.</a>
+
+<h2>Categories</h2>
+<table>
+{% for category in categories %}
+<tr>
+    <td><div class="tooltip">{{ category['name'] }}<span class="tooltiptext">{{ category['comment'] }}</span></div></td>
+    <td><a href="/categories/{{ category['id'] }}">Edit</a></td>
+    <td>{% if category['id'] != 1 %}<a href="/categories/delete/{{ category['id'] }}">Delete</a></td>
+</tr>
+</table>

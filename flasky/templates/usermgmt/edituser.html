@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Edit User{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<form action="" method="POST" novalidate formnovalidate class="form" role="form">
+
+    <label for="username">Username</label>
+    <input id="username" name="username" value="{{ record['name'] }}" />
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" />
+    <label for="retype_password">Retype Password</label>
+    <input id="retype_password" name="retype_password" type="password" />
+    <label for="first_name">First Name</label>
+    <input id="first_name" name="first_name" value="{{ record['first_name'] }}" />
+    <label for="last_name">Last Name</label>
+    <input id="last_name" name="last_name" value="{{ record['last_name'] }}" />
+    <label for="admin">Admin</label>
+    <input type="checkbox" name="admin" value="admin" {% if record['admin']  %}checked{% endif %} />
+    <input value="Save" type="submit"/>
+</form>
+
+{% endblock %}
