@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Postcode{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<ul>
+    <li>Name: {{ record[ 'postcode' ] }}</li>
+    <li>State: {{ record[ 'postcodestate' ] }}</li>
+    <li>SA2: {% for item in record['sa2'] %}{{ item }}, {% endfor %}</li>
+    <li>Localities: {% for item in record['locality'] %}{{ item }}, {% endfor %}</li>
+</ul>
+<h2>Restaurants</h2>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Address</th>
+    </tr>
+    {% for item in restaurants %}
+        <tr>
+            <td><a href="/tar/restaurants/{{ item['id']}}">{{ item[ 'restaurantname' ]}}</td>
+            <td>{{ item['street1']}}</td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

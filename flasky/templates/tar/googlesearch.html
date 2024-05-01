@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Search Places{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div id="searchform">
+<form method="POST" name="myform">
+    <div id="shareddiv">
+        <label for="address">Address</label>
+        <input name="address" id="address" /><br />
+        <label for="radius">Radius (in meters)</label>
+        <input name="radius" id="radius" type="number" max="5000" min="50" value="1000" /><br />
+        <h3>Optional settings</h3>
+        <label for="keywords">Keyword search</label>
+        <input name="keyword" id="keyword" value=''/><br />
+        <label for="minprice">Minimum price level (0-4)</label>
+        <input name="minprice" id="minprice" type="number" min="1" max="4" value="1"/>
+        <label for="maxprice">Maximum price level (0-4)</label>
+        <input name="maxprice" id="maxprice" type="number" min="1" max="4" value="4"/><br />
+    </div>
+    
+    <div id="googlediv" style="display: block;">
+        <h2>Google options</h2>
+        <label for="types">Place Types</label><br />
+        {% for item in recordlist %}
+            <p><input type="checkbox" name="type" value="{{ item.value }}" {% if item.checked %} checked {% endif %}/>{{ item.description }}</p>
+        {% endfor %}
+    </div>
+    <br />
+    <input value="Search" type="submit" onclick="displaysearching()" />
+</form>
+</div>
+<div id="searching" style="display: none;"><h2>Searching...</h2></div>
+</section>
+<script>
+    function displaysearching() {
+        var showid = document.getElementById("searching");
+        var hideid = document.getElementById("searchform");
+        showid.style.display = "block";
+        hideid.style.display = "none";
+        return true;
+    }
+
+    function showplugin(pluginname) {
+        var checkid = document.getElementById(pluginname + "plugin");
+        var divid = document.getElementById(pluginname + "div");
+
+        if (checkid.checked == true) {
+            divid.style.display = "block";
+        } else {
+            divid.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

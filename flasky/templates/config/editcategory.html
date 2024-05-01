@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Edit Category{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<form method="POST">
+  <h2>Category</h2>
+  <label for="categoryname">Name</label>
+  <input name="categoryname" id="categoryname" type="text" placeholder="{{ category['name'] }}" />
+  <label for="categorycomment">Comment</label>
+  <input name="categorycomment" id="categorycomment" type="text" placeholder="{{ category['comment'] }}" />
+  <h2>keywords</h2>
+  <table>
+    {% for type in typelist %}
+    <tr>
+      <td><input type="checkbox" id="{{ type['id'] }}" {% if type['checked'] %}checked="true"{% endif %} /></td>
+      <td>{{ type['placetype'] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <input value="Save" type="submit" />
+</form>
+{% endblock %}

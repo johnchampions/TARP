@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}List Google Place{% endblock %}</h1>
+{% endblock %}
+
+
+
+{% block content %}
+<p>Get more data in
+<ul>
+    <li><a href="/tar/downloads/tarreport_{{ jobnumber }}.xlsx">Trade Area Report</a></li>
+    <li><a href="/tar/downloads/tarreport_{{ jobnumber }}.xlsx">Trade Area Report</a></li>
+</ul></p>
+<div id="loading"></div>
+<div id="content">
+<table style="width:100%">
+    <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>keywords</th>
+    </tr>
+    {% for item in list %}
+        <tr>
+            <td><a href="/tar/restaurants/{{ item['placerow']['id'] }}">{{ item['placerow']['placename'] }}</a></td>
+            <td>{{ item['placerow']['vicinity'] }}</td>
+            <td>{{ item['placerow']['phonenumber'] }}</td>
+            <td>{{ item['placerow']['types'] }}</td>
+        </tr>
+    {% endfor %}
+</table>
+</div>
+<script type="text/javascript">
+    function preloader(){
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("content").style.display = "block";
+    }
+    window.onload = preloader;
+</script>
+
+{% endblock %}

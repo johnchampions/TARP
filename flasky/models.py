@@ -4,7 +4,7 @@ from sqlalchemy.sql.annotation import EMPTY_ANNOTATIONS
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import CHAR, FLOAT, DateTime, Float, TEXT, Boolean
 from flasky.db import Base
-from flask_user import UserMixin
+# from flask_user import UserMixin
 
 
 
@@ -452,7 +452,7 @@ class UserRoles(Base):
     
 
 
-class User(Base, UserMixin):
+class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     active = Column('is_active', Boolean, nullable=False, server_default='1')
