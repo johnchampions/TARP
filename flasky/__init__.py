@@ -7,11 +7,10 @@ from sqlalchemy.orm import DeclarativeBase
 
 
 from flasky.db import db_session
-from flasky.models import User
 import flasky.tar
 import flasky.configure
 import flasky.joblist
-#import flasky.usermgmt
+
 
 class Base(DeclarativeBase):
     pass
@@ -27,13 +26,9 @@ def create_app(test_config=None):
     except OSError:
         pass
     db.init_app(application)
-#    user_manager = UserManager(application, SQLAlchemy(application), UserClass=User)
-#    application.add_url_rule('/', 'index', indexpage)
-#    application.add_url_rule('/hello', 'hello', hello)
     application.register_blueprint(flasky.tar.bp)
     application.register_blueprint(flasky.configure.bp)
     application.register_blueprint(flasky.joblist.bp)
-    #application.register_blueprint(flasky.usermgmt.bp)
 
     @application.route('/hello')
     def hello():

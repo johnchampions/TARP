@@ -163,7 +163,7 @@ def search():
         job_dict['radius'] = radius
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
-        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0, userid=flask_user.current_user.id)
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id
