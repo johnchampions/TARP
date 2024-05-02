@@ -2,12 +2,7 @@ import threading
 import io
 import json
 from werkzeug.utils import send_file
-<<<<<<< HEAD
-from .gs import googlesearch, street_address_to_lat_lng
-#from . import zs
-#from .ys import yelpsearch
-=======
->>>>>>> First attempt Runs...
+
 from flask import (
     Blueprint,
     flash,
@@ -21,11 +16,16 @@ from json_excel_converter import Converter
 from json_excel_converter.xlsx import Writer
 
 from .gs import googlesearch, street_address_to_lat_lng
+from json_excel_converter import Converter
+from json_excel_converter.xlsx import Writer
+
+from .gs import googlesearch, street_address_to_lat_lng
 from . import reports
 from .joblist import display_job
 from .models import JobList, KeyWords, Places, PostCode, SearchCategories
 from . import tar_helper as helper
 from .db import db_session
+
 
 
 bp = Blueprint('tar', __name__, url_prefix='/tar')
@@ -162,6 +162,7 @@ def search():
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
         myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id
@@ -171,8 +172,10 @@ def search():
             error = 'Could not find address'
             flash(error)
             return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
+            return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         job_dict['lat'] = latlong['lat']
         job_dict['lng'] = latlong['lng']
+        myjob.lat = latlong['lat']
         myjob.lat = latlong['lat']
         myjob.lng = latlong['lng']
         minprice = request.form['minprice']
@@ -180,6 +183,39 @@ def search():
         myjob.maxprice = request.form['minprice']
         myjob.maxprice = request.form['minprice']
 
+        googleplacelist = ()
+        types = request.form.getlist('type')
+        keyword = request.form['keyword']
+        if len(types) == 0:
+            if keyword == '':
+                error = 'A google type or a keyword is required'
+        else:    
+            googleplacelist = []
+            if len(types) > 0:
+                job_dict['types'] = types
+                for mytype in types:
+                    mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
+                    db_session.add(mycategory)
+                try:
+                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                except Exception as e:
+                    error = str(e)
+            elif keyword != '':
+                job_dict['keyword'] = keyword
+                mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
+                db_session.add(mycategory)
+                try:
+                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                    job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+                except Exception as e:
+                    error = str(e)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+            myjob.googleplugin = len(googleplacelist)
+            myjob.googlecomplete = False
         googleplacelist = ()
         types = request.form.getlist('type')
         keyword = request.form['keyword']
@@ -222,9 +258,12 @@ def search():
             else:
                 flash(error)
                 return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
+                return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         finally:
             pass
+            pass
     else: 
+        return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
 
 
@@ -259,6 +298,11 @@ def get_xls_report(path_to_file):
             data = reports.tarreport(jobnumber).create_tar_report()
         except Exception as e:
             abort(404, e)
+    elif jobtype == 'TAReport':
+        try:
+            data = reports.tarreport(jobnumber).create_tar_report()
+        except Exception as e:
+            abort(404, e)
         converter = Converter()
         converter.convert(data, Writer(mem))
     elif jobtype == 'RawReport':
@@ -270,6 +314,7 @@ def get_xls_report(path_to_file):
         converter = Converter()
         converter.convert(data, Writer(mem))
     mem.seek(0)
+    myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
     myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
     if jobformat == 'csv':
         myreturnfile.mimetype = 'text/csv'

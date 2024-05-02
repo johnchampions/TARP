@@ -18,12 +18,9 @@ from .db import db_session, init_db
 from .models import CategoryList, ConfigKeys, CuisineList, GooglePlace, OpeningHours, JobResults, JobList, Places, PostCode, SearchCategories, YelpPlace, ZomatoPlace, CategoryToType
 import json
 from .gs import googleplace
-<<<<<<< HEAD
-#from .ys import yelpplace
+from .ys import yelpplace
 #from .zs import zomatoplace
 
-=======
->>>>>>> First attempt Runs...
 
 timefields = ('sundayopen','sundayclose',
     'mondayopen','mondayclose',
