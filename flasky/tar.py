@@ -1,8 +1,6 @@
-#import flask_user
 import threading
 import io
 import json
-#from flask_user.decorators import login_required
 from werkzeug.utils import send_file
 from flask import (
     Blueprint,
@@ -27,7 +25,6 @@ from .db import db_session
 bp = Blueprint('tar', __name__, url_prefix='/tar')
 
 @bp.route('/latlong', methods=('GET', 'POST'))
-#@login_required
 def latlong():
     if request.method == 'POST':
         address = request.form['address']
@@ -45,7 +42,6 @@ def latlong():
 
 
 @bp.route('/keyword', methods=('GET', 'POST'))
-#@login_required
 def keyword_search():
     if request.method == 'POST':
         error = None
@@ -80,7 +76,6 @@ def keyword_search():
 
 
 @bp.route('/restaurants/<int:id>', methods=('GET',))
-#@login_required
 def get_restaurant(id):
     place = Places.query.filter(Places.id == id).first()
     if place is None:
@@ -106,7 +101,6 @@ def get_restaurant(id):
     return render_template('/tar/restaurant.html', record=record)
 
 @bp.route('/postcodes', methods=('GET', 'POST',))
-#@login_required
 def search_postcodes():
     if request.method == 'POST':
         postcode = request.form['postcode']
@@ -141,13 +135,11 @@ def get_places_in_postcode(postcode):
     return restaurantlist
 
 @bp.route('/postcodes/<string:postcode>', methods=('GET',))
-#@login_required
 def get_postcode_from_url(postcode):
     return render_template('/tar/postcode.html', record=get_postcode(postcode), restaurants=get_places_in_postcode(postcode))
 
 
 @bp.route('/search', methods=('GET', 'POST',))
-#@login_required
 def search():
     if request.method == 'POST':
         error = None
@@ -208,8 +200,6 @@ def search():
                 try:
                     mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
                     googleplacelist = mygooglesearch.get_googleidlist()
-                    #gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber':jobid})
-                    #gt.start()
                     mygooglesearch.getplaceidlist(jobid)
                     job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                 except Exception as e:
@@ -233,7 +223,6 @@ def search():
 
 
 @bp.route('/downloads/<path:path_to_file>')
-#@login_required
 def get_xls_report(path_to_file):
     error = None
     try: 
@@ -252,7 +241,6 @@ def get_xls_report(path_to_file):
     
     proxyIO = io.StringIO()
     mem = io.BytesIO()
-    #TODO: Fix this bit...
     if jobtype == 'job':
         if jobformat == 'json':
             proxyIO.write(reports.create_job_json(jobnumber))
@@ -276,8 +264,7 @@ def get_xls_report(path_to_file):
         converter = Converter()
         converter.convert(data, Writer(mem))
     mem.seek(0)
-    myreturnfile = send_file(mem, download_name=path_to_file,
-        as_attachment=True)
+    myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
     if jobformat == 'csv':
         myreturnfile.mimetype = 'text/csv'
     elif jobformat == 'json':
