@@ -3,13 +3,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}Title{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     {% block extra_css %}{% endblock %}
     
 </head>
 <nav>
-    <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='Logo.png') }}" alt="Future Food Logo" style="width:150px; height : 50px;"></a>
+    <a href="{{ url_for('indexpage') }}"><img src="{{ url_for('static', filename='FF_logo.png') }}" alt="Future Food Logo" style="width:150px; height : 50px;"></a>
     <h1>TARP</h1>
 </nav>
 <section class="content">

@@ -1,5 +1,3 @@
-import flask_user
-from flask_user.decorators import login_required
 from sqlalchemy import outparam
 from werkzeug.exceptions import abort
 import json
@@ -8,22 +6,17 @@ from sqlalchemy.sql.expression import desc
 from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories
 from flask import Blueprint
 import time
-import config
-import application
 
 from . import gs
 
 bp = Blueprint('joblist', __name__, url_prefix='/joblist')
 
-
 @bp.route('/', methods=('GET',))
 @bp.route('', methods=('GET',))
 @bp.route('/joblist', methods=('GET',))
-@login_required
 def search_for_joblist(getall=False):
     output = []
-    userid = flask_user.current_user.id
-    joblistrecords = JobList.query.filter(JobList.userid == userid).order_by(desc(JobList.id)).all()
+    joblistrecords = JobList.query.all()
     for joblistrecord in joblistrecords:
         mydict = {'id': joblistrecord.id,
             'address': joblistrecord.address,
@@ -49,7 +42,6 @@ def get_places(jobid):
 
 
 @bp.route('/jobdisplay/<int:job_id>', methods=('GET',))
-@login_required
 def display_job(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
 
@@ -71,16 +63,14 @@ def is_finished(joblist_record):
     return (joblist_record.googleplugin == 0 or joblist_record.googlecomplete)  and  (joblist_record.yelpplugin == 0 or joblist_record.yelpcomplete) and (joblist_record.zomatoplugin == 0 or joblist_record.zomatocomplete)
 
 def update_restaurants(job_id):
-    with application.application.app_context():
-        now = time.time()
-        timeout = now + 360.0
-        while time.time() < timeout:
-            placerecords = get_restaurantlist(job_id)
-            application.turbo.push(application.turbo.replace(render_template('/joblist/restaurantlist.html', placerecords=placerecords), 'load'))
-            time.sleep(5)
+    now = time.time()
+    timeout = now + 360.0
+    while time.time() < timeout:
+        placerecords = get_restaurantlist(job_id)
+        render_template('/joblist/restaurantlist.html', placerecords=placerecords)
+        time.sleep(5)
 
 @bp.route('/jobrefresh/<int:job_id>', methods=('GET',))
-@login_required
 def refresh_job_places(job_id):
     joblist_record = JobList.query.filter(JobList.id == job_id).first()
     if joblist_record is None:

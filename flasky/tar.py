@@ -1,9 +1,8 @@
-import flask_user
 import threading
 import io
 import json
-from flask_user.decorators import login_required
 from werkzeug.utils import send_file
+
 from flask import (
     Blueprint,
     flash,
@@ -17,6 +16,10 @@ from json_excel_converter import Converter
 from json_excel_converter.xlsx import Writer
 
 from .gs import googlesearch, street_address_to_lat_lng
+from json_excel_converter import Converter
+from json_excel_converter.xlsx import Writer
+
+from .gs import googlesearch, street_address_to_lat_lng
 from . import reports
 from .joblist import display_job
 from .models import JobList, KeyWords, Places, PostCode, SearchCategories
@@ -24,10 +27,10 @@ from . import tar_helper as helper
 from .db import db_session
 
 
+
 bp = Blueprint('tar', __name__, url_prefix='/tar')
 
 @bp.route('/latlong', methods=('GET', 'POST'))
-@login_required
 def latlong():
     if request.method == 'POST':
         address = request.form['address']
@@ -45,7 +48,6 @@ def latlong():
 
 
 @bp.route('/keyword', methods=('GET', 'POST'))
-@login_required
 def keyword_search():
     if request.method == 'POST':
         error = None
@@ -80,7 +82,6 @@ def keyword_search():
 
 
 @bp.route('/restaurants/<int:id>', methods=('GET',))
-@login_required
 def get_restaurant(id):
     place = Places.query.filter(Places.id == id).first()
     if place is None:
@@ -106,7 +107,6 @@ def get_restaurant(id):
     return render_template('/tar/restaurant.html', record=record)
 
 @bp.route('/postcodes', methods=('GET', 'POST',))
-@login_required
 def search_postcodes():
     if request.method == 'POST':
         postcode = request.form['postcode']
@@ -141,18 +141,15 @@ def get_places_in_postcode(postcode):
     return restaurantlist
 
 @bp.route('/postcodes/<string:postcode>', methods=('GET',))
-@login_required
 def get_postcode_from_url(postcode):
     return render_template('/tar/postcode.html', record=get_postcode(postcode), restaurants=get_places_in_postcode(postcode))
 
 
 @bp.route('/search', methods=('GET', 'POST',))
-@login_required
 def search():
     if request.method == 'POST':
         error = None
         gt = None
-        yt = None
         job_dict = {}
         address = request.form['address']
         radius = request.form['radius']
@@ -164,7 +161,8 @@ def search():
         job_dict['radius'] = radius
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
-        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0, userid=flask_user.current_user.id)
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
+        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id
@@ -173,51 +171,84 @@ def search():
         except:
             error = 'Could not find address'
             flash(error)
-            return render_template('/tar/googlesearch.html')
+            return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
+            return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         job_dict['lat'] = latlong['lat']
         job_dict['lng'] = latlong['lng']
-        myjob.lat = latlong['lat'],
+        myjob.lat = latlong['lat']
+        myjob.lat = latlong['lat']
         myjob.lng = latlong['lng']
         minprice = request.form['minprice']
         maxprice = request.form['maxprice']
         myjob.maxprice = request.form['minprice']
         myjob.maxprice = request.form['minprice']
 
-        if request.form.get('googleplugin') is not None:
-            googleplacelist = ()
-            types = request.form.getlist('type')
-            keyword = request.form['keyword']
-            if len(types) == 0:
-                if keyword == '':
-                    error = 'A google type or a keyword is required'
-            else:    
-                googleplacelist = []
-                if len(types) > 0:
-                    job_dict['types'] = types
-                    for mytype in types:
-                        mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
-                        db_session.add(mycategory)
-                    try:
-                        mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
-                        googleplacelist = mygooglesearch.get_googleidlist()
-                        mygooglesearch.getplaceidlist(jobid)
-                    except Exception as e:
-                        error = str(e)
-                elif keyword != '':
-                    job_dict['keyword'] = keyword
-                    mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
+        googleplacelist = ()
+        types = request.form.getlist('type')
+        keyword = request.form['keyword']
+        if len(types) == 0:
+            if keyword == '':
+                error = 'A google type or a keyword is required'
+        else:    
+            googleplacelist = []
+            if len(types) > 0:
+                job_dict['types'] = types
+                for mytype in types:
+                    mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
                     db_session.add(mycategory)
-                    try:
-                        mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
-                        googleplacelist = mygooglesearch.get_googleidlist()
-                        gt = threading.Thread(target=mygooglesearch.getplaceidlist, kwargs={'jobnumber':jobid})
-                        gt.start()
-                        job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-                    except Exception as e:
-                        error = str(e)
-                job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-                myjob.googleplugin = len(googleplacelist)
-                myjob.googlecomplete = False
+                try:
+                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                except Exception as e:
+                    error = str(e)
+            elif keyword != '':
+                job_dict['keyword'] = keyword
+                mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
+                db_session.add(mycategory)
+                try:
+                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                    job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+                except Exception as e:
+                    error = str(e)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+            myjob.googleplugin = len(googleplacelist)
+            myjob.googlecomplete = False
+        googleplacelist = ()
+        types = request.form.getlist('type')
+        keyword = request.form['keyword']
+        if len(types) == 0:
+            if keyword == '':
+                error = 'A google type or a keyword is required'
+        else:    
+            googleplacelist = []
+            if len(types) > 0:
+                job_dict['types'] = types
+                for mytype in types:
+                    mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
+                    db_session.add(mycategory)
+                try:
+                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                except Exception as e:
+                    error = str(e)
+            elif keyword != '':
+                job_dict['keyword'] = keyword
+                mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
+                db_session.add(mycategory)
+                try:
+                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
+                    googleplacelist = mygooglesearch.get_googleidlist()
+                    mygooglesearch.getplaceidlist(jobid)
+                    job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+                except Exception as e:
+                    error = str(e)
+            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
+            myjob.googleplugin = len(googleplacelist)
+            myjob.googlecomplete = False
 
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
@@ -226,15 +257,17 @@ def search():
                 return redirect('/joblist/jobdisplay/' + str(jobid))
             else:
                 flash(error)
-                return render_template('/tar/googlesearch.html')
+                return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
+                return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         finally:
             pass
+            pass
     else: 
-        return render_template('/tar/googlesearch.html')
+        return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
+        return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
 
 
 @bp.route('/downloads/<path:path_to_file>')
-@login_required
 def get_xls_report(path_to_file):
     error = None
     try: 
@@ -253,7 +286,6 @@ def get_xls_report(path_to_file):
     
     proxyIO = io.StringIO()
     mem = io.BytesIO()
-    #TODO: Fix this bit...
     if jobtype == 'job':
         if jobformat == 'json':
             proxyIO.write(reports.create_job_json(jobnumber))
@@ -261,7 +293,12 @@ def get_xls_report(path_to_file):
             data = (json.load(reports.create_job_json(jobnumber)))
             converter = Converter()
             converter.convert(data, Writer(mem))
-    elif jobtype == 'tarreport':
+    elif jobtype == 'TAReport':
+        try:
+            data = reports.tarreport(jobnumber).create_tar_report()
+        except Exception as e:
+            abort(404, e)
+    elif jobtype == 'TAReport':
         try:
             data = reports.tarreport(jobnumber).create_tar_report()
         except Exception as e:
@@ -277,8 +314,8 @@ def get_xls_report(path_to_file):
         converter = Converter()
         converter.convert(data, Writer(mem))
     mem.seek(0)
-    myreturnfile = send_file(mem, download_name=path_to_file,
-        as_attachment=True)
+    myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
+    myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
     if jobformat == 'csv':
         myreturnfile.mimetype = 'text/csv'
     elif jobformat == 'json':

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, url_for
+from flask import redirect, url_for
 from flask.blueprints import Blueprint
 from flask_dance.contrib.facebook import make_facebook_blueprint, facebook
 

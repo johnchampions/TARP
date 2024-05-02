@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, redirect, url_for
 from flask_dance.contrib.facebook import facebook
-from oauth import github_blueprint
+from .oauth import github_blueprint
 app = Flask(__name__)
 
 app.secret_key = "dev"

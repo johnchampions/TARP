@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block header %}
+
+<h1>{% block title %}Latitude and longitude{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<ul>
+    <li>Latitude: {{ latlong['lat'] }}</li>
+    <li>Longitude: {{ latlong['lng'] }}</li>
+</ul>
+    
+{% endblock %}
+
+hi mum

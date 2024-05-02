@@ -1,0 +1,52 @@
+@font-face {
+	font-family: futura;
+	src: url(unicode.futurab.ttf)
+}
+
+html { font-family: sans-serif; background: #fff; padding: 1rem; }
+body { max-width: 960px; margin: 0 auto; background: white; }
+h1 { font-family: futura; color: #000; margin: 1rem 0; text-transform: uppercase;}
+h2 h3 { font-family: futura; color: #ea0b0b; margin: 1rem 0; text-transform: uppercase;}
+a { color: #377ba8; }
+hr { border: none; border-top: 1px solid lightgray; }
+.no-margins { margin: 0px; }
+.with-margins { margin: 10px; }
+.col-centered { float: none; margin: 0 auto; }
+nav { background: #101a32; display: flex; align-items: center; padding: 0 0.5rem; }
+nav h1 { font-family: futura; color: #ea0b0b; margin: 1rem 0; background-color: #101a32; }
+nav h1 a { text-decoration: none; padding: 0.25rem 0.5rem; }
+nav ul  { display: flex; list-style: none; margin: 0; padding: 0; }
+nav ul li a, nav ul li span, header .action { display: block; padding: 0.5rem; color: #fff;}
+.content { padding: 0 1rem 1rem; }
+.content > header { border-bottom: 1px solid white; display: flex; align-items: flex-end; }
+.content > header h1 { flex: auto; margin: 1rem 0 0.25rem 0; }
+.flash { margin: 1em 0; padding: 1em; background: #cae6f6; border: 1px solid #377ba8; }
+.post > header { display: flex; align-items: flex-end; font-size: 14px; }
+.post > header > div:first-of-type { flex: auto; }
+.post > header h1 { font-size: 1.5em; margin-bottom: 0; }
+.post .about { color: slategray; font-style: italic; }
+.post .body { white-space: pre-line; }
+.content:last-child { margin-bottom: 0; }
+.content form { margin: 1em 0; display: flex; flex-direction: column; }
+.content label { font-weight: bold; margin-bottom: 0.5em; }
+.content input, .content textarea { margin-bottom: 1em; }
+.content textarea { min-height: 12em; resize: vertical; }
+input.danger { color: #cc2f2e; }
+input[type=submit] { align-self: start; min-width: 10em; }
+.tooltip { position: relative;
+	display: inline-block;}
+.tooltip .tooltiptext {
+	visibility: hidden;
+	width: 120px;
+	background-color: #000;
+	color: #fff;
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px 0;
+	position: absolute;
+	z-index: 1;
+}
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+}
+
