@@ -11,9 +11,6 @@ def get_random_string(length):
     apistring = ''.join(random.choice(letters) for i in range(length))
     return apistring
 
-
-    
-
 def fixplacerecords():
     all_place_records = Places.query.all()
     for place_record in all_place_records:

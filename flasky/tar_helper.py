@@ -47,10 +47,6 @@ def get_location_from_placeid(placeid):
         raise Exception(f"Place {placeid} does not exist.")
     if myplace.googleplaceid is not None:
         myp = GooglePlace.query.filter(GooglePlace.id == myplace.googleplaceid).first()
-    elif myplace.yelpplaceid is not None:
-        myp = YelpPlace.query.filter(YelpPlace.id == myplace.yelpplaceid).first()
-    elif myplace.zomatoplaceid is not None:
-        myp = ZomatoPlace.query.filter( ZomatoPlace.id == myplace.zomatoplaceid).first()
     else:
         from . import gs
         try:
@@ -96,15 +92,6 @@ def googleplacelist_to_placelist(googleplacelist):
         googleplacerecord = GooglePlace.query.filter(GooglePlace.googleplace_id == googleplace).first()
         if googleplacerecord is not None:
             output.append(googleplacerecord.placeid)
-    return output
-    
-
-def yelpplacelist_to_placelist(yelpplacelist):
-    output = []
-    for yelpplace in yelpplacelist:
-        yelpplacerecord = YelpPlace.query.filter(YelpPlace.yelpplace_id == yelpplace).first()
-        if yelpplacerecord is not None:
-            output.append(yelpplacerecord.placeid)
     return output
     
 def listofplaces_to_listofdict(listofplaces):

@@ -20,9 +20,6 @@ from .db import db_session, init_db
 from .models import CategoryList, ConfigKeys, CuisineList, GooglePlace, OpeningHours, JobResults, JobList, Places, PostCode, SearchCategories, YelpPlace, ZomatoPlace, CategoryToType
 import json
 from .gs import googleplace
-#from .ys import yelpplace
-#from .zs import zomatoplace
-
 
 timefields = ('sundayopen','sundayclose',
     'mondayopen','mondayclose',
@@ -187,16 +184,6 @@ def refresh_places():
                 my_googleplace.set_placeid(myplacerecord.id)
                 my_googleplace.set_categories()
                 my_googleplace.openinghours_to_db()
-            except:
-                pass
-        if myplacerecord.yelpplaceid is not None:
-            my_yelp_place_record = YelpPlace.query.filter(YelpPlace.id == myplacerecord.yelpplaceid).first()
-            try:
-                my_yelpplace = yelpplace(my_yelp_place_record.yelpplace_id, refresh=True)
-                my_yelpplace.set_yelpplaceid()
-                my_yelpplace.set_placeid(myplacerecord.id)
-                my_yelpplace.set_categories()
-                my_yelpplace.openinghours_to_db()
             except:
                 pass
     db_session.commit()

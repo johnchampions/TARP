@@ -1,9 +1,9 @@
 import flask_user
+import threading
+import io
+import json
 from flask_user.decorators import login_required
 from werkzeug.utils import send_file
-from .gs import googlesearch, street_address_to_lat_lng
-#from . import zs
-#from .ys import yelpsearch
 from flask import (
     Blueprint,
     flash,
@@ -13,17 +13,16 @@ from flask import (
     send_file
 )
 from werkzeug.exceptions import abort
+from json_excel_converter import Converter
+from json_excel_converter.xlsx import Writer
+
+from .gs import googlesearch, street_address_to_lat_lng
 from . import reports
 from .joblist import display_job
 from .models import JobList, KeyWords, Places, PostCode, SearchCategories
 from . import tar_helper as helper
-import io
-import json
-
-from json_excel_converter import Converter
-from json_excel_converter.xlsx import Writer
 from .db import db_session
-import threading
+
 
 bp = Blueprint('tar', __name__, url_prefix='/tar')
 
@@ -220,46 +219,8 @@ def search():
                 myjob.googleplugin = len(googleplacelist)
                 myjob.googlecomplete = False
 
-        if request.form.get('yelpplugin'):
-            categories = request.form.getlist('categories')
-            term = request.form['keyword']
-            if (not categories) and (term == ''):
-                error = 'A yelp category or a keyword is required'
-            if len(categories) > 0:
-                job_dict['categories'] = categories
-                for category in categories:
-                    myrecord = SearchCategories(jobid=jobid, category=category, plugin='yelpcategory')
-                    db_session.add(myrecord)
-            if term != '':
-                job_dict['keyword'] = term
-                myrecord = SearchCategories(jobid=jobid, category=term, plugin='yelpkeyword')
-                db_session.add(myrecord)
-            myyelpsearch = yelpsearch(latlong, radius, categories, minprice=minprice, maxprice=maxprice, keyword=term)
-            yelpplacelist = myyelpsearch.get_yelpidlist()
-            if yelpplacelist is not None:
-                yt = threading.Thread(target=myyelpsearch.get_placeidlist, args=(jobid,))
-                yt.start()
-                job_dict['roughcount'] = job_dict['roughcount'] + len(yelpplacelist)
-                myjob.yelpplugin = len(yelpplacelist)
-                myjob.yelpcomplete = False
-        if request.form.get('zomatoplugin'):
-            term = request.form['keyword']
-            if term != '':
-                job_dict['keyword'] = term
-                myrecord = SearchCategories(jobid=jobid, category=term, plugin='zomatokeyword')
-            else:
-                myrecord = SearchCategories(jobid=jobid, plugin='zomatosearch')
-            #myzomatosearch = zs.zomatosearch(latlong, radius, address=address, keyword=term)
-            #zomatoplacelist = myzomatosearch.get_zomatoidlist()
-            #x = threading.Thread(target=myzomatosearch.getplaceidlist, kwargs={'jobnumber': jobid})
-            #x.start()
-            #job_dict['roughcount'] = job_dict['roughcount'] + len(zomatoplacelist)
-            myjob.zomatoplugin = 1
-            myjob.zomatocomplete = False
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
-        #if job_dict['roughcount'] == 0:
-        #    error = 'That search had no hits.'
         try:
             if error is None:
                 return redirect('/joblist/jobdisplay/' + str(jobid))
@@ -267,10 +228,7 @@ def search():
                 flash(error)
                 return render_template('/tar/googlesearch.html')
         finally:
-            if yt is not None:
-                yt.join()
-            if gt is not None:
-                gt.join()
+            pass
     else: 
         return render_template('/tar/googlesearch.html')
 
@@ -304,7 +262,10 @@ def get_xls_report(path_to_file):
             converter = Converter()
             converter.convert(data, Writer(mem))
     elif jobtype == 'tarreport':
-        data = reports.tarreport(jobnumber).create_tar_report()
+        try:
+            data = reports.tarreport(jobnumber).create_tar_report()
+        except Exception as e:
+            abort(404, e)
         converter = Converter()
         converter.convert(data, Writer(mem))
     elif jobtype == 'RawReport':
@@ -316,8 +277,8 @@ def get_xls_report(path_to_file):
         converter = Converter()
         converter.convert(data, Writer(mem))
     mem.seek(0)
-    myreturnfile = send_file(mem, attachment_filename=path_to_file,
-        as_attachment=True, cache_timeout=0)
+    myreturnfile = send_file(mem, download_name=path_to_file,
+        as_attachment=True)
     if jobformat == 'csv':
         myreturnfile.mimetype = 'text/csv'
     elif jobformat == 'json':

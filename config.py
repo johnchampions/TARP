@@ -1,7 +1,7 @@
-ENVIRONMENT = 'PROD'
+ENVIRONMENT = 'DEV'
 
 if ENVIRONMENT == 'DEV':
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://flasky:Merkin12@192.168.1.23:3306/flasky'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/tarp.sqlite3'
     URL = 'http://127.0.0.1/'
 if ENVIRONMENT == 'GOGO':
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://flasky:Merkin12@172.30.64.1:3306/flasky'
@@ -22,7 +22,7 @@ DEBUG = True
     # Flask-Mail SMTP server settings
 
 USER_APP_NAME = "Trade Area Review Program"      # Shown in and email templates and page footers
-USER_ENABLE_EMAIL = False        # Enable email authentication
+USER_ENABLE_EMAIL = False      # Enable email authentication
 USER_ENABLE_USERNAME = True    # Disable username authentication
 USER_EMAIL_SENDER_EMAIL = 'noreply@championsofchange.com.au'
 USER_ENABLE_REGISTER = False
