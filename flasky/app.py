@@ -25,11 +25,11 @@ app.register_blueprint(flasky.configure.bp)
 app.register_blueprint(flasky.joblist.bp)
 
 
-@application.teardown_appcontext
+@app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
 if __name__ == "__main__":
-    application.debug = True
-    application.run()
+    app.debug = True
+    app.run()
 
