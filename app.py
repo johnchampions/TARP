@@ -16,20 +16,20 @@ def hello():
     return "<h1 style='color:green'>Hello There!!!</h1>"
 
 
-application = Flask(__name__)
-application.config.from_pyfile('config.py')
-application.add_url_rule('/', 'index', indexpage)
-application.add_url_rule('/hello', 'hello', hello)
-application.register_blueprint(flasky.tar.bp)
-application.register_blueprint(flasky.configure.bp)
-application.register_blueprint(flasky.joblist.bp)
+app = Flask(__name__)
+app.config.from_pyfile('config.py')
+app.add_url_rule('/', 'index', indexpage)
+app.add_url_rule('/hello', 'hello', hello)
+app.register_blueprint(flasky.tar.bp)
+app.register_blueprint(flasky.configure.bp)
+app.register_blueprint(flasky.joblist.bp)
 
 
-@application.teardown_appcontext
+@app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
 if __name__ == "__main__":
-    application.debug = True
-    application.run()
+    app.debug = True
+    app.run()
 
