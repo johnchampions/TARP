@@ -17,24 +17,21 @@ def hello():
 
 
 
-application = Flask(__name__)
-#turbo = Turbo()
-application.config.from_pyfile('config.py')
-#turbo.init_app(application)
-application.add_url_rule('/', 'index', indexpage)
-application.add_url_rule('/hello', 'hello', hello)
-application.register_blueprint(flasky.tar.bp)
-application.register_blueprint(flasky.configure.bp)
-application.register_blueprint(flasky.joblist.bp)
-#application.register_blueprint(flasky.facebook.bp)
+app = Flask(__name__)
 
-@application.teardown_appcontext
+app.config.from_pyfile('config.py')
+
+app.add_url_rule('/', 'index', indexpage)
+app.add_url_rule('/hello', 'hello', hello)
+app.register_blueprint(flasky.tar.bp)
+app.register_blueprint(flasky.configure.bp)
+app.register_blueprint(flasky.joblist.bp)
+
+@app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
 if __name__ == "__main__":
-    application.debug = True
-    #application.port = 443
-    #application.ssl_context = 'adhoc'
-    application.run()
+    app.debug = True
+    app.run()
 
