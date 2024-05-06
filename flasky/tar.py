@@ -258,12 +258,9 @@ def search():
             else:
                 flash(error)
                 return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
-                return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         finally:
             pass
-            pass
     else: 
-        return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
 
 
@@ -298,11 +295,6 @@ def get_xls_report(path_to_file):
             data = reports.tarreport(jobnumber).create_tar_report()
         except Exception as e:
             abort(404, e)
-    elif jobtype == 'TAReport':
-        try:
-            data = reports.tarreport(jobnumber).create_tar_report()
-        except Exception as e:
-            abort(404, e)
         converter = Converter()
         converter.convert(data, Writer(mem))
     elif jobtype == 'RawReport':
@@ -314,7 +306,6 @@ def get_xls_report(path_to_file):
         converter = Converter()
         converter.convert(data, Writer(mem))
     mem.seek(0)
-    myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
     myreturnfile = send_file(mem, download_name=path_to_file,as_attachment=True)
     if jobformat == 'csv':
         myreturnfile.mimetype = 'text/csv'
