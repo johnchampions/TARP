@@ -1,5 +1,5 @@
 from math import atan2, floor, radians, sin, sqrt, cos
-from flasky.models import CuisineList, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places, YelpPlace, ZomatoPlace
+from flasky.models import CuisineList, GooglePlace, JobList, JobResults, KeyWords, OpeningHours, Places
 import flasky.tar_helper as helper
 
 
@@ -191,15 +191,13 @@ class tarreport:
             keywordsrecords = KeyWords.query.filter(
                 KeyWords.placeid == place.placeid).all()
             gprecord = GooglePlace.query.filter(GooglePlace.placeid == place.placeid).first()
-            yelprecord = YelpPlace.query.filter(YelpPlace.placeid == place.placeid).first()
-            zomatorecord = ZomatoPlace.query.filter(ZomatoPlace.placeid == place.placeid).first()
             if gprecord:
                 pluscode = gprecord.pluscode
             else:
                 pluscode = ''
             thisplace = {
                 'Name': placerecord.placename,
-                'Distance': distance_between_places(self.myjob.lat, self.myjob.lng, self.getlat(gprecord, yelprecord), self.getlng(gprecord, yelprecord)),
+                'Distance': distance_between_places(self.myjob.lat, self.myjob.lng, self.getlat(gprecord), self.getlng(gprecord)),
                 'Address': placerecord.vicinity,
                 'Plus Code' : pluscode,
                 'Latitude' : helper.get_location_from_placeid(placerecord.id)['lat'],
@@ -211,12 +209,25 @@ class tarreport:
                 'Lunch': self.is_open_for_meal(self.meals['lunch'], self.meals['lunchclose'], place.placeid),
                 'Dinner': self.is_open_for_meal(self.meals['dinner'], self.meals['dinnerclose'], place.placeid),
                 'Late': self.is_open_for_meal(self.meals['supper'], self.meals['supperclose'], place.placeid),
-                'Rating' : self.get_rating((gprecord,yelprecord,zomatorecord,)),
-                'Total Ratings' : self.get_total_ratings((gprecord, yelprecord,zomatorecord,))
+                'Rating' : self.get_rating(gprecord),
+                'Total Ratings' : self.get_total_ratings(gprecord),
+                'Maps URL': self.get_map_url(gprecord),
+                'Website': self.get_website(gprecord)
             }
             output.append(thisplace)
         return output
 
+    def get_map_url(self,gprecord):
+        if (gprecord is not None) and (gprecord.placeurl is not None):
+            return gprecord.placeurl
+        else:
+            return ''
+
+    def get_website(self, gprecord):
+        if (gprecord is not None) and (gprecord.website is not None):
+            return gprecord.website
+        else:
+            return ''
 
     def is_keyword_in_config_keywords(self, configkeywords, keywordsrecords):
         for configkeyword in configkeywords:
@@ -225,22 +236,17 @@ class tarreport:
                     return 'Yes'
         return ''
 
-    def getlat(self, gprecord, yelprecord):
+    def getlat(self, gprecord):
         if gprecord is not None:
             if gprecord.lat is not None:
                 return gprecord.lat
-        if yelprecord is not None:
-            if yelprecord.lat is not None:
-                return yelprecord.lat
-        return 0.0
+        else:
+            return 0.0
 
-    def getlng(self, gprecord, yelprecord):
+    def getlng(self, gprecord):
         if gprecord is not None:
             if gprecord.lng is not None:
                 return gprecord.lng
-        if yelprecord is not None:
-            if yelprecord.lng is not None:
-                return yelprecord.lng
         return 0.0
 
     
@@ -265,27 +271,16 @@ class tarreport:
         return ''
 
 
-    def get_rating(self, recordlist):
-        user_ratings = 0
-        rating = 0
-        for record in recordlist:
-            if record is None:
-                continue
-            if record.rating is not None:
-                user_ratings += record.user_ratings_total
-                rating += record.rating * record.user_ratings_total
-        if rating == 0:
-            return 0
+    def get_rating(self, record):
+        if (record is not None) and (record.rating is not None):
+            return record.rating
         else:
-            return rating / user_ratings
+            return 0.0
 
-    def get_total_ratings(self, recordlist):
+    def get_total_ratings(self, record):
         output = 0
-        for record in recordlist:
-            if record is None:
-                continue
-            if record.user_ratings_total is not None:
-                output += record.user_ratings_total
+        if (record is not None) and (record.user_ratings_total is not None):
+            output = record.user_ratings_total
         return output
     
 class new_tar_report:

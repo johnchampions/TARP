@@ -55,7 +55,7 @@ def keyword_search():
         if not keywords:
             error = 'You really need something to search for.'
         keywords_list = keywords.split()
-        keywords_list.append('restaurant')
+        #keywords_list.append('restaurant')
         if len(keywords_list) == 0:
             error = 'You really need a word to search for.'
         restaurantlist = []
@@ -149,7 +149,6 @@ def get_postcode_from_url(postcode):
 def search():
     if request.method == 'POST':
         error = None
-        gt = None
         job_dict = {}
         address = request.form['address']
         radius = request.form['radius']
@@ -162,7 +161,6 @@ def search():
         job_dict['placelist'] = []
         job_dict['roughcount'] = 0
         myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
-        myjob = JobList(address=request.form['address'], radius=request.form['radius'], roughcount=0)
         db_session.add(myjob)
         db_session.commit()
         jobid = myjob.id
@@ -172,15 +170,13 @@ def search():
             error = 'Could not find address'
             flash(error)
             return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
-            return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
         job_dict['lat'] = latlong['lat']
         job_dict['lng'] = latlong['lng']
-        myjob.lat = latlong['lat']
         myjob.lat = latlong['lat']
         myjob.lng = latlong['lng']
         minprice = request.form['minprice']
         maxprice = request.form['maxprice']
-        myjob.maxprice = request.form['minprice']
+        myjob.maxprice = request.form['maxprice']
         myjob.maxprice = request.form['minprice']
 
         googleplacelist = ()
