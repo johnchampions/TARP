@@ -91,6 +91,8 @@ class googlesearch:
             worker.start()
         for mytype in mytypes:
             typeq.put((radius, mytype, '', minprice, maxprice))
+        for mykeyword in keyword.split(' '):
+            typeq.put((radius, '',mykeyword , minprice, maxprice))
         typeq.join()
         del(typeq)
 
