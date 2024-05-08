@@ -97,20 +97,3 @@ def get_restaurantlist(jobid=0):
         if myplace is not None:
             output.append(myplace.__dict__)
     return output
-
-def get_incomplete_zomato_jobs():
-    output = []
-    myJoblist = JobList.query.filter(JobList.zomatoplugin > 0, JobList.zomatocomplete  == 0).all()
-    for jobby in myJoblist:
-        output.append(jobby.id)
-    return output
-
-@bp.route('/zomjob/<key>', methods=('GET',))
-def get_zomato_jobs(key):
-    if key != 'Z':
-        return '{"error": "Insufficient beer in diet."}'
-    job_list = get_incomplete_zomato_jobs()
-    jobs_avail = len(job_list) > 0
-    mydict = {'jobsAvailable': jobs_avail,
-        'joblist': job_list}
-    return json.dumps(mydict)
