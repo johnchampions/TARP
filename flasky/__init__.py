@@ -6,17 +6,6 @@ from sqlalchemy.orm import DeclarativeBase
 #from flask_user import UserManager, UserMixin
 
 
-from flasky.db import db_session
-import flasky.tar
-import flasky.configure
-import flasky.joblist
-
-
-class Base(DeclarativeBase):
-    pass
-
-db = SQLAlchemy(model_class=Base)
-
 def create_app(test_config=None):
     application = Flask(__name__)
     application.config.from_pyfile('config.py')
@@ -25,7 +14,10 @@ def create_app(test_config=None):
         os.makedirs(application.instance_path)
     except OSError:
         pass
-    db.init_app(application)
+    #db.init_app(application)
+    import flasky.tar
+    import flasky.configure
+    import flasky.joblist
     application.register_blueprint(flasky.tar.bp)
     application.register_blueprint(flasky.configure.bp)
     application.register_blueprint(flasky.joblist.bp)

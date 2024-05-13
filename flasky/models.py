@@ -1,8 +1,6 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean, Float
 from sqlalchemy.sql.schema import ForeignKey
-from sqlalchemy.sql.sqltypes import CHAR, FLOAT, Float, TEXT, Boolean
-from flasky.db import Base
-
+from .db import Base
 
 
 class ConfigKeys(Base):
@@ -10,7 +8,7 @@ class ConfigKeys(Base):
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
     keyname = Column(String(50), unique=True)
-    keyvalue = Column(TEXT)
+    keyvalue = Column(String)
     keytype = Column(String(20))
 
     def __init__(self, keyname=None, keyvalue=None, keytype='string'):
@@ -27,7 +25,7 @@ class KeyWords(Base):
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
-    placetype = Column(TEXT)
+    placetype = Column(String)
     
     def __init__(self, placeid=None, placetype=None):
         self.placeid = placeid
@@ -37,19 +35,19 @@ class Places(Base):
     __tablename__= 'places'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
-    placename = Column(TEXT(collation='utf8mb4'))
+    placename = Column(String(collation='utf8mb4'))
     parentplace = Column(Integer)
     googleplaceid = Column(Integer, ForeignKey('googleplace.id'))
     yelpplaceid = Column(Integer, ForeignKey('yelpplace.id'))
     zomatoplaceid = Column(Integer, ForeignKey('zomatoplace.id'))
-    vicinity = Column(TEXT)
-    street1 = Column(TEXT)
-    street2 = Column(TEXT)
-    suburb = Column(TEXT)
-    postcode = Column(TEXT)
-    placestate = Column(TEXT)
-    phonenumber = Column(TEXT)
-    pluscode = Column(TEXT)
+    vicinity = Column(String)
+    street1 = Column(String)
+    street2 = Column(String)
+    suburb = Column(String)
+    postcode = Column(String)
+    placestate = Column(String)
+    phonenumber = Column(String)
+    pluscode = Column(String)
 
     def __init__(self, placename=None, parentplace=None, googleplaceid=None, 
             yelpplaceid=None, zomatoplaceid=None, vicinity=None, street1=None, street2=None,
@@ -74,19 +72,19 @@ class GooglePlace(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     business_status = Column(Integer)
-    viewportnelat = Column(FLOAT)
-    viewportnelng = Column(FLOAT)
-    viewportswlat = Column(FLOAT)
-    viewportswlng = Column(FLOAT)
-    lat = Column(FLOAT)
-    lng = Column(FLOAT)
+    viewportnelat = Column(Float)
+    viewportnelng = Column(Float)
+    viewportswlat = Column(Float)
+    viewportswlng = Column(Float)
+    lat = Column(Float)
+    lng = Column(Float)
     price_level = Column(Integer)
-    rating = Column(FLOAT)
+    rating = Column(Float)
     user_ratings_total = Column(Integer)
-    googleplace_id = Column(TEXT)
-    placeurl = Column(TEXT)
-    website = Column(TEXT)
-    pluscode = Column(TEXT)
+    googleplace_id = Column(String)
+    placeurl = Column(String)
+    website = Column(String)
+    pluscode = Column(String)
 
     def __init__(self, placeid=None, business_status=None, viewportnelat=None,
             viewportnelng=None, viewportswlat=None, viewportswlng=None, 
@@ -116,13 +114,13 @@ class YelpPlace(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     business_status = Column(Integer)
-    lat = Column(FLOAT)
-    lng = Column(FLOAT)
+    lat = Column(Float)
+    lng = Column(Float)
     price_level = Column(Integer)
-    rating = Column(FLOAT)
+    rating = Column(Float)
     user_ratings_total = Column(Integer)
-    yelpplace_id = Column(TEXT)
-    website = Column(TEXT)
+    yelpplace_id = Column(String)
+    website = Column(String)
     
     def __init__(self, placeid=None, business_status=None, lat=None, lng=None,
             price_level=None, rating=None, user_ratings_total=None, 
@@ -143,14 +141,14 @@ class ZomatoPlace(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     zomatoplace_id = Column(Integer)
-    rating = Column(FLOAT)
+    rating = Column(Float)
     user_ratings_total = Column(Integer)
-    cuisine = Column(TEXT)
-    website =  Column(TEXT)
+    cuisine = Column(String)
+    website =  Column(String)
     business_status = Column(Integer)
     price_level = Column(Integer)
-    lat = Column(FLOAT)
-    lng = Column(FLOAT)
+    lat = Column(Float)
+    lng = Column(Float)
 
     def __init__(self, 
             placeid=None, 
@@ -182,20 +180,20 @@ class OpeningHours(Base):
     
     id = Column(Integer, primary_key=True)
     placeid =Column(Integer, ForeignKey('places.id'))
-    sundayopen = Column(TEXT)
-    sundayclose = Column(TEXT)
-    mondayopen = Column(TEXT)
-    mondayclose = Column(TEXT)
-    tuesdayopen = Column(TEXT)
-    tuesdayclose = Column(TEXT)
-    wednesdayopen = Column(TEXT)
-    wednesdayclose = Column(TEXT)
-    thursdayopen = Column(TEXT)
-    thursdayclose = Column(TEXT)
-    fridayopen = Column(TEXT)
-    fridayclose = Column(TEXT)
-    saturdayopen = Column(TEXT)
-    saturdayclose = Column(TEXT)
+    sundayopen = Column(String)
+    sundayclose = Column(String)
+    mondayopen = Column(String)
+    mondayclose = Column(String)
+    tuesdayopen = Column(String)
+    tuesdayclose = Column(String)
+    wednesdayopen = Column(String)
+    wednesdayclose = Column(String)
+    thursdayopen = Column(String)
+    thursdayclose = Column(String)
+    fridayopen = Column(String)
+    fridayclose = Column(String)
+    saturdayopen = Column(String)
+    saturdayclose = Column(String)
 
     def __init__(self, placeid=None, sundayopen=None, sundayclose=None,
             mondayopen=None, mondayclose=None, tuesdayopen=None, tuesdayclose=None,
@@ -223,13 +221,13 @@ class Reviews(Base):
     id = Column(Integer, primary_key=True)
     placeid = Column(Integer, ForeignKey('places.id'))
     rating = Column(Integer)
-    reviewtext = Column(TEXT)
-    source = Column(TEXT)
+    reviewString = Column(String)
+    source = Column(String)
 
-    def __init__(self, placeid=None, rating=None, reviewtext=None, source=None):
+    def __init__(self, placeid=None, rating=None, reviewString=None, source=None):
         self.placeid = placeid
         self.rating = rating
-        self.reviewtext = reviewtext
+        self.reviewString = reviewString
         self.source = source
 
     
@@ -237,9 +235,9 @@ class JobList(Base):
     __tablename__ = 'joblist'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
-    jobjson = Column(TEXT)
-    jobtype = Column(TEXT)
-    address = Column(TEXT)
+    jobjson = Column(String)
+    jobtype = Column(String)
+    address = Column(String)
     radius = Column(Integer)
     lat = Column(Float)
     lng = Column(Float)
@@ -279,11 +277,11 @@ class PostCode(Base):
     __tablename__ = 'postcode'
     __table_args__ = {'extend_existing': True}
     postcode = Column(Integer)
-    Locality = Column(TEXT)
-    postcodestate = Column(TEXT)
+    Locality = Column(String)
+    postcodestate = Column(String)
     lat = Column(Float)
     lng = Column(Float)
-    sa2 = Column(TEXT)
+    sa2 = Column(String)
     ID = Column(Integer, primary_key=True)
 
     def __init__(self, postcode=None, locality=None, postcodestate=None, lat=None, lng=None, sa2=None):
@@ -310,8 +308,8 @@ class SearchCategories(Base):
     __table_args__ = {'extend_existing': True }
     id = Column(Integer, primary_key=True)
     jobid = Column(Integer, ForeignKey('joblist.id'))
-    category = Column(TEXT)
-    plugin = Column(TEXT)
+    category = Column(String)
+    plugin = Column(String)
 
     def __init__(self, jobid=None, category=None, plugin=None):
         self.jobid = jobid
@@ -322,12 +320,12 @@ class RegionData(Base):
     __tablename__ = 'regiondata'
     __table_args__ = {'extend_existing': True }
     id = Column(Integer, primary_key=True)
-    sa2_maincode = Column(CHAR(9))
-    sa2_5_digit = Column(CHAR(5))
-    sa2_name = Column(TEXT)
-    sa3_name = Column(TEXT)
-    sa4_name = Column(TEXT)
-    state = Column(TEXT)
+    sa2_maincode = Column(String(9))
+    sa2_5_digit = Column(String(5))
+    sa2_name = Column(String)
+    sa3_name = Column(String)
+    sa4_name = Column(String)
+    state = Column(String)
     area = Column(Float)
 
     def __init__(self, sa2_maincode = None,
@@ -416,7 +414,7 @@ class CuisineList(Base):
     __tablename__ = 'cuisinelist'
     __table_args__ = {'extend_existing': True }
     id = Column(Integer, primary_key=True)
-    placetype = Column(TEXT)
+    placetype = Column(String)
     coffee = Column(Boolean)
     license = Column(Boolean)
     cuisine = Column(Boolean)
@@ -438,8 +436,8 @@ class CuisineList(Base):
 class CategoryList(Base):
     __tablename__ = 'categorylist'
     id = Column(Integer, primary_key=True)
-    name = Column(TEXT)
-    comment = Column(TEXT)
+    name = Column(String)
+    comment = Column(String)
 
     def __init__(self,
             name=None,
@@ -462,8 +460,8 @@ class CategoryToType(Base):
 class GoogleSupportedTypes(Base):
     __tablename__ = 'googlesupportedtypes'
     id = Column(Integer, primary_key=True)
-    description = Column(TEXT)
-    value = Column(TEXT)
+    description = Column(String)
+    value = Column(String)
     checked = (Boolean)
 
     def __init__(self,

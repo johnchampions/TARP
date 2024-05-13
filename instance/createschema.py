@@ -1,15 +1,9 @@
-from sqlalchemy.log import echo_property
-from sqlalchemy import create_engine
-from sqlalchemy import MetaData, Table, Column, Integer, String, Float, Boolean, ForeignKey
-from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
-from config import SQLALCHEMY_DATABASE_URI as dbstring
+from sqlalchemy import MetaData, Table, Column, Integer, String, Float, Boolean, ForeignKey, create_engine
+from flasky.db import engine, db_session
+from flasky.models import GoogleSupportedTypes, ConfigKeys
 
-engine = create_engine(dbstring, echo=True, future=True)
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
-Base = declarative_base()
-Base.query = db_session.query_property()
+def create_database():
 
-def init_db():
     meta = MetaData()
 
     ConfigKeys = Table(
@@ -213,10 +207,8 @@ def init_db():
         Column('checked', Boolean)
     )
     meta.create_all(engine)
-    from models import ConfigKeys as CK
-    from models import GoogleSupportedTypes as GST
-
-    myInsert = CK(keyname='googleapikey', keyvalue='AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', keytype='string')
+    
+    myInsert = ConfigKeys(keyname='googleapikey', keyvalue='AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', keytype='string')
     db_session.add(myInsert)
 
     dictlist = {
@@ -244,11 +236,9 @@ def init_db():
     }
 
     for i in dictlist:
-        myInsert = GST(value = i, description = dictlist[i])
+        myInsert = GoogleSupportedTypes(value = i, description = dictlist[i])
         db_session.add(myInsert)
-    db_session.commit()
-    
-if __name__ == "__main__":
-    init_db()
+        db_session.commit()
 
-    
+if __name__ == "__main__":
+    create_database()

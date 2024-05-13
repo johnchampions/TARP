@@ -193,12 +193,12 @@ def search():
                     mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
                     db_session.add(mycategory)
                 try:
-                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
+                    mygooglesearch = googlesearch(address, radius, types, '', minprice, maxprice)
                     googleplacelist = mygooglesearch.get_googleidlist()
                     mygooglesearch.getplaceidlist(jobid)
                 except Exception as e:
                     error = str(e)
-            elif keyword != '':
+            if keyword != '':
                 job_dict['keyword'] = keyword
                 mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
                 db_session.add(mycategory)
@@ -206,46 +206,11 @@ def search():
                     mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
                     googleplacelist = mygooglesearch.get_googleidlist()
                     mygooglesearch.getplaceidlist(jobid)
-                    job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
                 except Exception as e:
                     error = str(e)
             job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
             myjob.googleplugin = len(googleplacelist)
             myjob.googlecomplete = False
-        googleplacelist = ()
-        types = request.form.getlist('type')
-        keyword = request.form['keyword']
-        if len(types) == 0:
-            if keyword == '':
-                error = 'A google type or a keyword is required'
-        else:    
-            googleplacelist = []
-            if len(types) > 0:
-                job_dict['types'] = types
-                for mytype in types:
-                    mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
-                    db_session.add(mycategory)
-                try:
-                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice)
-                    googleplacelist = mygooglesearch.get_googleidlist()
-                    mygooglesearch.getplaceidlist(jobid)
-                except Exception as e:
-                    error = str(e)
-            elif keyword != '':
-                job_dict['keyword'] = keyword
-                mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
-                db_session.add(mycategory)
-                try:
-                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
-                    googleplacelist = mygooglesearch.get_googleidlist()
-                    mygooglesearch.getplaceidlist(jobid)
-                    job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-                except Exception as e:
-                    error = str(e)
-            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-            myjob.googleplugin = len(googleplacelist)
-            myjob.googlecomplete = False
-
         myjob.roughcount=job_dict['roughcount']
         db_session.commit()
         try:
