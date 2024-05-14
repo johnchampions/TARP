@@ -1,4 +1,4 @@
-ENVIRONMENT = 'DEVPOST'
+ENVIRONMENT = 'DEV'
 
 if ENVIRONMENT == 'DEV':
     SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/tarp.sqlite3'
