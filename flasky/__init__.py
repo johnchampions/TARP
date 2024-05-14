@@ -9,7 +9,6 @@ from sqlalchemy.orm import DeclarativeBase
 def create_app(test_config=None):
     application = Flask(__name__)
     application.config.from_pyfile('config.py')
-
     try:
         os.makedirs(application.instance_path)
     except OSError:
