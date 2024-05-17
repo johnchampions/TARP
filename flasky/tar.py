@@ -193,25 +193,19 @@ def search():
                     mycategory = SearchCategories(jobid=jobid, category=mytype, plugin='googletype')
                     db_session.add(mycategory)
                 try:
-                    mygooglesearch = googlesearch(address, radius, types, '', minprice, maxprice)
-                    googleplacelist = mygooglesearch.get_googleidlist()
-                    mygooglesearch.getplaceidlist(jobid)
+                    mygooglesearch = googlesearch(address, radius, types, keyword, minprice, maxprice, jobid=jobid)
                 except Exception as e:
                     error = str(e)
-            if keyword != '':
+            elif keyword != '':
                 job_dict['keyword'] = keyword
                 mycategory = SearchCategories(jobid=jobid, category=keyword, plugin='googlekeyword')
                 db_session.add(mycategory)
                 try:
-                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice)
-                    googleplacelist = mygooglesearch.get_googleidlist()
-                    mygooglesearch.getplaceidlist(jobid)
+                    mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice, jobid=jobid)
                 except Exception as e:
                     error = str(e)
             job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
-            myjob.googleplugin = len(googleplacelist)
             myjob.googlecomplete = False
-        myjob.roughcount=job_dict['roughcount']
         db_session.commit()
         try:
             if error is None:

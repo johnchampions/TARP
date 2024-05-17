@@ -7,33 +7,7 @@
 <p>Get more data in: <a href="/tar/downloads/TAReport_{{ job['id'] }}.xlsx">Spreadsheet download</a></p>
 <input type="button" value="Refresh Data" onclick="location.reload()" />
 <div id="content">
-    <h2>Search parameters</h2>
-    <ul>
-        <li>Address: {{ job['address'] }}</li>
-        <li>Radius: {{ job['radius'] }} meters</li>
-        <li>Latitude: {{ job['lat'] }}</li>
-        <li>Lonitude: {{ job['lng'] }}</li>
-        <li>Search count rough guess: {{ job['roughcount'] }}</li>
-        <li>Finished?: {% if job.finished %}Yes{% endif %}{% if not job.finished %}No{% endif %}</li>
-        <ul>
-            {% for parameter in job['searchcategories'] %}
-                <li>{{ parameter }}</li>
-            {% endfor %}
-        </ul>
-    </ul>
+    {% include "searchparameters.html" %}
+    {% include "searchresults.html" %}
 </div>
-<table style="width:100%">
-    <tr>
-        <th>Name</th>
-        <th>Address</th>
-        <th>Phone</th>
-    </tr>
-    {% for item in placerecords %}
-        <tr>
-            <td><a href="/tar/restaurants/{{ item['id'] }}">{{ item['placename'] }}</a></td>
-            <td>{{ item['vicinity'] }}</td>
-            <td>{{ item['phonenumber'] }}</td>
-        </tr>
-    {% endfor %}
-</table>
 {% endblock %}

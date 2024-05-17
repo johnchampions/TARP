@@ -1,0 +1,16 @@
+<div id="searchparameters" class="searchparameters">
+<h2>Search parameters</h2>
+    <ul>
+        <li>Address: {{ job['address'] }}</li>
+        <li>Radius: {{ job['radius'] }} meters</li>
+        <li>Latitude: {{ job['lat'] }}</li>
+        <li>Lonitude: {{ job['lng'] }}</li>
+        <li>Search count rough guess: {{ job['roughcount'] }}</li>
+        <li>Finished?: {% if job.finished %}Yes{% endif %}{% if not job.finished %}No{% endif %}</li>
+        <ul>
+            {% for parameter in job['searchcategories'] %}
+                <li>{{ parameter }}</li>
+            {% endfor %}
+        </ul>
+    </ul>
+</div>

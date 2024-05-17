@@ -1,0 +1,16 @@
+<div id="searchresults" class="searchresults">
+<table style="width:100%">
+    <tr>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+    </tr>
+    {% for item in placerecords %}
+        <tr>
+            <td><a href="/tar/restaurants/{{ item['id'] }}">{{ item['placename'] }}</a></td>
+            <td>{{ item['vicinity'] }}</td>
+            <td>{{ item['phonenumber'] }}</td>
+        </tr>
+    {% endfor %}
+</table>
+</div>
