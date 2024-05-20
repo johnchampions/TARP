@@ -74,7 +74,7 @@ class googlesearch:
     placeidlist = []
     location = dict()
 
-    def __init__(self, location, radius, mytypes, keyword='', minprice=0, maxprice=4 ):
+    def __init__(self, location, radius, mytypes, keyword='', minprice=0, maxprice=4, jobid=0 ):
         if type(location) is str:
             self.location = street_address_to_lat_lng(location)
         else:
@@ -95,6 +95,10 @@ class googlesearch:
             typeq.put((radius, '',mykeyword , minprice, maxprice))
         typeq.join()
         del(typeq)
+        worker2 = threading.Thread(target=self._getplaceidlist, args=(jobid,))
+        worker2.setDaemon(False)
+        worker2.start()
+        
 
     def _nearby_search_one_type(self, myqueue):
         while True:
@@ -171,12 +175,12 @@ class googlesearch:
             return []
         return self.googleidlist
 
-    def getplaceidlist(self, jobnumber=0):
+    def _getplaceidlist(self, jobnumber=0):
         if len(self.placeidlist) > 0:
             return self.placeidlist
         q = Queue()
         for i in range(5):
-            worker = threading.Thread(target=self._get_place_id_list, args=(q,))
+            worker = threading.Thread(target=self._get_place_id_list_thread, args=(q,))
             worker.setDaemon(False)
             worker.start()
         for googleid in self.googleidlist:
@@ -188,7 +192,7 @@ class googlesearch:
         db_session.commit()
         return self.placeidlist
 
-    def _get_place_id_list(self, myqueue):
+    def _get_place_id_list_thread(self, myqueue):
         while True:
             googleid, jobnumber = myqueue.get()
             mygoogleplace = googleplace(googleid)

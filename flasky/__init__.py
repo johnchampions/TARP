@@ -4,14 +4,12 @@ from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
 from turbo_flask import Turbo
 
-
 from flasky.db import db_session
 import flasky.tar
 import flasky.configure
 import flasky.joblist
 
 
-db = SQLAlchemy(model_class=Base)
 
 def create_app(test_config=None):
     application = Flask(__name__)

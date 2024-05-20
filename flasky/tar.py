@@ -204,17 +204,14 @@ def search():
                     mygooglesearch = googlesearch(address, radius, [], keyword, minprice, maxprice, jobid=jobid)
                 except Exception as e:
                     error = str(e)
-            job_dict['roughcount'] = job_dict['roughcount'] + len(googleplacelist)
             myjob.googlecomplete = False
         db_session.commit()
-        try:
-            if error is None:
-                return redirect('/joblist/jobdisplay/' + str(jobid))
-            else:
-                flash(error)
-                return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
-        finally:
-            pass
+        if error is None:
+            #return redirect('/joblist/jobdisplay/' + str(jobid))
+            return display_job(jobid)
+        else:
+            flash(error)
+            return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
     else: 
         return render_template('/tar/googlesearch.html', recordlist=helper.get_google_supported_types())
 

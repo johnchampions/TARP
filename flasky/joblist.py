@@ -5,7 +5,11 @@ from flask.templating import render_template
 from sqlalchemy.sql.expression import desc
 from flasky.models import GooglePlace, JobList, JobResults, Places, SearchCategories
 from flask import Blueprint
+from flask import current_app
+from threading import Thread
+from turbo_flask import Turbo
 import time
+
 
 from . import gs
 
@@ -43,8 +47,14 @@ def get_places(jobid):
 
 @bp.route('/jobdisplay/<int:job_id>', methods=('GET',))
 def display_job(job_id):
-    joblist_record = JobList.query.filter(JobList.id == job_id).first()
+    needle = Thread(target=update_joblist, args=(job_id,))
+    needle.daemon = False
+    needle.start()
+    return render_template('/joblist/jobdisplay.html')
 
+def update_joblist(job_id):
+    turbo = Turbo()
+    joblist_record = JobList.query.filter(JobList.id == job_id).first()
     mydict = {
         'id': joblist_record.id,
         'address': joblist_record.address,
@@ -55,9 +65,14 @@ def display_job(job_id):
         'roughcount': joblist_record.roughcount,
         'finished': is_finished(joblist_record)
     }
-    placerecords = get_restaurantlist(job_id)
-    placerecords=placerecords
-    return render_template('/joblist/jobdisplay.html', job=mydict, placerecords=placerecords)
+    turbo.push(turbo.replace(render_template('/joblist/searchparameters.html', job=mydict), 'searchparameters'))
+    while not is_finished(joblist_record):
+        placerecords = get_restaurantlist(job_id)
+        turbo.push(turbo.replace(render_template('/joblist/searchresults.html', placerecords=placerecords), 'searchresults'))
+        time.sleep(5)
+    turbo.push(turbo.replace(render_template('/joblist/searchresults.html', placerecords=placerecords), 'searchresults'))
+    turbo.push(turbo.replace(render_template('/joblist/searchparameters.html', job=mydict), 'searchparameters'))
+        
 
 def is_finished(joblist_record):
     return (joblist_record.googleplugin == 0 or joblist_record.googlecomplete)  and  (joblist_record.yelpplugin == 0 or joblist_record.yelpcomplete) and (joblist_record.zomatoplugin == 0 or joblist_record.zomatocomplete)
