@@ -10,13 +10,16 @@ import flasky.joblist
 
 
 def indexpage():
+    """ Function that returns a render of the front page of the web server"""
     return render_template('/frontpage/frontpage.html')
 
 def hello():
+    """ Test function to ensure web server is rendering string.
+      Returns: string"""
     return "<h1 style='color:green'>Hello There!!!</h1>"
 
 
-
+""" creates Flask app object and assigns basic configuration"""
 app = Flask(__name__)
 
 app.config.from_pyfile('config.py')
@@ -29,6 +32,7 @@ app.register_blueprint(flasky.joblist.bp)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
+    """ Graceful shutdown of db session on completion of web session"""
     db_session.remove()
 
 if __name__ == "__main__":

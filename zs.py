@@ -1,3 +1,8 @@
+"""Zomato Selenium script.
+Depreciated
+Do Not Use
+"""
+
 import requests
 import json
 

@@ -1,3 +1,5 @@
+-- Depreciated.  Do not use
+
 PRAGMA foreign_keys = OFF;
 
 DROP TABLE IF EXISTS users;

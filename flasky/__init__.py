@@ -3,10 +3,13 @@ from flask import Flask
 from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
-#from flask_user import UserManager, UserMixin
+
 
 
 def create_app(test_config=None):
+    """Creates Flask App
+    input: test configuration
+    Output: Flask Application"""
     application = Flask(__name__)
     application.config.from_pyfile('config.py')
     try:
@@ -31,6 +34,7 @@ def create_app(test_config=None):
 
     return application
 
+""" Runs Flask Application"""
 if __name__ == "__main__":
     myapp = create_app()
     myapp.debug = True

@@ -1,5 +1,7 @@
-SET FOREIGN_KEY_CHECKS=0; 
+-- SQL schema for setting up the blank database for an sqlite instance.
 
+SET FOREIGN_KEY_CHECKS=0; 
+-- Removes tables if they already exist
 DROP TABLE if EXISTS categorytotype;
 DROP TABLE if EXISTS categorylist;
 DROP TABLE IF EXISTS configkeys;
@@ -30,7 +32,10 @@ DROP TABLE IF EXISTS zomatoplace;
 
 SET FOREIGN_KEY_CHECKS=1; 
 
-#CREATE DATABASE `flasky_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+-- If the instance does not exist, uncomment this line
+-- CREATE DATABASE `flasky_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+
+-- Creates configkeys table.  A record list of configuration data.
 CREATE TABLE `configkeys` (
   `id` int NOT NULL AUTO_INCREMENT,
   `keyname` text NOT NULL,
@@ -39,6 +44,7 @@ CREATE TABLE `configkeys` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Creates a category list.  A list of different categories a searched place can be associated to
 CREATE TABLE `categorylist` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` text,
@@ -46,6 +52,7 @@ CREATE TABLE `categorylist` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Creates a record of types that a place can be associated with. 
 CREATE TABLE `cuisinelist` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placetype` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -56,6 +63,7 @@ CREATE TABLE `cuisinelist` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=307 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Creates a connection between possible categories an the placetype of a place
 CREATE TABLE `categorytotype` (
   `id` int NOT NULL AUTO_INCREMENT,
   `categoryid` int DEFAULT NULL,
@@ -67,7 +75,7 @@ CREATE TABLE `categorytotype` (
   CONSTRAINT `categorytotype_ibfk_2` FOREIGN KEY (`cuisineid`) REFERENCES `cuisinelist` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
+-- Creates a record list of all places found
 CREATE TABLE `places` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placename` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -87,7 +95,7 @@ CREATE TABLE `places` (
   ) ENGINE=InnoDB AUTO_INCREMENT=7758 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-
+-- Creates a record list of appropriate Google data for a place
 CREATE TABLE `googleplace` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
@@ -110,6 +118,8 @@ CREATE TABLE `googleplace` (
   CONSTRAINT `googleplace_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7282 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Creates a list of previous and current searches.
 CREATE TABLE `joblist` (
   `id` int NOT NULL AUTO_INCREMENT,
   `jobjson` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -131,6 +141,7 @@ CREATE TABLE `joblist` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=331 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Connects a place to a job
 CREATE TABLE `jobresults` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
@@ -143,7 +154,7 @@ CREATE TABLE `jobresults` (
 ) ENGINE=InnoDB AUTO_INCREMENT=14680 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-
+-- Table containing the hours a place is open
 CREATE TABLE `openinghours` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
@@ -166,6 +177,8 @@ CREATE TABLE `openinghours` (
   CONSTRAINT `openinghours_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6062 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Table containing location data matched with postcode data
 CREATE TABLE `regiondata` (
   `id` int NOT NULL AUTO_INCREMENT,
   `sa2_maincode` char(9) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -178,6 +191,8 @@ CREATE TABLE `regiondata` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Table containing the shape of postcode data
 CREATE TABLE `polygon` (
   `id` int NOT NULL AUTO_INCREMENT,
   `region_id` int DEFAULT NULL,
@@ -191,6 +206,8 @@ CREATE TABLE `polygon` (
   CONSTRAINT `polygon_ibfk_1` FOREIGN KEY (`region_id`) REFERENCES `regiondata` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8975 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- table containing corners of postcode polygons.
 CREATE TABLE `pointlist` (
   `id` int NOT NULL AUTO_INCREMENT,
   `polygon_id` int DEFAULT NULL,
@@ -203,7 +220,7 @@ CREATE TABLE `pointlist` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-
+-- Table containing list of connected points used to define postcode borders
 CREATE TABLE `linelist` (
   `id` int NOT NULL AUTO_INCREMENT,
   `polygon_id` int DEFAULT NULL,
@@ -216,6 +233,7 @@ CREATE TABLE `linelist` (
   CONSTRAINT `linelist_ibfk_1` FOREIGN KEY (`polygon_id`) REFERENCES `polygon` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4155609 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- List of postcodes
 CREATE TABLE `postcode` (
   `postcode` int DEFAULT NULL,
   `Locality` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -228,6 +246,7 @@ CREATE TABLE `postcode` (
 ) ENGINE=InnoDB AUTO_INCREMENT=18276 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
+-- List of reviews associated wit a place
 CREATE TABLE `reviews` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
@@ -239,6 +258,8 @@ CREATE TABLE `reviews` (
   CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- List of roles within TARP
 CREATE TABLE `roles` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -246,6 +267,8 @@ CREATE TABLE `roles` (
   UNIQUE KEY `name_UNIQUE` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- List of selected categories being searched for as part of a job
 CREATE TABLE `searchcategories` (
   `id` int NOT NULL AUTO_INCREMENT,
   `jobid` int DEFAULT NULL,
@@ -256,15 +279,18 @@ CREATE TABLE `searchcategories` (
   CONSTRAINT `searchcategories_ibfk_1` FOREIGN KEY (`jobid`) REFERENCES `joblist` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3598 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Associates place with a type
 CREATE TABLE `types` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
   `placetype` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`),openinghours
   KEY `placeid` (`placeid`),
   CONSTRAINT `types_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=23350 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Table for users of the TARP system
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -277,6 +303,8 @@ CREATE TABLE `users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Associates roles with user
 CREATE TABLE `user_roles` (
   `user_id` int DEFAULT NULL,
   `role_id` int DEFAULT NULL,
@@ -289,6 +317,7 @@ CREATE TABLE `user_roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
+-- Table containing information directly connected with Yelp
 CREATE TABLE `yelpplace` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
@@ -305,6 +334,8 @@ CREATE TABLE `yelpplace` (
   CONSTRAINT `yelpplace_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2802 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Table containing information directly connected with Zomato
 CREATE TABLE `zomatoplace` (
   `id` int NOT NULL AUTO_INCREMENT,
   `placeid` int DEFAULT NULL,
@@ -322,6 +353,8 @@ CREATE TABLE `zomatoplace` (
   CONSTRAINT `zomatoplace_ibfk_1` FOREIGN KEY (`placeid`) REFERENCES `places` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+
+-- Table containing all types that Google assigns
 CREATE TABLE `googlesupportedtypes` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -331,12 +364,11 @@ CREATE TABLE `googlesupportedtypes` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', 'string');
-
+-- Initiates basic configuration data.
+INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=<EXAMPLE>', 'string');
 INSERT INTO roles (name) VALUES ('admin');
 INSERT INTO users (username, password, is_active, first_name, last_name) VALUES ('arg', '$2b$12$E0zTUAot1FPyr9km7ONMDeD9BNPmpuhy9VEr50cbPCEgSROi0Uwgm', 1, 'Admin', 'Man');
 INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
-
 INSERT INTO googlesupportedtypes (description, value) VALUES ('Airport', 'airport');
 INSERT INTO googlesupportedtypes (description, value) VALUES ('Amusement Park', 'amusement_park');
 INSERT INTO googlesupportedtypes (description, value) VALUES ('Aquarium', 'aquarium');

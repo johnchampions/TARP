@@ -1,4 +1,7 @@
-
+"""
+Depreciated
+Do not use
+"""
 def checkapikey(sent_api)
     #TODO compare api key with input
 

@@ -8,3 +8,4 @@ setup(
     author_email='john@champions.tech',
     packages=['tarptest42'],
 )
+"""Creates  test package for Azure"""

@@ -1,5 +1,7 @@
-PRAGMA foreign_keys = OFF;
+-- SQL schema for setting up the blank database for an sqlite instance.
 
+PRAGMA foreign_keys = OFF;
+-- Removes tables if they already exist
 DROP TABLE if EXISTS categorytotype;
 DROP TABLE if EXISTS categorylist;
 DROP TABLE IF EXISTS configkeys;
@@ -32,7 +34,7 @@ DROP TABLE IF EXISTS zomatoplace;
 PRAGMA foreign_keys = ON;
 
 
-
+-- Creates configkeys table.  A record list of configuration data.
 CREATE TABLE configkeys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     keyname TEXT UNIQUE NOT NULL,
@@ -40,18 +42,21 @@ CREATE TABLE configkeys (
     keytype TEXT NOT NULL
 );
 
+-- Creates a connection between possible categories an the placetype of a place
 CREATE TABLE categorytotype (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   categoryid REFERENCES categorylist (id) ON DELETE CASCADE,
   cuisineid REFERENCES cuisinelist (id) ON DELETE CASCADE
 );
 
+-- Creates a category list.  A list of different categories a searched place can be associated to
 CREATE TABLE categorylist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name text,
   comment text
 );
 
+-- Creates a record of types that a place can be associated with.
 CREATE TABLE cuisinelist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placetype TEXT,
@@ -61,6 +66,7 @@ CREATE TABLE cuisinelist (
   blacklist BOOLEAN DEFAULT 0
 );
 
+-- Creates a record list of appropriate Google data for a place
 CREATE TABLE googleplace (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid int REFERENCES places (id),
@@ -80,6 +86,7 @@ CREATE TABLE googleplace (
   pluscode text
 );
 
+-- Creates a list of previous and current searches.
 CREATE TABLE joblist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   jobjson TEXT,
@@ -100,12 +107,14 @@ CREATE TABLE joblist (
   userid REFERENCES users (id)
 );
 
+-- Connects a place to a job
 CREATE TABLE jobresults (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid REFERENCES places (id),
   jobid REFERENCES jonlist (id)
 );
 
+-- Table containing list of connected points used to define postcode borders
 CREATE TABLE linelist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   polygon_id REFERENCES polygon (id),
@@ -115,6 +124,7 @@ CREATE TABLE linelist (
   slng float DEFAULT NULL
 ); 
 
+-- Table containing the hours a place is open
 CREATE TABLE openinghours (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid REFERENCES places (id),
@@ -134,6 +144,7 @@ CREATE TABLE openinghours (
   saturdayclose text
 );
 
+-- Creates a record list of all places found
 CREATE TABLE places (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placename text,
@@ -151,6 +162,7 @@ CREATE TABLE places (
   pluscode text
 );
 
+-- table containing corners of postcode polygons.
 CREATE TABLE pointlist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   polygon_id REFERENCES polygon (id),
@@ -159,6 +171,7 @@ CREATE TABLE pointlist (
   order_ int DEFAULT NULL
 );
 
+-- Table containing the shape of postcode data
 CREATE TABLE polygon (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   region_id REFERENCES regeiondata (id),
@@ -169,6 +182,7 @@ CREATE TABLE polygon (
   points int DEFAULT NULL
 );
 
+-- List of postcodes
 CREATE TABLE postcode (
   postcode int DEFAULT NULL,
   Locality text,
@@ -179,6 +193,7 @@ CREATE TABLE postcode (
   ID INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
+-- Table containing location data matched with postcode data
 CREATE TABLE regiondata (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   sa2_maincode character(9) DEFAULT NULL,
@@ -190,6 +205,7 @@ CREATE TABLE regiondata (
   area float DEFAULT NULL
 );
 
+-- List of reviews associated wit a place
 CREATE TABLE reviews (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid REFERENCES places (id),
@@ -198,11 +214,13 @@ CREATE TABLE reviews (
   source text
 );
 
+-- List of roles within TARP
 CREATE TABLE roles (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT UNIQUE
 );
 
+-- List of selected categories being searched for as part of a job
 CREATE TABLE searchcategories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   jobid REFERENCES joblist (id),
@@ -210,6 +228,7 @@ CREATE TABLE searchcategories (
   plugin text
 );
 
+-- Associates place with a type
 CREATE TABLE types (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid REFERENCES places (id) DEFAULT NULL,
@@ -222,6 +241,7 @@ CREATE TABLE user_roles (
   id INTEGER PRIMARY KEY AUTOINCREMENT
 );
 
+-- Table for users of the TARP system
 CREATE TABLE users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE DEFAULT NULL,
@@ -232,6 +252,7 @@ CREATE TABLE users (
   last_name TEXT DEFAULT NULL
 );
 
+-- Table containing information directly connected with Yelp
 CREATE TABLE yelpplace (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid REFERENCES places (id) DEFAULT NULL,
@@ -245,6 +266,7 @@ CREATE TABLE yelpplace (
   website text
 );
 
+-- Table containing information directly connected with Zomato
 CREATE TABLE zomatoplace (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   placeid  REFERENCES places (id) DEFAULT NULL,
@@ -259,6 +281,7 @@ CREATE TABLE zomatoplace (
   lng float DEFAULT NULL
 );
 
+-- Table containing all types that Google assigns
 CREATE TABLE googlesupportedtypes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   description TEXT,
@@ -266,8 +289,9 @@ CREATE TABLE googlesupportedtypes (
   checked BOOLEAN DEFAULT 1, 
 );
 
-INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=AIzaSyCG6S55TX0YlfBGrnyFlBEMrQzwpBdICzU', 'string');
-INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('yelpapikey', 'Bearer spf4KDBHyyC_RFAjsGq_x3bj1XJSk-tWW797udceKCQtXtwjHtIDw2KeZ1aMWrvgcCLkmfZi3G2A1nLcU5k77qko8syWYcgOWO_xZAKtRMxarOVkp5Fm461jFzX5XnYx', 'string');
+-- Initiates basic configuration data.
+INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('googleapikey', 'key=<Example>', 'string');
+INSERT INTO configkeys (keyname, keyvalue, keytype) VALUES ('yelpapikey', 'Bearer <Example>', 'string');
 
 INSERT INTO roles (name) VALUES ('admin');
 INSERT INTO users (username, password, is_active, first_name, last_name) VALUES ('arg', '$2b$12$E0zTUAot1FPyr9km7ONMDeD9BNPmpuhy9VEr50cbPCEgSROi0Uwgm', 1, 'Admin', 'Man');
